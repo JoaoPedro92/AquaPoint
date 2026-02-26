@@ -1,0 +1,50 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bs-body-font-family: 'Poppins', sans-serif;
+}
+
+body {
+  line-height: 1.6;
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.nav-item .nav-link{
+    border: 2px solid #a8a7a7;
+    border-radius: 10px;
+    padding: 2px 20px !important;
+}
+
+.nav-item .nav-link.active{
+    border: 1px solid #2262ec;
+    background-color: #2262ec;
+}
+
+.carousel-caption {
+    z-index: 2;
+    color: white !important;
+}
+
+.carousel-item img {
+    height: 600px;
+    object-fit: cover;
+}
+
+.carousel-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7));
+}
