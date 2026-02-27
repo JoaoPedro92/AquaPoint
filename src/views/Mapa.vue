@@ -2,40 +2,93 @@
     <h1>Mapa</h1>
 
     <div id="mapa" style="height: 500px; width: 100%"></div>
+
+    <div v-if="showAquapointPopup" class="modal-overlay" @click="showAquapointPopup = false">
+        <div class="modal-box" @click.stop>
+            <button class="btn-close" @click="showAquapointPopup = false"></button>
+
+            <img :src="selectedAquapoint.image" width="100%" height="300" alt="Imagem do bebedouro">
+            <h4 class="mt-2">{{ selectedAquapoint.nome }}</h4>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <span class="ms-1">{{ selectedAquapoint.ratingAvg}}</span> <span class="ms-1" style="font-size:0.8rem"> - {{selectedAquapoint.nrReviews }} opiniões</span>
+                </div>
+                <span>15min - 3,8km</span>
+            </div>
+            
+
+            <!-- Opinião dos Utilizadores -->
+             <h5 class="mt-4">Opinião dos Utilizadores</h5>
+            
+             <template v-if="reviews.length === 0">
+                <p class="text-muted">Ainda não há opiniões para este aquapoint.</p>
+             </template>
+             <template v-else>
+                <div v-for="review in reviews" :key="review.id">
+                    <div class="user-review-card">
+                        <div class="d-flex align-items-center">
+                            <img src="/src/assets/images/defaultUserImage.jpg" width="20" height="20" alt="imagem utilizador">
+                            <span class="ms-2">{{ review.userNome }}</span>
+                            <span class="ms-auto" style="font-size:0.8rem">{{ review.createdDate }}</span>
+                        </div>
+                        <!-- Stars Rating -->
+                        <span :title="review.pontuacao + ' estrelas'">
+                            <StarsRating :rating="review.pontuacao"></StarsRating> 
+                        </span>
+
+                        <p class="mb-0">{{ review.descrição }}</p>
+                    </div>
+                </div>
+             </template>
+        </div>
+    </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import L, { icon } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import StarsRating from '../components/StarsRating.vue'
+import { imageUrlToBase64 } from '../utilities/tools';
 
-const iconeVerde = L.divIcon({
-    className: '',
-    html: `<div style="
-        background-color: green;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        border: 2px solid white;
-        box-shadow: 0 0 4px rgba(0,0,0,0.5)
-    "></div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
-    popupAnchor: [0, -10]
-})
 
-onMounted(() => {
+const reviews = ref([])
+const selectedAquapoint = ref(null)
+const showAquapointPopup = ref(false)
+
+onMounted(async() => {
+
+    const imageBase64 = await imageUrlToBase64('https://scontent.flis9-2.fna.fbcdn.net/v/t1.6435-9/159226417_4049432591747023_5551976901920941269_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=13d280&_nc_ohc=4TYKScNiGWcQ7kNvwG6mRlw&_nc_oc=Adm-YNxGSIhNyQEL__HCr0HaqbtYLWFQRDxQh-ZanvMnr1WhLlaOMVN_j5R1mnU-P-M&_nc_zt=23&_nc_ht=scontent.flis9-2.fna&_nc_gid=7kr_Wj2Nkj7EQ0-dPZgkNw&oh=00_Afs7y1Mqp73JXjFta-li0d-usavddpMIJPW9lXojh3RGyQ&oe=69C8F988')
+    const image2Base64 = await imageUrlToBase64('https://pbs.twimg.com/media/EPSkJ3GXUAAYjuI.jpg')
+
+    const aquapointsList = [
+        { id: 1, nome: 'Aquapoint 1', image: imageBase64, estado: 'Ativo', morada: 'Rua teste teste', lat: 38.781558, lng: -9.102584, ratingAvg: 4.7, nrReviews: 400 },
+        { id: 2, nome: 'Aquapoint 2', image: image2Base64, estado: 'Inativo', morada: 'Rua teste teste', lat: 38.780195, lng: -9.104723, ratingAvg: 3.0, nrReviews: 52 }
+    ]
+
+    reviews.value = [
+         { id: 1, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 3, createdDate: '25/02/2026' },
+         { id: 2, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 5 , createdDate: '25/02/2026'},
+         { id: 3, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 4, createdDate: '25/02/2026' },
+    ]
+
     const mapa = L.map('mapa').setView([38.781558, -9.102584], 13)
 
    L.tileLayer('https://tile.jawg.io/jawg-lagoon/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
     attribution: '© Jawg Maps',
     accessToken: 'BumVzniBYxFsvv2lUwvsZ8fQMn6WdPC2sS5bAqyeSyDrROwuULnZrt0lE1uKPHrT'
-}).addTo(mapa)
+    }).addTo(mapa)
 
-    L.marker([38.781558, -9.102584], { icon: getIcone('green') })
-        .addTo(mapa)
-        .bindPopup('Aquapoint 1')
-        .openPopup()
+    aquapointsList.forEach(point => {
+        L.marker([point.lat, point.lng], { icon: getIcone(point.estado == 'Ativo' ? 'green' : 'orange') })
+            .addTo(mapa)
+            .on('click', () => {
+                selectedAquapoint.value = point
+                showAquapointPopup.value = true
+                console.log(point.image)
+            })
+        })
 })
 
 function getIcone(cor = 'blue') {
@@ -51,3 +104,35 @@ function getIcone(cor = 'blue') {
 }
 
 </script>
+
+<style scoped>
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal-box {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 400px;
+    position: relative;
+}
+
+.btn-close {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.user-review-card {
+    background-color: rgb(199, 199, 199);
+    padding: 10px;
+    margin: 10px 0px 10px 0px;
+}
+</style>
