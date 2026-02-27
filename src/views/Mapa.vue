@@ -32,15 +32,23 @@
                             <span class="ms-2">{{ review.userNome }}</span>
                             <span class="ms-auto" style="font-size:0.8rem">{{ review.createdDate }}</span>
                         </div>
+
                         <!-- Stars Rating -->
                         <span :title="review.pontuacao + ' estrelas'">
-                            <StarsRating :rating="review.pontuacao"></StarsRating> 
+                            <StarsRating :rating="review.pontuacao" :isReadonly="true"></StarsRating> 
                         </span>
 
                         <p class="mb-0">{{ review.descrição }}</p>
                     </div>
                 </div>
              </template>
+
+             <h5 class="mt-5 mb-0">AVALIA ESTE BEBEDOURO</h5>
+             <p style="font-size: 0.9rem; color:gray">Partilha a tua experiência</p>
+
+             <StarsRating v-model:rating="newReviewNumber" ></StarsRating>
+             <textarea v-model="reviewText" class="form-control" placeholder="Escreve um comentário" id="exampleFormControlTextarea1" rows="4"></textarea>
+             <button class="btn btn-primary mt-3" style="width:100%;" v-on:click="SubmitReview">SUBMETER</button>
         </div>
     </div>
 </template>
@@ -54,6 +62,8 @@ import { imageUrlToBase64 } from '../utilities/tools';
 
 
 const reviews = ref([])
+const newReviewNumber = ref(0)
+const reviewText = ref('')
 const selectedAquapoint = ref(null)
 const showAquapointPopup = ref(false)
 
@@ -86,7 +96,6 @@ onMounted(async() => {
             .on('click', () => {
                 selectedAquapoint.value = point
                 showAquapointPopup.value = true
-                console.log(point.image)
             })
         })
 })
@@ -101,6 +110,10 @@ function getIcone(cor = 'blue') {
         iconAnchor: [15, 40],
         popupAnchor: [0, -40]
     })
+}
+
+function SubmitReview(){
+    console.log('Rating: ' + newReviewNumber.value + '\nReview: ' + reviewText.value)
 }
 
 </script>
@@ -120,8 +133,10 @@ function getIcone(cor = 'blue') {
     background: white;
     padding: 2rem;
     border-radius: 8px;
-    width: 400px;
+    width: 500px;
+    max-height: 95%;
     position: relative;
+    overflow-y: auto;
 }
 
 .btn-close {
