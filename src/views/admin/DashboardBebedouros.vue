@@ -7,29 +7,34 @@
         <div v-if="loading">A carregar...</div>
 
         <div v-else >
-            <button type="button" class="btn btn-warning">(2)</button>
+            <button type="button" class="btn btn-warning">{{GetInactiveAquaPoints()}} Bebedouros Pendentes</button>
 
             <table class="table table-striped table-hover mt-3">
                 <thead>
                     <tr>
-                    <th scope="col" class="text-center">Imagem Perfil</th>
+                    <th scope="col" class="text-center">Imagem</th>
                     <th scope="col">Nome</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Role</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Pontuação Média</th>
+                    <th scope="col">Nº Reviews</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Credibilidade</th>
                     <th scope="col" class="text-center">Opções</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="aquapoints in aquapoint" :key="aquapoint.id">
-                    <td class="text-center"><img :src="aquapoint.profilePicture" class="rounded-circle" width="40" height="40"></td>
-                    <td>{{ aquapoint.name }}</td>
-                    <td>{{ aquapoint.type }}</td>
-                    <td>{{ aquapoint.ratingAVG }}</td>
-                    <td>{{ aquapoint.ratingAVG }}</td>
+                    <tr v-for="aquapoint  in aquapoints" :key="aquapoint.id">
+                    <td class="text-center"><img :src="aquapoint.image" class="rounded-circle" width="40" height="40"></td>
+                    <td >{{ aquapoint.name }}</td>
+                    <td>{{ typeDict[aquapoint.type] }}</td>
+                    <td class="text-center">{{ aquapoint.ratingAVG }}</td>
+                    <td class="text-center">{{ aquapoint.ratingsAmount }}</td>
+                    <td class="text-center">{{ stateDict[aquapoint.state_id] }}</td>
+                    <td>{{ trustLevelDict[aquapoint.trustLevel] }}</td>
                     <td class="text-center">
-                        <button class="btn btn-sm btn-primary mt-1 me-2" @click="editUser(user)">Editar</button>
-                        <button class="btn btn-sm btn-danger mt-1 me-2" @click="deleteUser(user.id)">Eliminar</button>
-                        <button class="btn btn-sm btn-success mt-1" @click="markUserAsAdmin(user.id)">Marcar como Admin</button>
+                        <button class="btn btn-sm btn-primary mt-1 me-2" @click="editAquaPoint(aquapoint)">Editar</button>
+                        <button class="btn btn-sm btn-danger mt-1 me-2" @click="deleteAquaPoint(aquapoint.id)">Eliminar</button>
+                        <button class="btn btn-sm btn-success mt-1" @click="changePointState(aquapoint.id)">Marcar como Ativo / Inativo</button>
                     </td>
                     </tr>
                     
@@ -42,16 +47,35 @@
 
 <script setup>
     import { ref, onMounted } from 'vue'
+    import { AquaPoint } from "/src/models/AquaPoint" 
 
     const aquapoints = ref([])
     const loading = ref(true)
+
+    let trustLevelDict = {
+        [1]: "Existe mas com pouca certeza",
+        [2]: "Existe com alguma certeza",
+        [3]: "Existe 100% certeza",
+    }
+
+    let typeDict = {
+        [0]: "Humanos",
+        [1]: "Animais",
+        [2]: "Ambos",
+    }
+
+    let stateDict = {
+        [0]: "Inativo",
+        [1]: "Funcional",
+        [2]: "Pendente"
+    }
 
     onMounted(() => {
         aquapoints.value = [
             new AquaPoint({
                 id: 1,
                 name: "Bebedouro Praça Central",
-                image: "/src/assets/images/defaultUserImage.jpg",
+                image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
                 type: 0,
                 longitude: -8.6110,
                 latitude: 41.1496,
@@ -65,7 +89,7 @@
             new AquaPoint({
                 id: 2,
                 name: "Bebedouro Jardim Norte",
-                image: "/src/assets/images/defaultUserImage.jpg",
+                image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
                 type: 0,
                 longitude: -8.6125,
                 latitude: 41.1502,
@@ -79,11 +103,11 @@
             new AquaPoint({
                 id: 3,
                 name: "Bebedouro Escola Secundária",
-                image: "/src/assets/images/defaultUserImage.jpg",
+                image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
                 type: 1,
                 longitude: -8.6098,
                 latitude: 41.1489,
-                state_id: 1,
+                state_id: 0,
                 ratingAVG: 1.5,
                 localId: 1,
                 ratingsAmount: 9,
@@ -93,7 +117,7 @@
             new AquaPoint({
                 id: 4,
                 name: "Bebedouro Parque Sul",
-                image: "/src/assets/images/defaultUserImage.jpg",
+                image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
                 type: 1,
                 longitude: -8.6133,
                 latitude: 41.1475,
@@ -107,11 +131,11 @@
             new AquaPoint({
                 id: 5,
                 name: "Bebedouro Câmara Municipal",
-                image: "https://via.placeholder.com/150",
+                image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
                 type: 2,
                 longitude: -8.6087,
                 latitude: 41.1510,
-                state_id: 1,
+                state_id: 0,
                 ratingAVG: 2.2,
                 localId: 1,
                 ratingsAmount: 8,
@@ -121,4 +145,22 @@
 
         loading.value = false
     })
+
+
+    function GetInactiveAquaPoints() {
+         return aquapoints.value.filter(a => a.state_id === 2).length
+    }
+
+    function editAquaPoint(aquapoint){
+        console.log('editar', aquapoint)
+        // abrir popup para editar user
+    }
+
+    function deleteAquaPoint(pointId){
+        // enviar para backend para delete
+    }
+
+    function changePointState(pointId){
+        // enviar para backend para marcar o user como admin
+    }
 </script>
