@@ -23,7 +23,7 @@ const routes = [
     { 
         path: '/admin/dashboard-users', 
         component: AdminUsers,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: false }
     },
     { 
         path: '/admin/dashboard-bebedouros', 

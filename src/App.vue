@@ -7,11 +7,16 @@ import NavBar from './components/NavBar.vue';
 <template>
   <!-- <HelloWorld msg="Vite + Vue" /> -->
 
+  <div class="d-flex flex-column min-vh-100">
+    <NavBar/>
+    <main class="flex-grow-1">
+      <router-view/>
+    </main>
 
-  <NavBar/>
-  <router-view/>
+    <Footer></Footer>
+  </div>
 
-  <Footer></Footer>
+  
 </template>
 
 <style scoped>
