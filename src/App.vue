@@ -1,4 +1,5 @@
 <script setup>
+import Footer from './components/Footer.vue';
 import HelloWorld from './components/HelloWorld.vue'
 import NavBar from './components/NavBar.vue';
 </script>
@@ -10,11 +11,7 @@ import NavBar from './components/NavBar.vue';
   <NavBar/>
   <router-view/>
 
-    <footer class="footer">
-    <div class="container">
-      <p>© 2026 - Aquapoint</p>
-    </div>
-  </footer>
+  <Footer></Footer>
 </template>
 
 <style scoped>
