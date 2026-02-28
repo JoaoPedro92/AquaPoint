@@ -1,14 +1,25 @@
 <template>
     <h1>Mapa</h1>
 
-    <div id="mapa" style="height: 500px; width: 100%"></div>
+    <div id="mapa" style="height: 80vh; width: 100%"></div>
 
     <div v-if="showAquapointPopup" class="modal-overlay" @click="showAquapointPopup = false">
         <div class="modal-box" @click.stop>
             <button class="btn-close" @click="showAquapointPopup = false"></button>
+            <!--<button class="btn btn-danger btn-close-popup">Fechar</button>-->
+            <!--<div class="mt-3">-->
+            <img :src="selectedAquapoint.image" width="100%" height="300" alt="Imagem do bebedouro" style=" border-radius: 12px 12px 0 0;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center mt-2">
+                    <h4>{{ selectedAquapoint.nome }}</h4>
+                    <i v-if="selectedAquapoint.estado === 'Inativo'" class="bi bi-exclamation-octagon-fill text-warning ms-2" title="Estado Inativo"></i>
+                </div>
 
-            <img :src="selectedAquapoint.image" width="100%" height="300" alt="Imagem do bebedouro">
-            <h4 class="mt-2">{{ selectedAquapoint.nome }}</h4>
+                <!-- Flag Reportar -->
+                <div class="hex-bg">
+                    <i class="bi bi-flag-fill text-white" style="font-size: 0.7rem" title="Reportar" v-on:click="ReportProblem"></i>
+                </div>
+            </div>
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <i class="bi bi-star-fill text-warning"></i>
@@ -25,30 +36,33 @@
                 <p class="text-muted">Ainda não há opiniões para este aquapoint.</p>
              </template>
              <template v-else>
-                <div v-for="review in reviews" :key="review.id">
-                    <div class="user-review-card">
-                        <div class="d-flex align-items-center">
-                            <img src="/src/assets/images/defaultUserImage.jpg" width="20" height="20" alt="imagem utilizador">
-                            <span class="ms-2">{{ review.userNome }}</span>
-                            <span class="ms-auto" style="font-size:0.8rem">{{ review.createdDate }}</span>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <div v-for="review in reviews" :key="review.id">
+                        <div class="user-review-card">
+                            <div class="d-flex align-items-center">
+                                <img src="/src/assets/images/defaultUserImage.jpg" width="20" height="20" alt="imagem utilizador">
+                                <span class="ms-2">{{ review.userNome }}</span>
+                                <span class="ms-auto" style="font-size:0.8rem">{{ review.createdDate }}</span>
+                            </div>
+
+                            <!-- Stars Rating -->
+                            <span :title="review.pontuacao + ' estrelas'">
+                                <StarsRating :rating="review.pontuacao" :isReadonly="true"></StarsRating> 
+                            </span>
+
+                            <p class="mb-0">{{ review.descrição }}</p>
                         </div>
-
-                        <!-- Stars Rating -->
-                        <span :title="review.pontuacao + ' estrelas'">
-                            <StarsRating :rating="review.pontuacao" :isReadonly="true"></StarsRating> 
-                        </span>
-
-                        <p class="mb-0">{{ review.descrição }}</p>
                     </div>
                 </div>
              </template>
 
              <h5 class="mt-5 mb-0">AVALIA ESTE BEBEDOURO</h5>
-             <p style="font-size: 0.9rem; color:gray">Partilha a tua experiência</p>
+             <p class="mb-1" style="font-size: 0.9rem; color:gray;">Partilha a tua experiência</p>
 
              <StarsRating v-model:rating="newReviewNumber" ></StarsRating>
-             <textarea v-model="reviewText" class="form-control" placeholder="Escreve um comentário" id="exampleFormControlTextarea1" rows="4"></textarea>
+             <textarea v-model="reviewText" class="form-control mt-1" placeholder="Escreve um comentário" id="exampleFormControlTextarea1" rows="4"></textarea>
              <button class="btn btn-primary mt-3" style="width:100%;" v-on:click="SubmitReview">SUBMETER</button>
+             <!--</div>-->
         </div>
     </div>
 </template>
@@ -114,6 +128,12 @@ function getIcone(cor = 'blue') {
 
 function SubmitReview(){
     console.log('Rating: ' + newReviewNumber.value + '\nReview: ' + reviewText.value)
+    newReviewNumber.value = 0
+    reviewText.value = ''
+}
+
+function ReportProblem(){
+    console.log('Report Problem clicked')
 }
 
 </script>
@@ -145,9 +165,35 @@ function SubmitReview(){
     right: 5px;
 }
 
+.btn-close-popup {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    padding: 4px 12px;
+    font-size: 0.7rem;
+}
+
 .user-review-card {
-    background-color: rgb(199, 199, 199);
+    background-color: rgb(216, 216, 216);
     padding: 10px;
     margin: 10px 0px 10px 0px;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    transition: box-shadow 0.2s;
+}
+
+.user-review-card:hover{
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.hex-bg {
+    width: 20px;
+    height: 20px;
+    background-color: #af0202;
+    clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }
 </style>
