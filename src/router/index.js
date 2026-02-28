@@ -28,7 +28,7 @@ const routes = [
     { 
         path: '/admin/dashboard-bebedouros', 
         component: AdminBebedouros,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: false }
     },
 ]
 
