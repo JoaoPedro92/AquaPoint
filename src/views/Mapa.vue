@@ -6,8 +6,8 @@
     <div v-if="showAquapointPopup" class="modal-overlay" @click="showAquapointPopup = false">
         <div class="modal-box" @click.stop>
             <button class="btn-close" @click="showAquapointPopup = false"></button>
-            <!--<button class="btn btn-danger btn-close-popup">Fechar</button>-->
-            <!--<div class="mt-3">-->
+
+            <!-- Imagem Bebedouro e informações -->
             <img :src="selectedAquapoint.image" width="100%" height="300" alt="Imagem do bebedouro" style=" border-radius: 12px 12px 0 0;">
             <div class="d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center mt-2">
@@ -27,7 +27,22 @@
                 </div>
                 <span>15min - 3,8km</span>
             </div>
-            
+            <!----------------------------------------->
+
+            <div class="mt-3">
+                <span style="font-size: 0.8rem">Nivel de Credibilidade</span>
+                <div class="progress" style="height: 12px; width: 30%; cursor:pointer;" title="Clicar para votar na credibilidade" v-on:click="VoteTrustLevel">
+                    <div 
+                        class="progress-bar" 
+                        :class="{ 
+                            'bg-orange': selectedAquapoint?.trustLevel === 1,
+                            'bg-warning': selectedAquapoint?.trustLevel === 2,
+                            'bg-success': selectedAquapoint?.trustLevel === 3
+                         }"
+                         style="width: 100%;">
+                    </div>
+                </div>
+            </div>
 
             <!-- Opinião dos Utilizadores -->
              <h5 class="mt-4">Opinião dos Utilizadores</h5>
@@ -55,14 +70,16 @@
                     </div>
                 </div>
              </template>
+            <!------------------------------------->
 
+            <!-- Nova avaliação do bebedouro -->
              <h5 class="mt-5 mb-0">AVALIA ESTE BEBEDOURO</h5>
              <p class="mb-1" style="font-size: 0.9rem; color:gray;">Partilha a tua experiência</p>
 
              <StarsRating v-model:rating="newReviewNumber" ></StarsRating>
              <textarea v-model="reviewText" class="form-control mt-1" placeholder="Escreve um comentário" id="exampleFormControlTextarea1" rows="4"></textarea>
              <button class="btn btn-primary mt-3" style="width:100%;" v-on:click="SubmitReview">SUBMETER</button>
-             <!--</div>-->
+             <!---------------------------------->
         </div>
     </div>
 </template>
@@ -87,8 +104,8 @@ onMounted(async() => {
     const image2Base64 = await imageUrlToBase64('https://pbs.twimg.com/media/EPSkJ3GXUAAYjuI.jpg')
 
     const aquapointsList = [
-        { id: 1, nome: 'Aquapoint 1', image: imageBase64, estado: 'Ativo', morada: 'Rua teste teste', lat: 38.781558, lng: -9.102584, ratingAvg: 4.7, nrReviews: 400 },
-        { id: 2, nome: 'Aquapoint 2', image: image2Base64, estado: 'Inativo', morada: 'Rua teste teste', lat: 38.780195, lng: -9.104723, ratingAvg: 3.0, nrReviews: 52 }
+        { id: 1, nome: 'Aquapoint 1', image: imageBase64, estado: 'Ativo', morada: 'Rua teste teste', lat: 38.781558, lng: -9.102584, ratingAvg: 4.7, nrReviews: 400, trustLevel: 3 },
+        { id: 2, nome: 'Aquapoint 2', image: image2Base64, estado: 'Inativo', morada: 'Rua teste teste', lat: 38.780195, lng: -9.104723, ratingAvg: 3.0, nrReviews: 52, trustLevel: 2 }
     ]
 
     reviews.value = [
@@ -112,6 +129,7 @@ onMounted(async() => {
                 showAquapointPopup.value = true
             })
         })
+
 })
 
 function getIcone(cor = 'blue') {
@@ -134,6 +152,10 @@ function SubmitReview(){
 
 function ReportProblem(){
     console.log('Report Problem clicked')
+}
+
+function VoteTrustLevel(){
+    console.log('VoteTrustLevel clicked')
 }
 
 </script>
