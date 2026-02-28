@@ -1,8 +1,16 @@
 <template>
     <h1>Mapa</h1>
 
-    <div id="mapa" style="height: 80vh; width: 100%"></div>
+    <div style="position: relative">
+        <div id="mapa" style="height: 80vh; width: 100%"></div>
 
+        <button class="btn btn-success" style="position: absolute; bottom: 20px; right: 20px; z-index: 1000;"
+            v-on:click="modoAdicionar = !modoAdicionar">
+
+            <i class="bi bi-plus-lg"></i>
+            {{ modoAdicionar ? 'Cancelar' : 'Adicionar Aquapoint' }}
+        </button>
+    </div>
     <div v-if="showAquapointPopup" class="modal-overlay" @click="showAquapointPopup = false">
         <div class="modal-box" @click.stop>
             <button class="btn-close" @click="showAquapointPopup = false"></button>
@@ -29,20 +37,35 @@
             </div>
             <!----------------------------------------->
 
+            <!-- Nivel de Credibilidade -->
             <div class="mt-3">
                 <span style="font-size: 0.8rem">Nivel de Credibilidade</span>
-                <div class="progress" style="height: 12px; width: 30%; cursor:pointer;" title="Clicar para votar na credibilidade" v-on:click="VoteTrustLevel">
-                    <div 
-                        class="progress-bar" 
-                        :class="{ 
-                            'bg-orange': selectedAquapoint?.trustLevel === 1,
-                            'bg-warning': selectedAquapoint?.trustLevel === 2,
-                            'bg-success': selectedAquapoint?.trustLevel === 3
-                         }"
-                         style="width: 100%;">
+                <div class="d-flex">
+                    <div class="progress" style="height: 12px; width: 30%; cursor:pointer;" title="Clicar para votar na credibilidade" v-on:click="VoteTrustLevel">
+                        <div 
+                            class="progress-bar" 
+                            :class="{ 
+                                'bg-orange': selectedAquapoint?.trustLevel === 1,
+                                'bg-warning': selectedAquapoint?.trustLevel === 2,
+                                'bg-success': selectedAquapoint?.trustLevel === 3
+                            }"
+                            style="width: 100%;">
+                        </div>
+                    </div>
+
+                    <div v-if="showTrustLevelVote" class="vote-trustLevelBox">
+                        <div class="d-flex gap-2 ms-2">
+                            <button class="btn btn-sm btn-success btn-trustLevelVote">
+                                <i class="bi bi-hand-thumbs-up-fill me-1"></i>Existe</button>
+                            <button class="btn btn-sm btn-danger btn-trustLevelVote">
+                               <i class="bi bi-hand-thumbs-down-fill me-1"></i>Não Existe</button>
+
+                        </div>
                     </div>
                 </div>
             </div>
+            <!----------------------------->
+
 
             <!-- Opinião dos Utilizadores -->
              <h5 class="mt-4">Opinião dos Utilizadores</h5>
@@ -82,10 +105,22 @@
              <!---------------------------------->
         </div>
     </div>
+
+    <!-- Offcanvas Informações Adicionar Bebedouro-->
+    <div class="offcanvas offcanvas-end" ref="offcanvasRef" tabindex="-1">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Título</h5>
+            <button class="btn-close" @click="closeOffcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            Conteúdo
+        </div>
+    </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import { Offcanvas } from 'bootstrap';
 import L, { icon } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import StarsRating from '../components/StarsRating.vue'
@@ -93,12 +128,24 @@ import { imageUrlToBase64 } from '../utilities/tools';
 
 
 const reviews = ref([])
+const mapaRef = ref(null)
 const newReviewNumber = ref(0)
 const reviewText = ref('')
 const selectedAquapoint = ref(null)
 const showAquapointPopup = ref(false)
+const showTrustLevelVote = ref(false)
+const modoAdicionar = ref(false)
+const offcanvasRef = ref(null)
+let offcanvasInstance = null
+const newMarkerAquapoint = ref(null)
 
 onMounted(async() => {
+    // Inicializa o offcanvas das informações no momento de adicionar um novo bebedouro
+    offcanvasInstance = new Offcanvas(offcanvasRef.value)
+    offcanvasRef.value.addEventListener('hide.bs.offcanvas', () => {
+        console.log('offcanvas fechado')
+        closeOffcanvas()
+    })
 
     const imageBase64 = await imageUrlToBase64('https://scontent.flis9-2.fna.fbcdn.net/v/t1.6435-9/159226417_4049432591747023_5551976901920941269_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=13d280&_nc_ohc=4TYKScNiGWcQ7kNvwG6mRlw&_nc_oc=Adm-YNxGSIhNyQEL__HCr0HaqbtYLWFQRDxQh-ZanvMnr1WhLlaOMVN_j5R1mnU-P-M&_nc_zt=23&_nc_ht=scontent.flis9-2.fna&_nc_gid=7kr_Wj2Nkj7EQ0-dPZgkNw&oh=00_Afs7y1Mqp73JXjFta-li0d-usavddpMIJPW9lXojh3RGyQ&oe=69C8F988')
     const image2Base64 = await imageUrlToBase64('https://pbs.twimg.com/media/EPSkJ3GXUAAYjuI.jpg')
@@ -114,22 +161,40 @@ onMounted(async() => {
          { id: 3, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 4, createdDate: '25/02/2026' },
     ]
 
-    const mapa = L.map('mapa').setView([38.781558, -9.102584], 13)
-
-   L.tileLayer('https://tile.jawg.io/jawg-lagoon/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
+    mapaRef.value = L.map('mapa').setView([38.781558, -9.102584], 13)
+    L.tileLayer('https://tile.jawg.io/jawg-lagoon/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
     attribution: '© Jawg Maps',
     accessToken: 'BumVzniBYxFsvv2lUwvsZ8fQMn6WdPC2sS5bAqyeSyDrROwuULnZrt0lE1uKPHrT'
-    }).addTo(mapa)
+    }).addTo(mapaRef.value)
+
+    mapaRef.value.on('click', (e) => {
+        if(!modoAdicionar.value) return 
+        const { lat, lng } = e.latlng
+
+        newMarkerAquapoint.value = L.marker([lat, lng], { icon: getIcone('red')})
+        .addTo(mapaRef.value)
+        .bindPopup(`Lat: ${lat.toFixed(5)} <br> Lng: ${lng.toFixed(5)}`)
+        .openPopup()
+
+        openOffcanvas()
+    })
 
     aquapointsList.forEach(point => {
         L.marker([point.lat, point.lng], { icon: getIcone(point.estado == 'Ativo' ? 'green' : 'orange') })
-            .addTo(mapa)
+            .addTo(mapaRef.value)
             .on('click', () => {
                 selectedAquapoint.value = point
                 showAquapointPopup.value = true
+                showTrustLevelVote.value = false
             })
         })
 
+})
+
+// Fica a aguardar que a variavel modoAdicionar altere e reaja à mudança mudando o tipo de cursor
+watch(modoAdicionar, (val) => {
+    if (!mapaRef.value) return
+    mapaRef.value.getContainer().style.cursor = val ? 'crosshair' : ''
 })
 
 function getIcone(cor = 'blue') {
@@ -156,6 +221,20 @@ function ReportProblem(){
 
 function VoteTrustLevel(){
     console.log('VoteTrustLevel clicked')
+    showTrustLevelVote.value = !showTrustLevelVote.value
+}
+
+function openOffcanvas(){
+    offcanvasInstance.show()
+}
+
+function closeOffcanvas(){
+    if(!newMarkerAquapoint.value) return;
+
+    mapaRef.value.removeLayer(newMarkerAquapoint.value)
+    newMarkerAquapoint.value = null
+    offcanvasInstance.hide()
+    modoAdicionar.value = false
 }
 
 </script>
@@ -217,5 +296,10 @@ function VoteTrustLevel(){
     align-items: center;
     justify-content: center;
     cursor: pointer;
+}
+
+.btn-trustLevelVote{
+    padding: 2px 5px;
+    font-size: 0.7rem;
 }
 </style>
