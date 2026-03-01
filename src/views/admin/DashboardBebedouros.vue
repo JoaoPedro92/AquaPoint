@@ -47,7 +47,7 @@
 
 <script setup>
     import { ref, onMounted } from 'vue'
-    import { AquaPoint } from "/src/models/AquaPoint" 
+    import { AquaPoint } from "/src/models/AquaPoint"
 
     const aquapoints = ref([])
     const loading = ref(true)
