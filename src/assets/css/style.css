@@ -6,7 +6,7 @@
 
 :root {
   --bs-body-font-family: 'Poppins', sans-serif;
-  --aquapoint-logo-blue: #29aae1;
+  --aquapoint-logo-blue: #4DA6AC; /* old #29aae1 */
   --aquapoint-gray: #bababa;
   --aquapoint-gray-hover: #9d9b9b;
 }
@@ -78,4 +78,77 @@ body {
 
 .btn-outline-secondary.btn-file-input:hover{
     background-color: var(--aquapoint-logo-blue);
+}
+
+
+.main-titles {
+    color: rgb(33,37,41);
+    font-size: 2.7vh;
+    font-weight: bold;
+}
+
+.spacer {
+    position: relative;
+    top: 0;
+    left: 0;
+    height: 3vh;
+    width: 100%;
+}
+
+.contact-form {
+  width: 95% !important;
+  height: 3.4vh !important;
+  padding-left: 0.5vh !important;
+}
+
+.about-us-image {
+  position: relative;
+  width: 90%;
+  border-radius: 1.5vh;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.container-spacer {
+  margin-bottom: 5%;
+}
+
+.column-title {
+  color: rgb(33,37,41);
+  font-size: 2.5vh;
+}
+
+.column-desc {
+  font-size: 1.8vh;
+  margin-top: 5%;
+  color: rgb(33,37,41);
+}
+
+.about-us-image-feature {
+  position: relative;
+  width: 40%;
+  left: 25%;
+  border-radius: 1.5vh;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.partner {
+  position: relative;
+  display: inline-block;
+  left: 2%;
+  top: 5%;
+  width: 13%;
+  height: 13vh;
+  margin-right: 2%;
+  transition: 0.5s ease;
+}
+
+.partner:hover {
+  transform: scale(1.1);
+}
+
+.partner > img {
+  width: 45%;
+  position: absolute;
+  left: 25%;
+  cursor: pointer;
 }

@@ -270,6 +270,7 @@ function VoteTrustLevel(){
 }
 
 function openOffcanvas(){
+    newAquapointImagePreview.value = '/src/assets/images/add_new_point.png'
     offcanvasInstance.show()
 }
 
@@ -398,11 +399,12 @@ function AddMarkerToMap(point){
 }
 
 .aquapoint-image-preview {
+    position: relative;
     margin-bottom: 10px;
-    width: 100%;
+    width: 50%;
+    left: 25%;
     border-radius: 8px;
-    height:400px;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 
