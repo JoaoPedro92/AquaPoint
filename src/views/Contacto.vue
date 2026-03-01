@@ -1,18 +1,3 @@
-<style>
-    .main-titles {
-        color: rgb(33,37,41);
-        font-size: 2.7vh;
-        font-weight: bold;
-    }
-    .spacer {
-        position: relative;
-        top: 0;
-        left: 0;
-        height: 3vh;
-        width: 100%;
-    }
-</style>
-
 <template>
     <div class="spacer"></div>
     <section class="main-container">
@@ -50,26 +35,26 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="label" for="name"></label>
-                                    <input type="text" class="form-control" name="name" id="name" placeholder="Nome" tabindex="0" required>
+                                    <input type="text" class="form-control contact-form" name="name" id="name" placeholder="Nome" tabindex="0" required>
                                 </div>
                             </div>
                             <div class="col-md-6"> 
                                 <div class="form-group">
                                     <label class="label" for="phone"></label>
-                                    <input type="number" class="form-control" name="phone" id="phone" placeholder="Telemóvel" tabindex="0" required>
+                                    <input type="number" class="form-control contact-form" name="phone" id="phone" placeholder="Telemóvel" tabindex="0" required>
                                 </div>
                             </div>
                             
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="label" for="email"></label>
-                                    <input type="email" class="form-control" name="email" id="email" placeholder="Email" tabindex="0" required>
+                                    <input type="email" class="form-control contact-form" name="email" id="email" placeholder="Email" tabindex="0" required>
                                 </div>
                             </div>
                             <div class="col-md-6"> 
                                 <div class="form-group">
                                     <label class="label" for="localization"></label>
-                                    <input type="text" class="form-control" name="localization" id="localization" placeholder="Localidade" tabindex="0" required>
+                                    <input type="text" class="form-control contact-form" name="localization" id="localization" placeholder="Localidade" tabindex="0" required>
                                 </div>
                             </div>
                             
@@ -77,14 +62,14 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="label" for="#"></label>
-                                    <textarea name="message" class="form-control" id="message" cols="30" rows="4" required placeholder="O que é que necessita? Explique o mais detalhadamente possível"></textarea>
+                                    <textarea name="message" class="form-control contact-form" id="message" style="width: 100% !important; resize: none; height: 15vh !important;" cols="30" rows="4" required placeholder="O que é que necessita? Explique o mais detalhadamente possível"></textarea>
                                 </div>
                             </div>
 
                             
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <input type="submit" value="Enviar" class="btn" style="width: 100% !important; margin-top: 4%; background-color: #4DA6AC; color: white;" tabindex="0">
+                                    <input type="submit" value="Enviar" class="btn btn-form" style="width: 100% !important; height: 3.4vh !important; margin-top: 4%; background-color: var(--aquapoint-logo-blue); color: white;" tabindex="0">
                                 </div>
                             </div>
                         </div>
@@ -107,3 +92,7 @@
         name: 'Contacto'
     }
 </script>
+
+<style scoped>
+    @import "/src/assets/css/style.css";
+</style>    
