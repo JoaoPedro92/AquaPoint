@@ -4,13 +4,17 @@
     <div style="position: relative">
         <div id="mapa" style="height: 80vh; width: 100%"></div>
 
-        <button class="btn btn-success" style="position: absolute; bottom: 20px; right: 20px; z-index: 1000;"
+        <!-- Botão Adicionar / Cancelar novo bebedouro -->
+        <button :class="modoAdicionar  ? 'btn btn-danger' : 'btn btn-success'" style="position: absolute; bottom: 20px; right: 20px; z-index: 1000;"
             v-on:click="modoAdicionar = !modoAdicionar">
 
-            <i class="bi bi-plus-lg"></i>
+            <i :class="modoAdicionar ? 'bi bi-x-lg' : 'bi bi-plus-lg' "></i>
             {{ modoAdicionar ? 'Cancelar' : 'Adicionar Aquapoint' }}
         </button>
+        <!------------------------------------------------>
     </div>
+
+    <!-- Modal detalhes do bebedouro selecionado -->
     <div v-if="showAquapointPopup" class="modal-overlay" @click="showAquapointPopup = false">
         <div class="modal-box" @click.stop>
             <button class="btn-close" @click="showAquapointPopup = false"></button>
@@ -22,11 +26,11 @@
                     <h4>{{ selectedAquapoint.nome }}</h4>
                     <i v-if="selectedAquapoint.estado === 'Inativo'" class="bi bi-exclamation-octagon-fill text-warning ms-2" title="Estado Inativo"></i>
                 </div>
-
                 <!-- Flag Reportar -->
                 <div class="hex-bg">
                     <i class="bi bi-flag-fill text-white" style="font-size: 0.7rem" title="Reportar" v-on:click="ReportProblem"></i>
                 </div>
+                <!------------------->
             </div>
             <div class="d-flex justify-content-between align-items-center">
                 <div>
@@ -107,13 +111,39 @@
     </div>
 
     <!-- Offcanvas Informações Adicionar Bebedouro-->
-    <div class="offcanvas offcanvas-end" ref="offcanvasRef" tabindex="-1">
+    <div class="offcanvas offcanvas-end" style="width:500px;" ref="offcanvasRef" tabindex="-1">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title">Título</h5>
-            <button class="btn-close" @click="closeOffcanvas"></button>
+            <h5 class="offcanvas-title">Adicionar Bebedouro</h5>
+            <button class="btn-close" v-on:click="offcanvasInstance.hide()"></button>
         </div>
         <div class="offcanvas-body">
-            Conteúdo
+            <div class="d-flex flex-column gap-2">
+                
+                <!-- Upload imagem bebedouro -->
+                <div class="mb-3">
+                    <img :src="newAquapointImagePreview" class="aquapoint-image-preview">
+                    <input type="file" ref="fileInput" style="display:none" @change="onFileChange" accept="image/*">
+                    <button class="btn btn-outline-secondary btn-file-input w-100" @click="fileInput.click()">
+                        <i class="bi bi-upload me-2"></i>Escolher ficheiro
+                    </button>
+                </div>
+                <!----------------------------->
+
+                <div class="mb-3">
+                    <h6>Nome do Bebedouro:</h6>
+                    <input v-model="newAquapointName" type="text" class="form-control" id="nome-aquapoint">
+                </div>
+                <!-- Tipo de bebedouro -->
+                <h6>Tipo de Bebedouro:</h6>
+                <button v-for="type in aquapointTypes" :key="type.id" 
+                :class="newAquapointType === type.nome ? 'btn bg-aquapoint-blue text-white' : 'btn bg-aquapoint-gray'"
+                 v-on:click="newAquapointType = type.nome"> {{ type.nome }}</button>
+                 <!----------------------->
+            </div>
+
+            <div class="d-flex justify-content-center mt-5">
+                <button class="btn btn-success" style="width: 60%" v-on:click="SubmitNewAquapoint">SUBMETER</button>
+            </div>
         </div>
     </div>
 </template>
@@ -125,8 +155,10 @@ import L, { icon } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import StarsRating from '../components/StarsRating.vue'
 import { imageUrlToBase64 } from '../utilities/tools';
+import { useToast } from 'vue-toastification';
 
 
+const toast = useToast()
 const reviews = ref([])
 const mapaRef = ref(null)
 const newReviewNumber = ref(0)
@@ -138,6 +170,19 @@ const modoAdicionar = ref(false)
 const offcanvasRef = ref(null)
 let offcanvasInstance = null
 const newMarkerAquapoint = ref(null)
+const aquapointTypes = [
+    { id: 1, nome: 'Pessoas' },
+    { id: 2, nome: 'Animais' },
+    { id: 3, nome: 'Ambos' }
+]
+const newAquapointType = ref('Pessoas')
+const fileInput = ref(null)
+const fileName = ref('')
+const newAquapointImagePreview = ref(null)
+const newAquapointName = ref('')
+const offcanvasClosedBySubmitButton = ref(false)
+const aquapointsList = ref([])
+
 
 onMounted(async() => {
     // Inicializa o offcanvas das informações no momento de adicionar um novo bebedouro
@@ -150,9 +195,9 @@ onMounted(async() => {
     const imageBase64 = await imageUrlToBase64('https://scontent.flis9-2.fna.fbcdn.net/v/t1.6435-9/159226417_4049432591747023_5551976901920941269_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=13d280&_nc_ohc=4TYKScNiGWcQ7kNvwG6mRlw&_nc_oc=Adm-YNxGSIhNyQEL__HCr0HaqbtYLWFQRDxQh-ZanvMnr1WhLlaOMVN_j5R1mnU-P-M&_nc_zt=23&_nc_ht=scontent.flis9-2.fna&_nc_gid=7kr_Wj2Nkj7EQ0-dPZgkNw&oh=00_Afs7y1Mqp73JXjFta-li0d-usavddpMIJPW9lXojh3RGyQ&oe=69C8F988')
     const image2Base64 = await imageUrlToBase64('https://pbs.twimg.com/media/EPSkJ3GXUAAYjuI.jpg')
 
-    const aquapointsList = [
-        { id: 1, nome: 'Aquapoint 1', image: imageBase64, estado: 'Ativo', morada: 'Rua teste teste', lat: 38.781558, lng: -9.102584, ratingAvg: 4.7, nrReviews: 400, trustLevel: 3 },
-        { id: 2, nome: 'Aquapoint 2', image: image2Base64, estado: 'Inativo', morada: 'Rua teste teste', lat: 38.780195, lng: -9.104723, ratingAvg: 3.0, nrReviews: 52, trustLevel: 2 }
+    aquapointsList.value = [
+        { id: 1, nome: 'Aquapoint 1', image: imageBase64, estado: 'Ativo', lat: 38.781558, lng: -9.102584, ratingAvg: 4.7, nrReviews: 400, trustLevel: 3 },
+        { id: 2, nome: 'Aquapoint 2', image: image2Base64, estado: 'Inativo', lat: 38.780195, lng: -9.104723, ratingAvg: 3.0, nrReviews: 52, trustLevel: 2 }
     ]
 
     reviews.value = [
@@ -179,7 +224,7 @@ onMounted(async() => {
         openOffcanvas()
     })
 
-    aquapointsList.forEach(point => {
+    aquapointsList.value.forEach(point => {
         L.marker([point.lat, point.lng], { icon: getIcone(point.estado == 'Ativo' ? 'green' : 'orange') })
             .addTo(mapaRef.value)
             .on('click', () => {
@@ -229,12 +274,61 @@ function openOffcanvas(){
 }
 
 function closeOffcanvas(){
-    if(!newMarkerAquapoint.value) return;
+    if(!newMarkerAquapoint.value) return;    
 
-    mapaRef.value.removeLayer(newMarkerAquapoint.value)
-    newMarkerAquapoint.value = null
-    offcanvasInstance.hide()
+    //if(!offcanvasClosedBySubmitButton.value) {
+        mapaRef.value.removeLayer(newMarkerAquapoint.value)
+        newMarkerAquapoint.value = null
+    //}
+
+    //offcanvasClosedBySubmitButton.value = false
+
     modoAdicionar.value = false
+    newAquapointType.value = 'Pessoas'
+    newAquapointName.value = null
+    newAquapointImagePreview.value = null
+}
+
+function onFileChange(e) {
+    const file = e.target.files[0]
+    if(!file) return
+    
+    fileName.value = file.name
+    const reader = new FileReader()
+    reader.onload = (e) => {
+        newAquapointImagePreview.value = e.target.result
+    }
+    reader.readAsDataURL(file)
+    
+}
+
+function SubmitNewAquapoint(){
+    if (!newAquapointName.value || newAquapointName.value.trim() === ''){
+        // failed
+        console.log('Failed to submit, name is null')
+        return;
+    }
+
+    console.log(`${newAquapointName.value} \n${newAquapointType.value}`)
+    //offcanvasClosedBySubmitButton.value = true
+
+    const coords = newMarkerAquapoint.value.getLatLng()
+    const newPoint = { id: aquapointsList.length + 1, nome: newAquapointName.value, image: newAquapointImagePreview.value, estado: 'Ativo', lat: coords.lat, lng: coords.lng, ratingAvg: 0, nrReviews: 0, trustLevel: 1 }
+    aquapointsList.value.push(newPoint)
+
+    AddMarkerToMap(newPoint)
+    offcanvasInstance.hide()
+    toast.success('Aquapoint criado com sucesso!')
+}
+
+function AddMarkerToMap(point){
+    L.marker([point.lat, point.lng], { icon: getIcone(point.estado === 'Ativo' ? 'green' : 'orange') })
+        .addTo(mapaRef.value)
+        .on('click', () => {
+            selectedAquapoint.value = point
+            showAquapointPopup.value = true
+            showTrustLevelVote = false
+        })
 }
 
 </script>
@@ -302,4 +396,14 @@ function closeOffcanvas(){
     padding: 2px 5px;
     font-size: 0.7rem;
 }
+
+.aquapoint-image-preview {
+    margin-bottom: 10px;
+    width: 100%;
+    border-radius: 8px;
+    height:400px;
+    object-fit: cover;
+}
+
+
 </style>

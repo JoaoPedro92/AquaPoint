@@ -6,6 +6,9 @@
 
 :root {
   --bs-body-font-family: 'Poppins', sans-serif;
+  --aquapoint-logo-blue: #29aae1;
+  --aquapoint-gray: #bababa;
+  --aquapoint-gray-hover: #9d9b9b;
 }
 
 body {
@@ -25,8 +28,16 @@ body {
 }
 
 .nav-item .nav-link.active{
-    border: 1px solid #2262ec;
-    background-color: #2262ec;
+    border: 1px solid var(--aquapoint-logo-blue);
+    background-color: var(--aquapoint-logo-blue);
+}
+
+.nav-item .router-link-exact-active{
+  border: 1px solid var(--aquapoint-logo-blue) !important;
+  background-color: var(--aquapoint-logo-blue) !important;
+  color: white !important;
+  border-radius: 5px;
+  padding: 4px 10px;
 }
 
 .carousel-caption {
@@ -51,4 +62,20 @@ body {
 
 .bg-orange{
   background-color: #fd7302 !important;
+}
+
+.bg-aquapoint-gray {
+  background-color: var(--aquapoint-gray) !important;
+}
+
+.bg-aquapoint-blue {
+  background-color: var(--aquapoint-logo-blue) !important;
+}
+
+.btn.bg-aquapoint-gray:hover {
+  background-color: var(--aquapoint-gray-hover) !important;
+}
+
+.btn-outline-secondary.btn-file-input:hover{
+    background-color: var(--aquapoint-logo-blue);
 }
