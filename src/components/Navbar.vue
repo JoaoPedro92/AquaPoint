@@ -29,14 +29,19 @@
             </li>
         </ul>
 
-        <a href="#" class="btn btn-outline-light mt-2 mt-lg-0">Login</a>
+        <a href="#" class="btn btn-outline-light mt-2 mt-lg-0" v-on:click="loginModalVisible = true">Login</a>
       </div>
     </div>
   </nav>
+
+  <LoginModal v-model:visible="loginModalVisible"></LoginModal>
+  
   </template>
 
-<script>
-  export default {
-    name: 'Navbar'
-}
+<script setup>
+import { ref } from 'vue';
+import LoginModal from './LoginModal.vue';
+
+  const loginModalVisible = ref(false)
+
 </script>
