@@ -121,7 +121,7 @@
                 
                 <!-- Upload imagem bebedouro -->
                 <div class="mb-3">
-                    <img :src="newAquapointImagePreview" class="aquapoint-image-preview">
+                    <img :src="newAquapointImagePreview" class="aquapoint-image-preview" style="cursor:pointer;" v-on:click="fileInput.click()">
                     <input type="file" ref="fileInput" style="display:none" @change="onFileChange" accept="image/*">
                     <button class="btn btn-outline-secondary btn-file-input w-100" @click="fileInput.click()">
                         <i class="bi bi-upload me-2"></i>Escolher ficheiro
@@ -136,13 +136,13 @@
                 <!-- Tipo de bebedouro -->
                 <h6>Tipo de Bebedouro:</h6>
                 <button v-for="type in aquapointTypes" :key="type.id" 
-                :class="newAquapointType === type.nome ? 'btn bg-aquapoint-blue text-white' : 'btn bg-aquapoint-gray'"
+                :class="newAquapointType === type.nome ? 'btn bg-aquapoint-blue text-white shadow-sm' : 'btn bg-aquapoint-gray'"
                  v-on:click="newAquapointType = type.nome"> {{ type.nome }}</button>
                  <!----------------------->
             </div>
 
             <div class="d-flex justify-content-center mt-5">
-                <button class="btn btn-success" style="width: 60%" v-on:click="SubmitNewAquapoint">SUBMETER</button>
+                <button class="btn btn-success shadow-sm" style="width: 60%" v-on:click="SubmitNewAquapoint">SUBMETER</button>
             </div>
         </div>
     </div>
