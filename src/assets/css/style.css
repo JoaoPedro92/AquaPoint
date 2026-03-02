@@ -9,6 +9,7 @@
   --aquapoint-logo-blue: #4DA6AC; /* old #29aae1 */
   --aquapoint-gray: #bababa;
   --aquapoint-gray-hover: #9d9b9b;
+  --aquapoint-marker-blue: #29aae1;
 }
 
 body {
@@ -151,4 +152,15 @@ body {
   position: absolute;
   left: 25%;
   cursor: pointer;
+}
+
+.hex-bg {
+    width: 20px;
+    height: 20px;
+    background-color: #af0202;
+    clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }
