@@ -12,12 +12,14 @@
             
 
             <div class="form-floating mb-3 mt-4">
-                <input v-model="userEmail" type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+                <input v-model="userEmail" type="email" class="form-control" :class="{ 'is-invalid': errors.email }" id="floatingInput" placeholder="name@example.com">
                 <label for="floatingInput">Email</label>
+                <div class="invalid-feedback">{{  errors.email }}</div>
             </div>
             <div class="form-floating">
-                <textarea v-model="reportDescription" class="form-control" id="floatingPassword" placeholder="Descrição" rows="6" style="min-height: 150px;"></textarea>
+                <textarea v-model="reportDescription" class="form-control" :class="{ 'is-invalid': errors.description}" id="floatingPassword" placeholder="Descrição" rows="6" style="min-height: 150px;"></textarea>
                 <label for="floatingPassword">Descrição</label>
+                <div class="invalid-feedback">{{  errors.description }}</div>
             </div>
 
             <div class="d-flex justify-content-center mt-4">
@@ -29,9 +31,12 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useFormValidation } from '../utilities/useFormValidation'
 
+const { errors, validate, validateEmail, clearErrors } = useFormValidation()
 const userEmail = ref('')
 const reportDescription = ref('')
+
 
     defineProps({
         visible: {
@@ -47,6 +52,16 @@ const reportDescription = ref('')
     }
 
     function ReportProblem(){
+        clearErrors()
+        const emailError = validateEmail(userEmail.value)
+        if(emailError) errors.value.email = emailError
+
+        const isValid = validate({
+            description: reportDescription.value
+        })
+
+        if(!isValid || emailError) return
+
         console.log(`Email: ${userEmail.value}\nDescrição: ${reportDescription.value}`)
     }
 </script>

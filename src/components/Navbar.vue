@@ -42,6 +42,6 @@
 import { ref } from 'vue';
 import LoginModal from './LoginModal.vue';
 
-  const loginModalVisible = ref(false)
+const loginModalVisible = ref(false)
 
 </script>
