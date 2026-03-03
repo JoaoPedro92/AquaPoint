@@ -321,7 +321,7 @@ function AddMarkerToMap(point){
         .on('click', () => {
             selectedAquapoint.value = point
             showAquapointPopup.value = true
-            showTrustLevelVote = false
+            showTrustLevelVote.value = false
         })
 }
 
