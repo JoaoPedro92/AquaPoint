@@ -121,7 +121,7 @@
                 
                 <!-- Upload imagem bebedouro -->
                 <div class="mb-3">
-                    <img :src="newAquapointImagePreview" class="aquapoint-image-preview">
+                    <img :src="newAquapointImagePreview" class="aquapoint-image-preview" style="cursor:pointer;" v-on:click="fileInput.click()">
                     <input type="file" ref="fileInput" style="display:none" @change="onFileChange" accept="image/*">
                     <button class="btn btn-outline-secondary btn-file-input w-100" @click="fileInput.click()">
                         <i class="bi bi-upload me-2"></i>Escolher ficheiro
@@ -136,26 +136,30 @@
                 <!-- Tipo de bebedouro -->
                 <h6>Tipo de Bebedouro:</h6>
                 <button v-for="type in aquapointTypes" :key="type.id" 
-                :class="newAquapointType === type.nome ? 'btn bg-aquapoint-blue text-white' : 'btn bg-aquapoint-gray'"
+                :class="newAquapointType === type.nome ? 'btn bg-aquapoint-blue text-white shadow-sm' : 'btn bg-aquapoint-gray'"
                  v-on:click="newAquapointType = type.nome"> {{ type.nome }}</button>
                  <!----------------------->
             </div>
 
             <div class="d-flex justify-content-center mt-5">
-                <button class="btn btn-success" style="width: 60%" v-on:click="SubmitNewAquapoint">SUBMETER</button>
+                <button class="btn btn-success shadow-sm" style="width: 60%" v-on:click="SubmitNewAquapoint">SUBMETER</button>
             </div>
         </div>
     </div>
+
+    <ReportProblemModal v-model:visible="showReportProblemModal"></ReportProblemModal>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
+import addNewMarkerImg from '../assets/images/map-markers/add_new_aqua_point_marker.png'
 import { Offcanvas } from 'bootstrap';
 import L, { icon } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import StarsRating from '../components/StarsRating.vue'
 import { imageUrlToBase64 } from '../utilities/tools';
 import { useToast } from 'vue-toastification';
+import ReportProblemModal from '../components/ReportProblemModal.vue';
 
 
 const toast = useToast()
@@ -165,6 +169,7 @@ const newReviewNumber = ref(0)
 const reviewText = ref('')
 const selectedAquapoint = ref(null)
 const showAquapointPopup = ref(false)
+const showReportProblemModal = ref(false)
 const showTrustLevelVote = ref(false)
 const modoAdicionar = ref(false)
 const offcanvasRef = ref(null)
@@ -216,7 +221,7 @@ onMounted(async() => {
         if(!modoAdicionar.value) return 
         const { lat, lng } = e.latlng
 
-        newMarkerAquapoint.value = L.marker([lat, lng], { icon: getIcone('red')})
+        newMarkerAquapoint.value = L.marker([lat, lng], { icon: getAddNewMarker()})
         .addTo(mapaRef.value)
         .bindPopup(`Lat: ${lat.toFixed(5)} <br> Lng: ${lng.toFixed(5)}`)
         .openPopup()
@@ -225,7 +230,7 @@ onMounted(async() => {
     })
 
     aquapointsList.value.forEach(point => {
-        L.marker([point.lat, point.lng], { icon: getIcone(point.estado == 'Ativo' ? 'green' : 'orange') })
+        L.marker([point.lat, point.lng], { icon: getMarkerIcon(point.estado == 'Ativo' ? 'var(--aquapoint-marker-blue)' : 'orange') })
             .addTo(mapaRef.value)
             .on('click', () => {
                 selectedAquapoint.value = point
@@ -242,17 +247,7 @@ watch(modoAdicionar, (val) => {
     mapaRef.value.getContainer().style.cursor = val ? 'crosshair' : ''
 })
 
-function getIcone(cor = 'blue') {
-    return L.divIcon({
-        className: '',
-        html: `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="60" viewBox="0 0 24 24">
-            <path fill="${cor}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-        </svg>`,
-        iconSize: [100, 60],
-        iconAnchor: [15, 40],
-        popupAnchor: [0, -40]
-    })
-}
+
 
 function SubmitReview(){
     console.log('Rating: ' + newReviewNumber.value + '\nReview: ' + reviewText.value)
@@ -262,6 +257,8 @@ function SubmitReview(){
 
 function ReportProblem(){
     console.log('Report Problem clicked')
+
+    showReportProblemModal.value = true
 }
 
 function VoteTrustLevel(){
@@ -277,12 +274,8 @@ function openOffcanvas(){
 function closeOffcanvas(){
     if(!newMarkerAquapoint.value) return;    
 
-    //if(!offcanvasClosedBySubmitButton.value) {
-        mapaRef.value.removeLayer(newMarkerAquapoint.value)
-        newMarkerAquapoint.value = null
-    //}
-
-    //offcanvasClosedBySubmitButton.value = false
+    mapaRef.value.removeLayer(newMarkerAquapoint.value)
+    newMarkerAquapoint.value = null
 
     modoAdicionar.value = false
     newAquapointType.value = 'Pessoas'
@@ -323,13 +316,35 @@ function SubmitNewAquapoint(){
 }
 
 function AddMarkerToMap(point){
-    L.marker([point.lat, point.lng], { icon: getIcone(point.estado === 'Ativo' ? 'green' : 'orange') })
+    L.marker([point.lat, point.lng], { icon: getMarkerIcon(point.estado === 'Ativo' ? 'green' : 'orange') })
         .addTo(mapaRef.value)
         .on('click', () => {
             selectedAquapoint.value = point
             showAquapointPopup.value = true
-            showTrustLevelVote = false
+            showTrustLevelVote.value = false
         })
+}
+
+function getMarkerIcon(color = 'blue') {
+    return L.divIcon({
+        className: '',
+        html: `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="60" viewBox="0 0 24 24">
+            <path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>`,
+        iconSize: [100, 60],
+        iconAnchor: [15, 40],
+        popupAnchor: [0, -40]
+    })
+}
+
+function getAddNewMarker(){
+    return L.divIcon({
+        className: '',
+        html: `<img src="${addNewMarkerImg}" style="width: 50px; height: 50px;">`,
+        iconSize: [100, 60],
+        iconAnchor: [15, 40],
+        popupAnchor: [0, -40]
+    })
 }
 
 </script>
@@ -361,14 +376,6 @@ function AddMarkerToMap(point){
     right: 5px;
 }
 
-.btn-close-popup {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    padding: 4px 12px;
-    font-size: 0.7rem;
-}
-
 .user-review-card {
     background-color: rgb(216, 216, 216);
     padding: 10px;
@@ -380,17 +387,6 @@ function AddMarkerToMap(point){
 
 .user-review-card:hover{
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-
-.hex-bg {
-    width: 20px;
-    height: 20px;
-    background-color: #af0202;
-    clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
 }
 
 .btn-trustLevelVote{
