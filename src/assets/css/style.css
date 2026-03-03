@@ -98,8 +98,9 @@ body {
 
 .contact-form {
   width: 95% !important;
-  height: 3.4vh !important;
+  height: 40px !important;
   padding-left: 0.5vh !important;
+  padding-bottom: 0.2vh !important;
 }
 
 .about-us-image {
@@ -107,6 +108,11 @@ body {
   width: 90%;
   border-radius: 1.5vh;
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  transition: 0.5s ease;
+}
+
+.about-us-image:hover {
+  transform: scale(1.03);
 }
 
 .container-spacer {
@@ -115,7 +121,7 @@ body {
 
 .column-title {
   color: rgb(33,37,41);
-  font-size: 2.5vh;
+  font-size: 2.3vh;
 }
 
 .column-desc {
@@ -130,6 +136,11 @@ body {
   left: 25%;
   border-radius: 1.5vh;
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  transition: 0.5s ease;
+}
+
+.about-us-image-feature:hover {
+  transform: scale(1.05);
 }
 
 .partner {
@@ -165,4 +176,12 @@ body {
     cursor: pointer;
 }
 
+.map-wrapper{
+  display: flex;
+  justify-content: center;
+  margin-top: 8%;
+}
 
+.map-wrapper iframe{
+  max-width: 100%;
+}
