@@ -62,14 +62,14 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="label" for="#"></label>
-                                    <textarea name="message" class="form-control contact-form" id="message" style="width: 100% !important; resize: none; height: 15vh !important;" cols="30" rows="4" required placeholder="O que é que necessita? Explique o mais detalhadamente possível"></textarea>
+                                    <textarea name="message" class="form-control contact-form" id="message" style="width: 100% !important; resize: none; height: 120px !important;" cols="30" rows="4" required placeholder="O que é que necessita? Explique o mais detalhadamente possível"></textarea>
                                 </div>
                             </div>
 
                             
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <input type="submit" value="Enviar" class="btn btn-form" style="width: 100% !important; height: 3.4vh !important; margin-top: 4%; background-color: var(--aquapoint-logo-blue); color: white;" tabindex="0">
+                                    <input type="submit" value="Enviar" class="btn btn-form" style="width: 100% !important; height: 40px !important; margin-top: 4%; background-color: var(--aquapoint-logo-blue); color: white;" tabindex="0">
                                 </div>
                             </div>
                         </div>

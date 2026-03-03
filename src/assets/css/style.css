@@ -97,8 +97,9 @@ body {
 
 .contact-form {
   width: 95% !important;
-  height: 3.4vh !important;
+  height: 40px !important;
   padding-left: 0.5vh !important;
+  padding-bottom: 0.2vh !important;
 }
 
 .about-us-image {
@@ -119,7 +120,7 @@ body {
 
 .column-title {
   color: rgb(33,37,41);
-  font-size: 2.5vh;
+  font-size: 2.3vh;
 }
 
 .column-desc {
