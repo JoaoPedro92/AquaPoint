@@ -1,8 +1,4 @@
-<script setup>
-import Footer from './components/Footer.vue';
-import HelloWorld from './components/HelloWorld.vue'
-import NavBar from './components/NavBar.vue';
-</script>
+
 
 <template>
   <!-- <HelloWorld msg="Vite + Vue" /> -->
@@ -11,6 +7,8 @@ import NavBar from './components/NavBar.vue';
     <NavBar/>
     <main class="flex-grow-1">
       <router-view/>
+      <LoginModal></LoginModal>
+
     </main>
 
     <Footer></Footer>
@@ -18,6 +16,12 @@ import NavBar from './components/NavBar.vue';
 
   
 </template>
+
+<script setup>
+import Footer from './components/Footer.vue';
+import NavBar from './components/NavBar.vue';
+import LoginModal from './components/LoginModal.vue';
+</script>
 
 <style scoped>
 .logo {

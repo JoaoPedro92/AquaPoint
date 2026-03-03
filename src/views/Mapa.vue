@@ -5,11 +5,11 @@
         <div id="mapa" style="height: 80vh; width: 100%"></div>
 
         <!-- Botão Adicionar / Cancelar novo bebedouro -->
-        <button :class="modoAdicionar  ? 'btn btn-danger' : 'btn btn-success'" style="position: absolute; bottom: 20px; right: 20px; z-index: 1000;"
-            v-on:click="modoAdicionar = !modoAdicionar">
+        <button :class="AddNewMode  ? 'btn btn-danger' : 'btn btn-success'" style="position: absolute; bottom: 20px; right: 20px; z-index: 1000;"
+            v-on:click="AddOrCancelMarkerClick">
 
-            <i :class="modoAdicionar ? 'bi bi-x-lg' : 'bi bi-plus-lg' "></i>
-            {{ modoAdicionar ? 'Cancelar' : 'Adicionar Aquapoint' }}
+            <i :class="AddNewMode ? 'bi bi-x-lg' : 'bi bi-plus-lg' "></i>
+            {{ AddNewMode ? 'Cancelar' : 'Adicionar Aquapoint' }}
         </button>
         <!------------------------------------------------>
     </div>
@@ -159,9 +159,12 @@ import 'leaflet/dist/leaflet.css'
 import StarsRating from '../components/StarsRating.vue'
 import { imageUrlToBase64 } from '../utilities/tools';
 import { useToast } from 'vue-toastification';
+import { useAuth } from '../utilities/useAuth';
+import { useModalStore } from '../utilities/modal';
 import ReportProblemModal from '../components/ReportProblemModal.vue';
 
-
+const loginModal = useModalStore()
+const Auth = useAuth()
 const toast = useToast()
 const reviews = ref([])
 const mapaRef = ref(null)
@@ -171,7 +174,7 @@ const selectedAquapoint = ref(null)
 const showAquapointPopup = ref(false)
 const showReportProblemModal = ref(false)
 const showTrustLevelVote = ref(false)
-const modoAdicionar = ref(false)
+const AddNewMode = ref(false)
 const offcanvasRef = ref(null)
 let offcanvasInstance = null
 const newMarkerAquapoint = ref(null)
@@ -218,10 +221,10 @@ onMounted(async() => {
     }).addTo(mapaRef.value)
 
     mapaRef.value.on('click', (e) => {
-        if(!modoAdicionar.value) return 
+        if(!AddNewMode.value) return 
         const { lat, lng } = e.latlng
 
-        newMarkerAquapoint.value = L.marker([lat, lng], { icon: getAddNewMarker()})
+        newMarkerAquapoint.value = L.marker([lat, lng], { icon: getAddNewMarkerIcon()})
         .addTo(mapaRef.value)
         .bindPopup(`Lat: ${lat.toFixed(5)} <br> Lng: ${lng.toFixed(5)}`)
         .openPopup()
@@ -242,13 +245,20 @@ onMounted(async() => {
 })
 
 // Fica a aguardar que a variavel modoAdicionar altere e reaja à mudança mudando o tipo de cursor
-watch(modoAdicionar, (val) => {
+watch(AddNewMode, (val) => {
     if (!mapaRef.value) return
     mapaRef.value.getContainer().style.cursor = val ? 'crosshair' : ''
 })
 
 
+function AddOrCancelMarkerClick(){
+    if(!Auth.isLoggedIn){
+        loginModal.openLoginModal()
+        return
+    }
 
+    AddNewMode.value = !AddNewMode.value
+}
 function SubmitReview(){
     console.log('Rating: ' + newReviewNumber.value + '\nReview: ' + reviewText.value)
     newReviewNumber.value = 0
@@ -277,7 +287,7 @@ function closeOffcanvas(){
     mapaRef.value.removeLayer(newMarkerAquapoint.value)
     newMarkerAquapoint.value = null
 
-    modoAdicionar.value = false
+    AddNewMode.value = false
     newAquapointType.value = 'Pessoas'
     newAquapointName.value = null
     newAquapointImagePreview.value = null
@@ -337,7 +347,7 @@ function getMarkerIcon(color = 'blue') {
     })
 }
 
-function getAddNewMarker(){
+function getAddNewMarkerIcon(){
     return L.divIcon({
         className: '',
         html: `<img src="${addNewMarkerImg}" style="width: 50px; height: 50px;">`,

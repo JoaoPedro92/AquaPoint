@@ -1,11 +1,11 @@
 <template>
-    <div v-if="visible" class="modal-overlay" @click="ChangeVisibility(!visible)">
+    <div v-if="loginModal.loginModalOpen" class="modal-overlay" @click="loginModal.closeLoginModal()">
         <div class="container py-5 h-100" >
             <div class="row d-flex justify-content-center align-items-center h-100">                
                 <div class="col-12 col-md-8 col-lg-6 col-xl-5" style="max-height: 90vh;" @click.stop>                    
                     <div class="card bg-dark text-white" style="border-radius: 1rem; height: auto; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
 
-                        <button class="btn-close" style="filter: invert(1);" @click="ChangeVisibility(!visible)"></button>
+                        <button class="btn-close" style="filter: invert(1);" @click="loginModal.closeLoginModal()"></button>
 
                         <div class="card-body p-5 pb-0 text-center">                           
 
@@ -57,6 +57,7 @@
 import { ref } from 'vue';
 import { useFormValidation } from '../utilities/useFormValidation';
 import { useAuth } from '../utilities/useAuth';
+import { useModalStore } from '../utilities/modal';
 
     defineProps({
         visible: {
@@ -65,16 +66,11 @@ import { useAuth } from '../utilities/useAuth';
         }
     })
 
+    const loginModal = useModalStore()
     const Auth = useAuth()
     const { errors, validate, validateEmail, clearErrors } = useFormValidation()
     const emailUser = ref('')
     const passwordUser = ref('')
-
-    const emit = defineEmits(['update:visible'])
-
-    function ChangeVisibility(value){
-        emit('update:visible', value)
-    }
 
     function ProcessLogin(){
         clearErrors()
@@ -96,7 +92,7 @@ import { useAuth } from '../utilities/useAuth';
                 'token-test-123'
             )
 
-            ChangeVisibility(false)
+            loginModal.closeLoginModal()
         }
 
         catch (e){

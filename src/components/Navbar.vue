@@ -31,8 +31,8 @@
             </ul>
         
         <div class="col-md-3 text-end text-center text-md-end ">
-            <a v-if="!Auth.isLoggedIn" href="#" class="btn btn-outline-light mt-2 mt-lg-0" v-on:click="loginModalVisible = true">Login</a>
-            <a v-if="!Auth.isLoggedIn" href="#" class="btn btn-primary ms-3 mt-2 mt-lg-0" v-on:click="loginModalVisible = true">Registar</a>
+            <a v-if="!Auth.isLoggedIn" href="#" class="btn btn-outline-light mt-2 mt-lg-0" v-on:click="loginModal.openLoginModal()">Login</a>
+            <a v-if="!Auth.isLoggedIn" href="#" class="btn btn-primary ms-3 mt-2 mt-lg-0" v-on:click="loginModal.openLoginModal()">Registar</a>
             <div v-else class="position-relative mt-2 mt-lg-0">
                 <!-- overlay para fechar ao clicar fora -->
                 <div v-if="showUserMenu" 
@@ -56,7 +56,6 @@
 
   </nav>
 
-  <LoginModal v-model:visible="loginModalVisible"></LoginModal>
   
   </template>
 
@@ -64,7 +63,9 @@
 import { ref } from 'vue';
 import LoginModal from './LoginModal.vue';
 import { useAuth } from '../utilities/useAuth';
+import { useModalStore } from '../utilities/modal';
 
+const loginModal = useModalStore()
 const Auth = useAuth()
 const loginModalVisible = ref(false)
 const showUserMenu = ref(false)
