@@ -1,0 +1,19 @@
+use aquapoint;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE interaction;
+TRUNCATE TABLE favorites;
+TRUNCATE TABLE points_trust;
+TRUNCATE TABLE points_state;
+TRUNCATE TABLE aqua_points;
+TRUNCATE TABLE comment;
+TRUNCATE TABLE rating;
+TRUNCATE TABLE users;
+TRUNCATE TABLE trustLevels;
+TRUNCATE TABLE states;
+TRUNCATE TABLE local;
+TRUNCATE TABLE zone;
+TRUNCATE TABLE type;
+
+SET FOREIGN_KEY_CHECKS = 1;
