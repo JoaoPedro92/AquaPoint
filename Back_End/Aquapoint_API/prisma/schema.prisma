@@ -1,33 +1,35 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 model aqua_points {
   id           Int            @id @default(autoincrement())
   point_name   String         @db.Text
   point_type   Int
-  point_trust  Int
   local_id     Int
   image        Bytes?         @db.Blob
   latitude     Float
   longitude    Float
-  trustlevels  trustlevels    @relation(fields: [point_trust], references: [id], onDelete: Cascade, map: "FK_aqua_points_trustlevels")
   local        local          @relation(fields: [local_id], references: [id], onDelete: Cascade, map: "fk_aqua_points_local")
   type         type           @relation(fields: [point_type], references: [id], onDelete: Cascade, map: "fk_aqua_points_type")
   favorites    favorites[]
+  interaction  interaction[]
   points_state points_state[]
-  reports      reports[]
-  reviews      reviews[]
+  points_trust points_trust[]
 
-  @@index([point_trust], map: "FK_aqua_points_trustlevels")
   @@index([local_id], map: "fk_aqua_points_local")
   @@index([point_type], map: "fk_aqua_points_type")
+}
+
+model comment {
+  id          Int           @id @default(autoincrement())
+  comment     String        @db.Text
+  interaction interaction[]
 }
 
 model favorites {
@@ -40,6 +42,25 @@ model favorites {
 
   @@index([point_id], map: "fk_favorites_point")
   @@index([user_id], map: "fk_favorites_user")
+}
+
+model interaction {
+  id               Int         @id @default(autoincrement())
+  interaction_type Int
+  user_id          Int
+  rating_id        Int
+  comment_id       Int
+  point_id         Int
+  createdAt        DateTime    @db.Date
+  comment          comment     @relation(fields: [comment_id], references: [id], onDelete: Cascade, map: "fk_interaction_comment")
+  aqua_points      aqua_points @relation(fields: [point_id], references: [id], onDelete: Cascade, map: "fk_interaction_point")
+  rating           rating      @relation(fields: [rating_id], references: [id], onDelete: Cascade, map: "fk_interaction_rating")
+  users            users       @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_interaction_user")
+
+  @@index([comment_id], map: "fk_interaction_comment")
+  @@index([point_id], map: "fk_interaction_point")
+  @@index([rating_id], map: "fk_interaction_rating")
+  @@index([user_id], map: "fk_interaction_user")
 }
 
 model local {
@@ -63,31 +84,21 @@ model points_state {
   @@index([state_id], map: "fk_points_state_state")
 }
 
-model reports {
+model points_trust {
   id          Int         @id @default(autoincrement())
-  user_id     Int
-  comment     String      @db.Text
   point_id    Int
-  createdAt   DateTime    @db.Date
-  aqua_points aqua_points @relation(fields: [point_id], references: [id], onDelete: Cascade, map: "fk_reports_point")
-  users       users       @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_reports_user")
+  trust_id    Int
+  trustlevels trustlevels @relation(fields: [trust_id], references: [id], onDelete: Cascade, map: "fk_points_trust_label")
+  aqua_points aqua_points @relation(fields: [point_id], references: [id], onDelete: Cascade, map: "fk_points_trust_point")
 
-  @@index([point_id], map: "fk_reports_point")
-  @@index([user_id], map: "fk_reports_user")
+  @@index([trust_id], map: "fk_points_trust_label")
+  @@index([point_id], map: "fk_points_trust_point")
 }
 
-model reviews {
-  id          Int         @id @default(autoincrement())
-  user_id     Int
+model rating {
+  id          Int           @id @default(autoincrement())
   rating      Int
-  comment     String      @db.Text
-  point_id    Int
-  createdAt   DateTime    @db.Date
-  aqua_points aqua_points @relation(fields: [point_id], references: [id], onDelete: Cascade, map: "fk_reviews_point")
-  users       users       @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_reviews_user")
-
-  @@index([point_id], map: "fk_reviews_point")
-  @@index([user_id], map: "fk_reviews_user")
+  interaction interaction[]
 }
 
 model states {
@@ -97,9 +108,9 @@ model states {
 }
 
 model trustlevels {
-  id          Int           @id @default(autoincrement())
-  trust_name  String        @db.Text
-  aqua_points aqua_points[]
+  id           Int            @id @default(autoincrement())
+  trust_name   String         @db.Text
+  points_trust points_trust[]
 }
 
 model type {
@@ -109,16 +120,15 @@ model type {
 }
 
 model users {
-  id             Int         @id @default(autoincrement())
-  name           String      @db.Text
-  email          String      @db.Text
-  passwordHash   String      @db.Text
-  profilePicture Bytes?      @db.Blob
-  isAdmin        Boolean     @default(false)
-  createdAt      DateTime    @default(now()) @db.DateTime(0)
+  id             Int           @id @default(autoincrement())
+  name           String        @db.Text
+  email          String        @db.Text
+  passwordHash   String        @db.Text
+  profilePicture Bytes?        @db.Blob
+  createdAt      DateTime      @default(now())@db.DateTime
+  role           Int
   favorites      favorites[]
-  reports        reports[]
-  reviews        reviews[]
+  interaction    interaction[]
 }
 
 model zone {
