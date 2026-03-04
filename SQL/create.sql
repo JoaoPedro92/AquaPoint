@@ -67,30 +67,13 @@ create table trustLevels (
 );
 
 -- -------------------------------------------------------
--- TABELA RATING
--- -------------------------------------------------------=
-create table rating (
-    id int not null auto_increment,
-    rating int not null,             
-    primary key (id)
-);
-
--- -------------------------------------------------------
--- TABELA COMMENT
--- -------------------------------------------------------
-create table comment (
-    id int not null auto_increment,
-    comment text not null,
-    primary key (id)
-);
-
--- -------------------------------------------------------
 -- TABELA AQUA_POINTS
 -- -------------------------------------------------------
 create table aqua_points (
     id int not null auto_increment,
     point_name text not null,
-    point_type int not null,         
+    point_type int not null,  
+    point_trust int not null,       
     local_id int not null,       
     image BLOB default NULL,    
     latitude double not null,
@@ -108,16 +91,6 @@ create table points_state (
     primary key (id)
 );
 
--- -------------------------------------------------------
--- TABELA POINT TRUST
--- -------------------------------------------------------
-create table points_trust (
-    id int not null auto_increment,
-    point_id int not null,           
-    trust_id int not null,           
-    primary key (id)
-);
-
 
 -- -------------------------------------------------------
 -- TABELA FAVORITES
@@ -131,14 +104,25 @@ create table favorites (
 );
 
 -- -------------------------------------------------------
--- TABELA INTERACTION (reviews and reports)
+-- TABELA REVIEWS
 -- -------------------------------------------------------
-create table interaction (
+create table reviews (
     id int not null auto_increment,
-    interaction_type int not null,
     user_id int not null,            
-    rating_id int not null,          
-    comment_id int not null,         
+    rating int not null,          
+    comment TEXT not null,         
+    point_id int not null,           
+    createdAt date not null,
+    primary key (id)
+);
+
+-- -------------------------------------------------------
+-- TABELA REPORTS
+-- -------------------------------------------------------
+create table reports (
+    id int not null auto_increment,
+    user_id int not null,   
+    comment TEXT not null,         
     point_id int not null,           
     createdAt date not null,
     primary key (id)
@@ -177,14 +161,9 @@ foreign key (state_id) references states(id)
 on delete cascade on update cascade;
 
 -- POINTS_TRUST -> AQUA_POINTS e TRUSTLEVELS
-alter table points_trust
+alter table aqua_points
 add constraint fk_points_trust_point
-foreign key (point_id) references aqua_points(id)
-on delete cascade on update cascade;
-
-alter table points_trust
-add constraint fk_points_trust_label
-foreign key (trust_id) references trustLevels(id)
+foreign key (point_trust) references trustLevels(id)
 on delete cascade on update cascade;
 
 -- FAVORITES -> USERS e AQUA_POINTS
@@ -199,22 +178,22 @@ foreign key (point_id) references aqua_points(id)
 on delete cascade on update cascade;
 
 -- INTERACTION -> USERS, RATING, COMMENT, AQUA_POINTS
-alter table interaction
-add constraint fk_interaction_user
+alter table reviews
+add constraint fk_reviews_user
 foreign key (user_id) references users(id)
 on delete cascade on update cascade;
 
-alter table interaction
-add constraint fk_interaction_rating
-foreign key (rating_id) references rating(id)
+alter table reviews
+add constraint fk_reviews_point
+foreign key (point_id) references aqua_points(id)
 on delete cascade on update cascade;
 
-alter table interaction
-add constraint fk_interaction_comment
-foreign key (comment_id) references comment(id)
+alter table reports
+add constraint fk_reports_user
+foreign key (user_id) references users(id)
 on delete cascade on update cascade;
 
-alter table interaction
-add constraint fk_interaction_point
+alter table reports
+add constraint fk_reports_point
 foreign key (point_id) references aqua_points(id)
 on delete cascade on update cascade;
