@@ -43,7 +43,7 @@ create table users (
     passwordHash text not null,
     profilePicture BLOB default NULL,
     createdAt date not null,
-    role int not null,
+    isAdmin TINYINT not null,
     primary key (id)
 );
 

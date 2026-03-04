@@ -38,13 +38,13 @@ insert into trustLevels (id, trust_name) values (4, 'Verificado');
 -- -------------------------------------------------------
 -- USERS
 -- -------------------------------------------------------
-insert into users (id, name, email, passwordHash, createdAt, role)
+insert into users (id, name, email, passwordHash, createdAt, isAdmin)
 values (1, 'Admin', 'admin@aquapoint.pt', 'hash_admin', '2025-01-01', 1);
 
-insert into users (id, name, email, passwordHash, createdAt, role)
+insert into users (id, name, email, passwordHash, createdAt, isAdmin)
 values (2, 'João Silva', 'joao@email.com', 'hash_joao', '2025-01-02', 0);
 
-insert into users (id, name, email, passwordHash, createdAt, role)
+insert into users (id, name, email, passwordHash, createdAt, isAdmin)
 values (3, 'Maria Santos', 'maria@email.com', 'hash_maria', '2025-01-03', 0);
 
 -- -------------------------------------------------------
