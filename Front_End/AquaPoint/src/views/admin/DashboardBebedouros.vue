@@ -25,12 +25,12 @@
                 <tbody>
                     <tr v-for="aquapoint  in aquapoints" :key="aquapoint.id">
                     <td class="text-center"><img :src="aquapoint.image" class="rounded-circle" width="40" height="40"></td>
-                    <td >{{ aquapoint.name }}</td>
-                    <td>{{ typeDict[aquapoint.type] }}</td>
+                    <td >{{ aquapoint.point_name }}</td>
+                    <td>{{ typeDict[aquapoint.point_type] }}</td>
                     <td class="text-center">{{ aquapoint.ratingAVG }}</td>
                     <td class="text-center">{{ aquapoint.ratingsAmount }}</td>
                     <td class="text-center">{{ stateDict[aquapoint.state_id] }}</td>
-                    <td>{{ trustLevelDict[aquapoint.trustLevel] }}</td>
+                    <td>{{ trustLevelDict[aquapoint.point_trust] }}</td>
                     <td class="text-center">
                         <button class="btn btn-sm btn-primary mt-1 me-2" @click="editAquaPoint(aquapoint)">Editar</button>
                         <button class="btn btn-sm btn-danger mt-1 me-2" @click="deleteAquaPoint(aquapoint.id)">Eliminar</button>
@@ -74,72 +74,72 @@
         aquapoints.value = [
             new AquaPoint({
                 id: 1,
-                name: "Bebedouro Praça Central",
+                point_name: "Bebedouro Praça Central",
                 image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
-                type: 0,
+                point_type: 0,
                 longitude: -8.6110,
                 latitude: 41.1496,
                 state_id: 1,
                 ratingAVG: 4.2,
-                localId: 1,
+                local_id: 1,
                 ratingsAmount: 5,
-                trustLevel: 2,
+                point_trust: 2,
             }),
 
             new AquaPoint({
                 id: 2,
-                name: "Bebedouro Jardim Norte",
+                point_name: "Bebedouro Jardim Norte",
                 image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
-                type: 0,
+                point_type: 0,
                 longitude: -8.6125,
                 latitude: 41.1502,
                 state_id: 2,
                 ratingAVG: 3.2,
-                localId: 1,
+                local_id: 1,
                 ratingsAmount: 9,
-                trustLevel: 1,
+                point_trust: 1,
             }),
 
             new AquaPoint({
                 id: 3,
-                name: "Bebedouro Escola Secundária",
+                point_name: "Bebedouro Escola Secundária",
                 image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
-                type: 1,
+                point_type: 1,
                 longitude: -8.6098,
                 latitude: 41.1489,
                 state_id: 0,
                 ratingAVG: 1.5,
-                localId: 1,
+                local_id: 1,
                 ratingsAmount: 9,
-                trustLevel: 3,
+                point_trust: 3,
             }),
 
             new AquaPoint({
                 id: 4,
-                name: "Bebedouro Parque Sul",
+                point_name: "Bebedouro Parque Sul",
                 image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
-                type: 1,
+                point_type: 1,
                 longitude: -8.6133,
                 latitude: 41.1475,
                 state_id: 2,
                 ratingAVG: 3.24, 
-                localId: 1,
+                local_id: 1,
                 ratingsAmount: 52,
-                trustLevel: 1,
+                point_trust: 1,
             }),
 
             new AquaPoint({
                 id: 5,
-                name: "Bebedouro Câmara Municipal",
+                point_name: "Bebedouro Câmara Municipal",
                 image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
-                type: 2,
+                point_type: 2,
                 longitude: -8.6087,
                 latitude: 41.1510,
                 state_id: 0,
                 ratingAVG: 2.2,
-                localId: 1,
+                local_id: 1,
                 ratingsAmount: 8,
-                trustLevel: 3,
+                point_trust: 3,
             })
         ]
 

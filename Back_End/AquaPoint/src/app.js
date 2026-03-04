@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import usersRoutes from "./routes/user.routes.js";
+import aquaPointsRoutes from "./routes/aquapoints.routes.js";
 
 const app = express();
 
@@ -12,5 +13,6 @@ app.get("/health", (req, res) => { // testar se está on
 });
 
 app.use("/api/users", usersRoutes);
+app.use("/api/aquapoints", aquaPointsRoutes);
 
 export default app;

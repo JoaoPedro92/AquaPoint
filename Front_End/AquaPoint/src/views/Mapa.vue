@@ -49,9 +49,9 @@
                         <div 
                             class="progress-bar" 
                             :class="{ 
-                                'bg-orange': selectedAquapoint?.trustLevel === 1,
-                                'bg-warning': selectedAquapoint?.trustLevel === 2,
-                                'bg-success': selectedAquapoint?.trustLevel === 3
+                                'bg-orange': selectedAquapoint?.point_trust === 1,
+                                'bg-warning': selectedAquapoint?.point_trust === 2,
+                                'bg-success': selectedAquapoint?.point_trust === 3
                             }"
                             style="width: 100%;">
                         </div>
