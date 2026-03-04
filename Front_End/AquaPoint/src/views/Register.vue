@@ -47,19 +47,31 @@
             </div>
 
             <div class="form-group mb-3">
-              <label class="form-label">Criar Password</label>
-              <input
-                v-model="passwordValue"
-                type="password"
-                class="form-control contact-form"
-                placeholder="Introduza uma password"
-                required>
-            </div>
+  <label class="form-label">Criar Password</label>
+
+  <div class="password-wrapper">
+
+        <input
+        v-model="passwordValue"
+        :type="showPassword ? 'text' : 'password'"
+        class="form-control password-input"
+        placeholder="Introduza uma password" required>
+
+          <i 
+          class="toggle-password"
+          :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"
+          @click="showPassword = !showPassword">
+           </i>
+
+          </div>
+
+          </div>
 
             <input
               type="submit"
               value="Registar"
-              class="btn btn-register">
+              class="btn btn-register"
+            >
 
           </form>
 
@@ -78,10 +90,14 @@
 <script setup>
 
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
 
 const nameValue = ref('')
 const emailValue = ref('')
 const passwordValue = ref('')
+const showPassword = ref(false)
+const router = useRouter()
 
 function RegisterUser(){
 
@@ -94,6 +110,8 @@ function RegisterUser(){
   nameValue.value = ''
   emailValue.value = ''
   passwordValue.value = ''
+
+  router.push("/")
 
 }
 
@@ -134,6 +152,31 @@ function RegisterUser(){
   font-size: 0.9rem;
   font-weight: 500;
   margin-bottom: 4px;
+}
+
+.password-wrapper{
+  position: relative;
+  width: 95%;
+}
+
+.password-input{
+  width: 100%;
+  height: 40px;
+  padding: 0 45px 0 0.5vh;
+}
+
+.toggle-password{
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  color: #6c757d;
+}
+
+.toggle-password:hover{
+  color: var(--aquapoint-logo-blue);
 }
 
 .btn-register{
