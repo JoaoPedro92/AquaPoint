@@ -12,4 +12,4 @@ const adapter = new PrismaMariaDb({
 
 const prisma = new PrismaClient({ adapter });
 
-module.exports = prisma;
+module.exports = prisma;  

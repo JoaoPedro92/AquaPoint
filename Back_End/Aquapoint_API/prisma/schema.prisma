@@ -125,7 +125,7 @@ model users {
   email          String        @db.Text
   passwordHash   String        @db.Text
   profilePicture Bytes?        @db.Blob
-  createdAt      DateTime      @db.Date
+  createdAt      DateTime      @default(now())@db.DateTime
   role           Int
   favorites      favorites[]
   interaction    interaction[]
