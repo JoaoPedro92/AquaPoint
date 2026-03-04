@@ -32,7 +32,12 @@
         
         <div class="col-md-3 text-end text-center text-md-end ">
             <a v-if="!Auth.isLoggedIn" href="#" class="btn btn-outline-light mt-2 mt-lg-0" v-on:click="loginModal.openLoginModal()">Login</a>
-            <a v-if="!Auth.isLoggedIn" href="#" class="btn btn-primary ms-3 mt-2 mt-lg-0" v-on:click="loginModal.openLoginModal()">Registar</a>
+             <router-link 
+                v-if="!Auth.isLoggedIn"
+                to="/register"
+                class="btn btn-primary ms-3 mt-2 mt-lg-0">
+                Registar
+            </router-link>
             <div v-else class="position-relative mt-2 mt-lg-0">
                 <!-- overlay para fechar ao clicar fora -->
                 <div v-if="showUserMenu" 
