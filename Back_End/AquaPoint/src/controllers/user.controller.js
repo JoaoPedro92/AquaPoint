@@ -2,7 +2,7 @@ import { pool } from "../db.js";
 
 export async function listUsers(req, res) {
   try {
-    const [rows] = await pool.query("SELECT * FROM users LIMIT 100");
+    const [rows] = await pool.query("SELECT * FROM users");
     res.json(rows);
   } catch (err) {
     console.error(err);
