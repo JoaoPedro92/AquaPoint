@@ -1,14 +1,12 @@
-use aquapoint;
+USE aquapoint;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
-TRUNCATE TABLE interaction;
+TRUNCATE TABLE reports;
+TRUNCATE TABLE reviews;
 TRUNCATE TABLE favorites;
-TRUNCATE TABLE points_trust;
 TRUNCATE TABLE points_state;
 TRUNCATE TABLE aqua_points;
-TRUNCATE TABLE comment;
-TRUNCATE TABLE rating;
 TRUNCATE TABLE users;
 TRUNCATE TABLE trustLevels;
 TRUNCATE TABLE states;
