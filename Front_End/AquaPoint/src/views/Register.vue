@@ -8,7 +8,6 @@
 
     <div class="row align-items-center">
 
-      <!-- IMAGEM -->
       <div class="col-lg-6 register-image-area">
 
         <img
@@ -23,7 +22,7 @@
 
         <div class="register-form-wrapper">
 
-          <h3 class="main-titles">REGISTAR UTILIZADOR</h3>
+          <h3 class="main-titles mb-5">REGISTAR UTILIZADOR</h3>
 
           <form @submit.prevent="RegisterUser">
 
@@ -104,8 +103,6 @@ function RegisterUser(){
 
 @import "/src/assets/css/style.css";
 
-/* REGISTER PAGE */
-
 .register-section{
   min-height: 70vh;
   display: flex;
@@ -141,8 +138,9 @@ function RegisterUser(){
 
 .btn-register{
   width: 95%;
+  max-width: 220px;
   height: 40px;
-  margin-top: 3%;
+  margin: 20px auto 0 auto;
   background-color: var(--aquapoint-logo-blue);
   color: white;
   border: none;
@@ -153,7 +151,6 @@ function RegisterUser(){
 }
 
 /* MOBILE */
-
 @media (max-width: 992px){
 
 .register-section{
