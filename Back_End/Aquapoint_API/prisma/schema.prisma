@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model aqua_points {
+  id           Int            @id @default(autoincrement())
+  point_name   String         @db.Text
+  point_type   Int
+  local_id     Int
+  image        Bytes?         @db.Blob
+  latitude     Float
+  longitude    Float
+  local        local          @relation(fields: [local_id], references: [id], onDelete: Cascade, map: "fk_aqua_points_local")
+  type         type           @relation(fields: [point_type], references: [id], onDelete: Cascade, map: "fk_aqua_points_type")
+  favorites    favorites[]
+  interaction  interaction[]
+  points_state points_state[]
+  points_trust points_trust[]
+
+  @@index([local_id], map: "fk_aqua_points_local")
+  @@index([point_type], map: "fk_aqua_points_type")
+}
+
+model comment {
+  id          Int           @id @default(autoincrement())
+  comment     String        @db.Text
+  interaction interaction[]
+}
+
+model favorites {
+  id          Int         @id @default(autoincrement())
+  user_id     Int
+  point_id    Int
+  date        DateTime    @db.Date
+  aqua_points aqua_points @relation(fields: [point_id], references: [id], onDelete: Cascade, map: "fk_favorites_point")
+  users       users       @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_favorites_user")
+
+  @@index([point_id], map: "fk_favorites_point")
+  @@index([user_id], map: "fk_favorites_user")
+}
+
+model interaction {
+  id               Int         @id @default(autoincrement())
+  interaction_type Int
+  user_id          Int
+  rating_id        Int
+  comment_id       Int
+  point_id         Int
+  createdAt        DateTime    @db.Date
+  comment          comment     @relation(fields: [comment_id], references: [id], onDelete: Cascade, map: "fk_interaction_comment")
+  aqua_points      aqua_points @relation(fields: [point_id], references: [id], onDelete: Cascade, map: "fk_interaction_point")
+  rating           rating      @relation(fields: [rating_id], references: [id], onDelete: Cascade, map: "fk_interaction_rating")
+  users            users       @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_interaction_user")
+
+  @@index([comment_id], map: "fk_interaction_comment")
+  @@index([point_id], map: "fk_interaction_point")
+  @@index([rating_id], map: "fk_interaction_rating")
+  @@index([user_id], map: "fk_interaction_user")
+}
+
+model local {
+  id          Int           @id @default(autoincrement())
+  local_name  String        @db.Text
+  zone_id     Int
+  aqua_points aqua_points[]
+  zone        zone          @relation(fields: [zone_id], references: [id], onDelete: Cascade, map: "fk_local_zone")
+
+  @@index([zone_id], map: "fk_local_zone")
+}
+
+model points_state {
+  id          Int         @id @default(autoincrement())
+  point_id    Int
+  state_id    Int
+  aqua_points aqua_points @relation(fields: [point_id], references: [id], onDelete: Cascade, map: "fk_points_state_point")
+  states      states      @relation(fields: [state_id], references: [id], onDelete: Cascade, map: "fk_points_state_state")
+
+  @@index([point_id], map: "fk_points_state_point")
+  @@index([state_id], map: "fk_points_state_state")
+}
+
+model points_trust {
+  id          Int         @id @default(autoincrement())
+  point_id    Int
+  trust_id    Int
+  trustlevels trustlevels @relation(fields: [trust_id], references: [id], onDelete: Cascade, map: "fk_points_trust_label")
+  aqua_points aqua_points @relation(fields: [point_id], references: [id], onDelete: Cascade, map: "fk_points_trust_point")
+
+  @@index([trust_id], map: "fk_points_trust_label")
+  @@index([point_id], map: "fk_points_trust_point")
+}
+
+model rating {
+  id          Int           @id @default(autoincrement())
+  rating      Int
+  interaction interaction[]
+}
+
+model states {
+  id           Int            @id @default(autoincrement())
+  state_name   String         @db.Text
+  points_state points_state[]
+}
+
+model trustlevels {
+  id           Int            @id @default(autoincrement())
+  trust_name   String         @db.Text
+  points_trust points_trust[]
+}
+
+model type {
+  id          Int           @id @default(autoincrement())
+  type_name   String        @db.Text
+  aqua_points aqua_points[]
+}
+
+model users {
+  id             Int           @id @default(autoincrement())
+  name           String        @db.Text
+  email          String        @db.Text
+  passwordHash   String        @db.Text
+  profilePicture Bytes?        @db.Blob
+  createdAt      DateTime      @db.Date
+  role           Int
+  favorites      favorites[]
+  interaction    interaction[]
+}
+
+model zone {
+  id        Int     @id @default(autoincrement())
+  zone_name String  @db.Text
+  local     local[]
+}

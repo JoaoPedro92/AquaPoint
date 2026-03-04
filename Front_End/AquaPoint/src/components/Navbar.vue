@@ -47,14 +47,10 @@
 
                 <ul v-if="showUserMenu" class="dropdown-menu dropdown-menu-dark show" style="position:absolute; right:0; z-index:999; width: fit-content;">
                     <li>
-                        <router-link 
-                            to="/user/personal-area" 
-                            class="dropdown-item">
-                            Perfil
-                        </router-link>
+                        <router-link to="/user/personal-area" class="dropdown-item">Perfil</router-link>
                     </li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" @click="LogoutUser">Logout</a></li>
+                    <li><a class="dropdown-item text-danger" style="cursor:pointer;" @click="LogoutUser">Logout</a></li>
                 </ul>
             </div>
         </div>
