@@ -58,6 +58,8 @@ import { ref } from 'vue';
 import { useFormValidation } from '../utilities/useFormValidation';
 import { useAuth } from '../utilities/useAuth';
 import { useModalStore } from '../utilities/modal';
+import { useRouter } from 'vue-router';
+
 
     defineProps({
         visible: {
@@ -66,11 +68,13 @@ import { useModalStore } from '../utilities/modal';
         }
     })
 
+    const router = useRouter()
     const loginModal = useModalStore()
     const Auth = useAuth()
     const { errors, validate, validateEmail, clearErrors } = useFormValidation()
     const emailUser = ref('')
     const passwordUser = ref('')
+   
 
     function ProcessLogin(){
         clearErrors()
@@ -102,7 +106,9 @@ import { useModalStore } from '../utilities/modal';
     }
 
     function GoToRegistNewAccount(){
-        console.log('GoToRegistNewAccount clicked.')
+       loginModal.closeLoginModal()
+
+       router.push("/register")
     }
 
 </script>

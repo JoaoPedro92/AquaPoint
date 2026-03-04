@@ -4,6 +4,8 @@ import Home from '../views/Home.vue'
 import SobreNos from '../views/SobreNos.vue'
 import Mapa from '../views/Mapa.vue'
 import Contacto from '../views/Contacto.vue'
+import Register from '../views/Register.vue'
+
 
 // Protected views (only for admins)
 import Dashboard from '../views/admin/Dashboard.vue'
@@ -16,6 +18,7 @@ const routes = [
     { path: '/sobre-nos', component: SobreNos },
     { path: '/mapa', component: Mapa },
     { path: '/contacto', component: Contacto },
+    { path: '/register', component: Register },
     { 
         path: '/admin/dashboard', 
         component: Dashboard,
