@@ -82,7 +82,7 @@
                     <div v-for="review in reviews" :key="review.id">
                         <div class="user-review-card">
                             <div class="d-flex align-items-center">
-                                <img src="/src/assets/images/defaultUserImage.jpg" width="20" height="20" alt="imagem utilizador">
+                                <img src="/src/assets/images/user_image.png" width="20" height="20" alt="imagem utilizador">
                                 <span class="ms-2">{{ review.userNome }}</span>
                                 <span class="ms-auto" style="font-size:0.8rem">{{ review.createdDate }}</span>
                             </div>

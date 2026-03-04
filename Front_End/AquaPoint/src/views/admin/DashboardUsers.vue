@@ -19,7 +19,7 @@
             </thead>
             <tbody>
                 <tr v-for="user in users" :key="user.id">
-                <td class="text-center"><img :src="user.profilePicture || '/src/assets/images/defaultUserImage.jpg'" class="rounded-circle" width="40" height="40"></td>
+                <td class="text-center"><img :src="user.profilePicture || '/src/assets/images/user_image.png'" class="rounded-circle" width="40" height="40"></td>
                 <td>{{ user.nome }}</td>
                 <td>{{ user.email }}</td>
                 <td>{{ user.role }}</td>

@@ -9,6 +9,7 @@ import Contacto from '../views/Contacto.vue'
 import Dashboard from '../views/admin/Dashboard.vue'
 import AdminUsers from '../views/admin/DashboardUsers.vue'
 import AdminBebedouros from '../views/admin/DashboardBebedouros.vue'
+import AreaPessoal from '../views/AreaPessoal.vue'
 
 const routes = [
     { path: '/', component: Home },
@@ -28,6 +29,11 @@ const routes = [
     { 
         path: '/admin/dashboard-bebedouros', 
         component: AdminBebedouros,
+        meta: { requiresAuth: true }
+    },
+    { 
+        path: '/user/personal-area', 
+        component: AreaPessoal,
         meta: { requiresAuth: true }
     },
 ]

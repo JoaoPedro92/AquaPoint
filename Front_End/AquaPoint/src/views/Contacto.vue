@@ -30,31 +30,31 @@
                 
                     <h3 class="main-titles">FORMULÁRIO</h3>
 
-                    <form id="contactForm" name="contactForm" class="contactForm">
+                    <form id="contactForm" name="contactForm" class="contactForm" @submit.prevent="SubmitContactForm">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="label" for="name"></label>
-                                    <input type="text" class="form-control contact-form" name="name" id="name" placeholder="Nome" tabindex="0" required>
+                                    <input v-model="nameValue" type="text" class="form-control contact-form" name="name" id="name" placeholder="Nome" tabindex="0" required>
                                 </div>
                             </div>
                             <div class="col-md-6"> 
                                 <div class="form-group">
                                     <label class="label" for="phone"></label>
-                                    <input type="number" class="form-control contact-form" name="phone" id="phone" placeholder="Telemóvel" tabindex="0" required>
+                                    <input v-model="phoneValue" type="number" class="form-control contact-form" name="phone" id="phone" placeholder="Telemóvel" tabindex="0" required>
                                 </div>
                             </div>
                             
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="label" for="email"></label>
-                                    <input type="email" class="form-control contact-form" name="email" id="email" placeholder="Email" tabindex="0" required>
+                                    <input v-model="emailValue" type="email" class="form-control contact-form" name="email" id="email" placeholder="Email" tabindex="0" required>
                                 </div>
                             </div>
                             <div class="col-md-6"> 
                                 <div class="form-group">
                                     <label class="label" for="localization"></label>
-                                    <input type="text" class="form-control contact-form" name="localization" id="localization" placeholder="Localidade" tabindex="0" required>
+                                    <input v-model="localizationValue" type="text" class="form-control contact-form" name="localization" id="localization" placeholder="Localidade" tabindex="0" required>
                                 </div>
                             </div>
                             
@@ -62,14 +62,14 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="label" for="#"></label>
-                                    <textarea name="message" class="form-control contact-form" id="message" style="width: 100% !important; resize: none; height: 15vh !important;" cols="30" rows="4" required placeholder="O que é que necessita? Explique o mais detalhadamente possível"></textarea>
+                                    <textarea v-model="messageValue" name="message" class="form-control contact-form" id="message" style="width: 100% !important; resize: none; height: 120px !important;" cols="30" rows="4" required placeholder="O que é que necessita? Explique o mais detalhadamente possível"></textarea>
                                 </div>
                             </div>
 
                             
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <input type="submit" value="Enviar" class="btn btn-form" style="width: 100% !important; height: 3.4vh !important; margin-top: 4%; background-color: var(--aquapoint-logo-blue); color: white;" tabindex="0">
+                                    <input type="submit" value="Enviar" class="btn btn-form" style="width: 100% !important; height: 40px !important; margin-top: 4%; background-color: var(--aquapoint-logo-blue); color: white;" tabindex="0">
                                 </div>
                             </div>
                         </div>
@@ -80,16 +80,38 @@
             
             <br>
 
-            <center>
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3110.2102738604317!2d-9.105085123639652!3d38.78181365351522!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd1934838cfa1033%3A0x36de966c91888246!2sIADE!5e0!3m2!1spt-PT!2spt!4v1772317445933!5m2!1spt-PT!2spt" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-            </center>
+            <div class="map-wrapper">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3110.2102738604317!2d-9.105085123639652!3d38.78181365351522!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd1934838cfa1033%3A0x36de966c91888246!2sIADE!5e0!3m2!1spt-PT!2spt!4v1772317445933!5m2!1spt-PT!2spt"
+                    width="100%"
+                    height="450"
+                    style="border:0;"
+                    allowfullscreen=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
         </div>
     </section>
 </template>
 
-<script>
-    export default {
-        name: 'Contacto'
+<script setup>
+    import { ref, onMounted, watch } from 'vue';
+
+
+    const nameValue = ref('')
+    const phoneValue = ref('')
+    const emailValue = ref('')
+    const localizationValue = ref('')
+    const messageValue = ref('')
+
+    function SubmitContactForm(){
+        console.log('Name: ' + nameValue.value + '\nPhone: ' + phoneValue.value + '\nEmail: ' + emailValue.value + '\nLocation: ' + localizationValue.value + '\nMessage: ' + messageValue.value)
+        phoneValue.value = ''
+        nameValue.value = ''
+        emailValue.value = ''
+        localizationValue.value = ''
+        messageValue.value = ''
     }
 </script>
 
