@@ -1,4 +1,5 @@
 import { pool } from "../db.js";
+import { findFavoritesByUserId } from "./favorites.controller.js";
 
 // GET /users
 export async function getAllUsers(req, res) {
@@ -25,6 +26,8 @@ export async function getUserById(req, res) {
     res.status(500).json(err);
   }
 }
+
+
 
 // POST /users
 export async function createUser(req, res) {
@@ -89,7 +92,7 @@ export async function deleteUser(req, res) {
 }
 
 
-async function findUserById(id){
+export async function findUserById(id){
   const [rows] = await pool.query(
       "SELECT * FROM users WHERE id = ?",
       [id]

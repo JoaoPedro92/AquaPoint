@@ -1,4 +1,6 @@
 import { pool } from "../db.js";
+import { findUserById } from "./user.controller.js";
+import { findFavoritesByUserId } from "./favorites.controller.js";
 
 
 // GET /aquapoints
@@ -33,11 +35,31 @@ export async function getAquaPointById(req, res) {
     `, [id]);*/
 
     const findAquapoint = await findAquapointById(id);
+    if(!findAquapoint) return res.status(404).json({ error: `Aquapoint with ID: ${id} not found`});
 
     res.json(findAquapoint);
   } catch (err) {
     console.error(err);
-    res.status(500).json(err);
+    res.status(500).json(err.message);
+  }
+}
+
+// GET /aquapoints/user/{id}/favorites
+export async function getUserFavoritePoints(req, res){
+  try{
+    const userId = Number(req.params.id)
+    const findUser = await findUserById(userId)
+    if(!findUser) return res.status(404).json({ error: `User with ID: ${userId} not found`});
+
+    const favoriteUserPoints = await findFavoritesByUserId(findUser.id)
+    const favoriteAquapoints = await Promise.all(
+      favoriteUserPoints.map((point) => findAquapointById(point.point_id))
+    )
+
+    res.json(favoriteAquapoints)
+  }
+  catch(err){
+    res.status(500).json({ error: err.message })  
   }
 }
 
@@ -66,9 +88,10 @@ export async function createAquapoint(req, res){
 export async function updateAquapoint(req, res) {
 
   try{
-    const findAquapoint = await findAquapointById(Number(req.params.id))
+    const id = Number(req.params.id)
+    const findAquapoint = await findAquapointById(id)
 
-    if(!findAquapoint) return res.status(404).json({ error: `Aquapoint not found with id ${findAquapoint.id}`})
+    if(!findAquapoint) return res.status(404).json({ error: `Aquapoint not found with id ${id}`})
     
     //const { point_name, point_type, point_trust, local_id, state_id, image, latitude, longitude } = req.body
     const point_name = req.body.point_name ?? findAquapoint.point_name;
@@ -98,8 +121,9 @@ export async function updateAquapoint(req, res) {
 // PUT /aquapoints/change-state/{id}
 export async function changeAquapointState(req, res){
   try{
-    const findAquapoint = await findAquapointById(Number(req.params.id))
-    if(!findAquapoint) return res.status(404).json({ error: `Aquapoint not found with id ${findAquapoint.id}`})
+    const id = Number(req.params.id)
+    const findAquapoint = await findAquapointById(id)
+    if(!findAquapoint) return res.status(404).json({ error: `Aquapoint not found with id ${id}`})
     
     const state_id = req.body
 
@@ -121,8 +145,9 @@ export async function changeAquapointState(req, res){
 export async function deleteAquapoint(req, res){
 
   try{
-    const findAquapoint = await findAquapointById(Number(req.params.id))
-    if(!findAquapoint) return res.status(404).json({ error: `Aquapoint not found with id ${findAquapoint.id}`})
+    const id = Number(req.params.id)
+    const findAquapoint = await findAquapointById(id)
+    if(!findAquapoint) return res.status(404).json({ error: `Aquapoint not found with id ${id}`})
     
     await pool.query('DELETE FROM aqua_points WHERE id = ?', findAquapoint.id)
 
