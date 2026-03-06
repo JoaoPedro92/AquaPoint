@@ -1,9 +1,13 @@
 import { Router } from "express";
-import { listAquaPoints, getAquaPointById } from "../controllers/aquapoints.controller.js";
+import { getAllAquapoints, getAquaPointById, createAquapoint, updateAquapoint, changeAquapointState, deleteAquapoint } from "../controllers/aquapoints.controller.js";
 
 const router = Router();
 
-router.get("/", listAquaPoints);       
-router.get("/:id", getAquaPointById);   
+router.get("/", getAllAquapoints);       
+router.get("/:id", getAquaPointById);  
+router.post("/", createAquapoint);
+router.put("/:id", updateAquapoint);
+router.put("/change-state/:id", changeAquapointState);
+router.delete("/:id", deleteAquapoint);
 
 export default router;

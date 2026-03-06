@@ -72,16 +72,14 @@ export async function updateUser(req, res) {
 }
 
 // DELETE /users/{id}
-export async function deleteUser(req, res) {
+export async function deleteUser(req, res) { 
   
-  const userId = Number(req.params.id)
-
   try{
-    const findUser = await findUserById(userId)
+    const findUser = await findUserById(Number(req.params.id))
 
     if(!findUser) return res.status(404).json({ error: "User not found" })
 
-    await pool.query('DELETE FROM users WHERE id = ?', [userId]);
+    await pool.query('DELETE FROM users WHERE id = ?', [findUser.id]);
 
     res.json({ message: `User with ID: ${userId} was deleted successfully` });
   }
