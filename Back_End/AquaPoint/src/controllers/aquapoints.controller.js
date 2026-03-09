@@ -168,7 +168,7 @@ async function returnAllAquapoints(){
         l.local_name,
         z.zone_name,
         trust.trust_name,
-        AVG(r.rating) AS ratingAVG,
+        ROUND(AVG(r.rating), 1) AS ratingAVG,
         COUNT(r.id) AS ratingsAmount
       FROM aqua_points ap
       INNER JOIN states s
@@ -197,7 +197,7 @@ async function findAquapointById(id){
         l.local_name,
         z.zone_name,
         trust.trust_name,
-        AVG(r.rating) AS ratingAVG,
+        ROUND(AVG(r.rating), 1) AS ratingAVG,
         COUNT(r.id) AS ratingsAmount
       FROM aqua_points ap
       LEFT JOIN states s

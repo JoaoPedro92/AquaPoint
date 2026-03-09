@@ -70,7 +70,7 @@
                 <div class="col-lg-12" style="display: inline-block;">
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -82,7 +82,7 @@
                     </div>
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -94,7 +94,7 @@
                     </div>
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -106,7 +106,7 @@
                     </div>
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -118,7 +118,7 @@
                     </div>
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -130,7 +130,7 @@
                     </div>
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -142,7 +142,7 @@
                     </div>
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -154,7 +154,7 @@
                     </div>
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
