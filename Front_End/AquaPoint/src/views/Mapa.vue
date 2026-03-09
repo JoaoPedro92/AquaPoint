@@ -162,6 +162,7 @@ import { useToast } from 'vue-toastification';
 import { useAuth } from '../utilities/useAuth';
 import { useModalStore } from '../utilities/modal';
 import ReportProblemModal from '../components/ReportProblemModal.vue';
+import { userService } from '../services/userService';
 
 const loginModal = useModalStore()
 const Auth = useAuth()
