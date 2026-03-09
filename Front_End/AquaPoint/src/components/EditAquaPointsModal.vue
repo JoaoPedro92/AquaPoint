@@ -27,65 +27,67 @@
                                 accept="image/*"
                             >
                         </div>
-
+                       
                         <div class="col-lg-6">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="label" for="name"></label>
-                                        <input v-model="nameValue" type="text" class="form-control edit-form" name="name" id="name" placeholder="Nome do bebedouro" tabindex="0" required>
+                            <form @submit.prevent="UpdateAquaPointData()">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="label" for="name">Nome do bebedouro</label>
+                                            <input v-model="nameValue" type="text" class="form-control edit-form" name="name" id="name" placeholder="Nome do bebedouro" tabindex="0" required>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6"> 
-                                    <div class="form-group">
-                                        <label class="label" for="state"></label>
-                                        <select v-model="stateValue" class="form-control edit-form" name="state" id="state" required>
-                                            <option value="1">Ativo</option>
-                                            <option value="2">Inativo</option>
-                                            <option value="3">Pendente</option>
-                                        </select>
+                                    <div class="col-md-6"> 
+                                        <div class="form-group">
+                                            <label class="label" for="state">Estado do bebedouro</label>
+                                            <select v-model="stateValue" class="form-control edit-form" name="state" id="state" required>
+                                                <option value="1">Ativo</option>
+                                                <option value="2">Inativo</option>
+                                                <option value="3">Pendente</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="label" for="trust"></label>
-                                        <select v-model="trustValue" class="form-control edit-form" name="trust" id="trust" required>
-                                            <option value="2">Existe mas com pouca certeza</option>
-                                            <option value="3">Existe com alguma certeza</option>
-                                            <option value="4">Verificado</option>
-                                        </select>
+                                    
+                                    <div class="col-md-6" style="margin-top: 1vh;">
+                                        <div class="form-group">
+                                            <label class="label" for="trust">Nível de confiança</label>
+                                            <select v-model="trustValue" class="form-control edit-form" name="trust" id="trust" required>
+                                                <option value="2">Existe mas com pouca certeza</option>
+                                                <option value="3">Existe com alguma certeza</option>
+                                                <option value="4">Verificado</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6"> 
-                                    <div class="form-group">
-                                        <label class="label" for="latitude"></label>
-                                        <input v-model="latitudeValue" type="text" class="form-control edit-form" name="latitude" id="latitude" placeholder="Latitude" tabindex="0" required>
+                                    
+                                    <div class="col-md-6" style="margin-top: 1vh;"> 
+                                        <div class="form-group">
+                                            <label class="label" for="zone">Zona do bebedouro</label>
+                                            <input v-model="zoneValue" type="text" class="form-control edit-form" name="zone" id="zone" placeholder="Zona" tabindex="0" required>
+                                        </div>
                                     </div>
-                                </div>
-                                
-                                
-                                <div class="col-md-6"> 
-                                    <div class="form-group">
-                                        <label class="label" for="longitude"></label>
-                                        <input v-model="longitudeValue" type="text" class="form-control edit-form" name="longitude" id="longitude" placeholder="Longitude" tabindex="0" required>
-                                    </div>
-                                </div>
 
-                                <div class="col-md-6"> 
-                                    <div class="form-group">
-                                        <label class="label" for="zone"></label>
-                                        <input v-model="zoneValue" type="text" class="form-control edit-form" name="zone" id="zone" placeholder="Zona" tabindex="0" required>
+                                    <div class="col-md-6" style="margin-top: 1vh;"> 
+                                        <div class="form-group">
+                                            <label class="label" for="latitude">Latitude</label>
+                                            <input v-model="latitudeValue" type="text" disabled class="form-control edit-form" name="latitude" id="latitude" placeholder="Latitude" tabindex="0" required>
+                                        </div>
                                     </div>
-                                </div>
+                                    
+                                    <div class="col-md-6" style="margin-top: 1vh;"> 
+                                        <div class="form-group">
+                                            <label class="label" for="longitude">Longitude</label>
+                                            <input v-model="longitudeValue" type="text" disabled class="form-control edit-form" name="longitude" id="longitude" placeholder="Longitude" tabindex="0" required>
+                                        </div>
+                                    </div>
 
-                                
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <input type="submit" value="Submeter" class="btn btn-form bg-primary" style="width: 100% !important; height: 40px !important; margin-top: 4%; color: white;" tabindex="0">
+                                    
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input type="submit" value="Submeter" class="btn btn-form bg-primary" style="width: 100% !important; height: 40px !important; margin-top: 4%; color: white;" tabindex="0">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </form>
                         </div><!-- Col end -->
 
                         
@@ -93,15 +95,21 @@
 
                 </div><!-- Container end -->
             </section>
+
+            <div style="position: relative">
+                <div id="mapa" style="height: 40vh; width: 100%"></div>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
-    import { ref, watch } from 'vue'
+    import { ref, watch, onBeforeUnmount, nextTick } from 'vue'
 
     const fileInput = ref(null)
+    const mapaRef = ref(null)
     let newAquapointImage = ref(null)
+
     const props = defineProps({
         visible: {
             type: Boolean,
@@ -109,7 +117,7 @@
         },
         aquapoint: {
             type: Object,
-            default: null
+            default: () => null
         }
     })
 
@@ -121,6 +129,7 @@
     const latitudeValue = ref('')
     const longitudeValue = ref('')
     const zoneValue = ref('')
+    let marker = null
 
     function ChangeVisibility(value) {
         emit('update:visible', value)
@@ -128,34 +137,46 @@
 
     watch(
         () => props.aquapoint,
-            (newValue) => {
-                if (newValue) {
-                    nameValue.value = newValue.point_name ?? ''
-                    stateValue.value = newValue.state_id ?? ''
-                    trustValue.value = newValue.point_trust ?? ''
-                    latitudeValue.value = newValue.latitude ?? ''
-                    longitudeValue.value = newValue.longitude ?? ''
-                    zoneValue.value = newValue.zone_name ?? ''
-                    newAquapointImage.value = newValue.image ?? "/src/assets/images/defaultPointImage.jpg"
-                } else {
-                    nameValue.value = ''
-                    stateValue.value = ''
-                    trustValue.value = ''
-                    latitudeValue.value = ''
-                    longitudeValue.value = ''
-                    zoneValue.value = ''
-                    newAquapointImage.value = "/src/assets/images/defaultPointImage.jpg"
-                }
-            },
+        (newValue) => {
+            if (newValue) {
+                nameValue.value = newValue.point_name ?? ''
+                stateValue.value = newValue.state_id ?? ''
+                trustValue.value = newValue.point_trust ?? ''
+                latitudeValue.value = newValue.latitude ?? ''
+                longitudeValue.value = newValue.longitude ?? ''
+                zoneValue.value = newValue.zone_name ?? ''
+                newAquapointImage.value = newValue.image ?? '/src/assets/images/defaultPointImage.jpg'
+            } else {
+                nameValue.value = ''
+                stateValue.value = ''
+                trustValue.value = ''
+                latitudeValue.value = ''
+                longitudeValue.value = ''
+                zoneValue.value = ''
+                newAquapointImage.value = '/src/assets/images/defaultPointImage.jpg'
+            }
+        },
         { immediate: true }
     )
 
+    watch(
+        () => props.visible, // on value change basicamente
+        async (isVisible) => {
+            if (isVisible) {
+                await nextTick() // esperar que o DOM dê load
+                LoadMap()
+            } else {
+                DestroyMap()
+            }
+        }
+    )
+
     function openFileInput() {
-        fileInput.value.click()
+        fileInput.value?.click()
     }
 
     function onFileChange(event) {
-        const file = event.target.files[0]
+        const file = event.target.files?.[0]
         if (!file) return
 
         const reader = new FileReader()
@@ -164,6 +185,81 @@
         }
         reader.readAsDataURL(file)
     }
+
+    function LoadMap() {
+        if (mapaRef.value) return
+
+        mapaRef.value = L.map('mapa').setView([38.781558, -9.102584], 13)
+
+        L.tileLayer('https://tile.jawg.io/jawg-lagoon/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
+            attribution: '© Jawg Maps',
+            accessToken: 'BumVzniBYxFsvv2lUwvsZ8fQMn6WdPC2sS5bAqyeSyDrROwuULnZrt0lE1uKPHrT'
+        }).addTo(mapaRef.value)
+
+        mapaRef.value.on('click', (e) => {
+            const { lat, lng } = e.latlng
+            latitudeValue.value = lat
+            longitudeValue.value = lng
+
+            if (marker) {
+                marker.setLatLng([lat, lng])
+            } else {
+                marker = L.marker([lat, lng]).addTo(mapaRef.value)
+            }
+
+            marker.bindPopup(props.aquapoint.point_name || 'Bebedouro').openPopup()
+            mapaRef.value.setView([lat, lng], 13)
+        })
+
+        setTimeout(() => {
+            mapaRef.value?.invalidateSize()
+
+            if (latitudeValue.value && longitudeValue.value) {
+                marker = L.marker([latitudeValue.value, longitudeValue.value]).addTo(mapaRef.value)
+                marker.bindPopup(props.aquapoint.point_name || 'Bebedouro').openPopup()
+
+                mapaRef.value.setView([latitudeValue.value, longitudeValue.value], 13)
+            }
+        }, 100)
+    }
+
+    function DestroyMap() {
+        if (mapaRef.value) {
+            mapaRef.value.remove()
+            mapaRef.value = null
+        }
+    }
+
+    function UpdateAquaPointData() {
+        console.log("Dados a submeter:", {
+            id: props.aquapoint.id,
+            point_name: nameValue.value,
+            state_id: stateValue.value,
+            point_trust: trustValue.value,
+            latitude: latitudeValue.value,
+            longitude: longitudeValue.value,
+            local_id: zoneValue.value,
+            image: newAquapointImage.value
+        })
+        /*aquapointService.update({
+            id: props.aquapoint.id,
+            name: nameValue.value,
+            state: stateValue.value,
+            trust: trustValue.value,
+            latitude: latitudeValue.value,
+            longitude: longitudeValue.value,
+            zone: zoneValue.value,
+            image: newAquapointImage.value
+        }).then(() => {
+            ChangeVisibility(false)
+        }).catch(error => {
+            console.error("Erro ao atualizar bebedouro:", error)
+        })*/
+    }   
+
+    onBeforeUnmount(() => {
+        DestroyMap()
+    })
 </script>
 
 <style scoped>
