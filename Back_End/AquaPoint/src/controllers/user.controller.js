@@ -38,7 +38,7 @@ export async function getUserProfilePicture(req, res){
 export async function createUser(req, res) {
   const { name, email, passwordHash, isAdmin } = req.body
 
-  if(!name || !email || !passwordHash || !isAdmin) {
+  if(!name || !email || !passwordHash || isAdmin === undefined || isAdmin === null) {
     return res.status(400).json({ error: 'All fields are required' })
   }
 
@@ -113,7 +113,7 @@ export async function deleteUser(req, res) {
 
     await pool.query('DELETE FROM users WHERE id = ?', [findUser.id]);
 
-    res.json({ message: `User with ID: ${userId} was deleted successfully` });
+    res.json({ message: `User with ID: ${findUser.id} was deleted successfully` });
   }
   catch(err){
     res.status(500).json({ error: err.message })  
