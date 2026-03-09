@@ -5,7 +5,7 @@ import { findFavoritesByUserId } from "./favorites.controller.js";
 export async function getAllUsers(req, res) {
   try {
     const [rows] = await pool.query("SELECT * FROM users");
-    res.json(rows);
+    res.json(rows.map(formatUser));
   } catch (err) {
     console.error(err);
     res.status(500).json(err);
@@ -20,11 +20,16 @@ export async function getUserById(req, res) {
     const findUser = await findUserById(userId);
     if(!findUser) return res.status(404).json({ error: `User with ID: ${userId} not found`});
 
-    res.json(findUser);
+    res.json(formatUser(findUser));
   } catch (err) {
     console.error(err);
     res.status(500).json(err);
   }
+}
+
+// GET /users/id/profile-picture
+export async function getUserProfilePicture(req, res){
+  return res.json(await returnUserProfilePicture(Number(req.params.id)))
 }
 
 
@@ -59,15 +64,21 @@ export async function updateUser(req, res) {
     if(!findUser) return res.status(404).json({ error: "User not found" })
 
     const { name, email, profilePicture } = req.body
+    let profilePictureBlob = null
+
+    if(profilePicture){
+      profilePictureBlob = Buffer.from(profilePicture.split(',')[1], 'base64')
+    }
 
     const[result] = await pool.query(
       'UPDATE users SET name = ?, email = ?, profilePicture = ? WHERE id = ?',
-      [name, email, profilePicture, userId]
+      [name, email, profilePictureBlob, userId]
     );
 
     res.json({ message: `User with ID: ${userId} updated successfully` });
   }
   catch(err){
+    console.log(err.message)
     res.status(500).json({ error: err.message })
   }
 }
@@ -116,6 +127,21 @@ export async function findUserById(id){
       [id]
     );
     return rows[0];
+}
+
+export async function returnUserProfilePicture(id){
+  const findUser = await findUserById(id)
+  if(!findUser) return res.status(404).json({ error: 'User not found'})
+  
+  return `data:image/jpeg;base64,${findUser.profilePicture.toString('base64')}`
+}
+
+export function formatUser(user){
+  if(user.profilePicture){
+    user.profilePicture = `data:image/jpeg;base64,${user.profilePicture.toString('base64')}`
+  }
+
+  return user
 }
 
 

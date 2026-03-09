@@ -8,8 +8,10 @@ import reportsRoutes from "./routes/reports.routes.js";
 
 const app = express();
 
+// Extending upload image limit
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ limit: '10mb', extended: true }))
 app.use(cors({ origin: "*" }));       
-app.use(express.json());            
 
 app.get("/health", (req, res) => { // testar se está on
   res.json({ ok: true });

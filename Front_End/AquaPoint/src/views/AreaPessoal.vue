@@ -37,12 +37,12 @@
                         <br>
                         <div class="form-group">
                             <label for="exampleInputPassword1">Password</label>
-                            <input type="password" v-model="passwordValue" class="form-control contact-form" id="exampleInputPassword1" placeholder="Password" required>
+                            <input type="password" v-model="passwordValue" class="form-control contact-form" id="exampleInputPassword1" placeholder="Password">
                         </div>
                         <br>
                         <div class="form-group">
                             <label for="exampleInputPassword1">Repetir Password</label>
-                            <input type="password" v-model="passwordRepeatValue" class="form-control contact-form" id="exampleInputPassword1" placeholder="Password" required>
+                            <input type="password" v-model="passwordRepeatValue" class="form-control contact-form" id="exampleInputPassword1" placeholder="Password">
                         </div>
         
                         <div class="col-md-12">
@@ -175,20 +175,40 @@
 <script setup>
     import { ref, onMounted, watch } from 'vue';
     import { useAuth } from '/src/utilities/useAuth';
+    import { useToast } from 'vue-toastification';
+    import { userService } from '../services/userService';
 
     const Auth = useAuth()
+    const toast = useToast()
     const nameValue = ref(Auth.user.name)
     const emailValue = ref(Auth.user.email)
     const passwordValue = ref('')
     const passwordRepeatValue = ref('')
     const profileImage = ref("/src/assets/images/user_image.png") 
 
-    function UpdateProfileData(){
+
+   onMounted(async () => {
+     
+        profileImage.value = (await userService.getProfilePicture(Auth.user.id)).data
+    })
+
+    async function UpdateProfileData(){
         console.log('Name: ' + nameValue.value + '\nEmail: ' + emailValue.value + '\nPassword: ' + passwordValue.value + '\nPassword Repeat: ' + passwordRepeatValue.value)
-        nameValue.value = Auth.user.name
-        emailValue.value = Auth.user.email
-        passwordValue.value = ''
-        passwordRepeatValue.value = ''
+        const updatedUser = { name: nameValue.value, email: emailValue.value, profilePicture: profileImage.value }
+        
+        try{
+            console.log(profileImage.value)
+            await userService.update(Auth.user.id, updatedUser)
+            nameValue.value = Auth.user.name
+            emailValue.value = Auth.user.email
+            passwordValue.value = ''
+            passwordRepeatValue.value = ''
+            toast.success('Dados atualizados com sucesso.')
+        }
+
+        catch(err){
+            toast.error(`Erro ao atualizar dados do utilizador: ${err.message}`)
+        }
     }
 
     function onProfileImageChange(e) {
@@ -200,6 +220,7 @@
             profileImage.value = e.target.result
         }
         reader.readAsDataURL(file)
+
     }
 </script>
 
