@@ -74,23 +74,13 @@ create table aqua_points (
     point_name text not null,
     point_type int not null,  
     point_trust int not null,       
-    local_id int not null,       
+    local_id int not null,      
+    state_id int not null,     
     image BLOB default NULL,    
     latitude double not null,
     longitude double not null,
     primary key (id)
 );
-
--- -------------------------------------------------------
--- TABELA POINTS_STATE
--- -------------------------------------------------------
-create table points_state (
-    id int not null auto_increment,
-    point_id int not null,           
-    state_id int not null,           
-    primary key (id)
-);
-
 
 -- -------------------------------------------------------
 -- TABELA FAVORITES
@@ -149,14 +139,9 @@ add constraint fk_aqua_points_local
 foreign key (local_id) references local(id)
 on delete cascade on update cascade;
 
--- POINTS_STATE -> AQUA_POINTS e STATES
-alter table points_state
-add constraint fk_points_state_point
-foreign key (point_id) references aqua_points(id)
-on delete cascade on update cascade;
-
-alter table points_state
-add constraint fk_points_state_state
+-- AQUA_POINTS -> AQUA_POINTS e STATES
+alter table aqua_points
+add constraint fk_aqua_points_state
 foreign key (state_id) references states(id)
 on delete cascade on update cascade;
 

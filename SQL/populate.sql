@@ -50,25 +50,17 @@ values (3, 'Maria Santos', 'maria@email.com', 'hash_maria', '2025-01-03', 0);
 -- -------------------------------------------------------
 -- AQUA POINTS
 -- -------------------------------------------------------
-insert into aqua_points (id, point_name, point_type, point_trust, local_id, latitude, longitude)
-values (1, 'Fonte do Jardim', 1, 4, 1, 38.6979, -9.4215);
+insert into aqua_points (id, point_name, point_type, point_trust, local_id, state_id, latitude, longitude)
+values (1, 'Fonte do Jardim', 1, 4, 1, 1, 38.6979, -9.4215);
 
-insert into aqua_points (id, point_name, point_type, point_trust, local_id, latitude, longitude)
-values (2, 'Bebedouro do Parque', 3, 3, 2, 38.8029, -9.3817);
+insert into aqua_points (id, point_name, point_type, point_trust, local_id, state_id, latitude, longitude)
+values (2, 'Bebedouro do Parque', 3, 3, 2, 3, 38.8029, -9.3817);
 
-insert into aqua_points (id, point_name, point_type, point_trust, local_id, latitude, longitude)
-values (3, 'Fonte da Praia', 3, 2, 3, 41.1820, -8.6890);
+insert into aqua_points (id, point_name, point_type, point_trust, local_id, state_id, latitude, longitude)
+values (3, 'Fonte da Praia', 3, 2, 3, 1, 41.1820, -8.6890);
 
-insert into aqua_points (id, point_name, point_type, point_trust, local_id, latitude, longitude)
-values (4, 'Bebedouro Central', 1, 4, 4, 37.0891, -8.2479);
-
--- -------------------------------------------------------
--- POINTS STATE
--- -------------------------------------------------------
-insert into points_state (id, point_id, state_id) values (1, 1, 2);
-insert into points_state (id, point_id, state_id) values (2, 2, 3);
-insert into points_state (id, point_id, state_id) values (3, 3, 1);
-insert into points_state (id, point_id, state_id) values (4, 4, 2);
+insert into aqua_points (id, point_name, point_type, point_trust, local_id, state_id, latitude, longitude)
+values (4, 'Bebedouro Central', 1, 4, 4, 2, 37.0891, -8.2479);
 
 -- -------------------------------------------------------
 -- FAVORITES

@@ -3,6 +3,7 @@ import cors from "cors";
 import usersRoutes from "./routes/user.routes.js";
 import aquaPointsRoutes from "./routes/aquapoints.routes.js";
 import favoritesRoutes from "./routes/favorites.routes.js";
+import reportsRoutes from "./routes/reports.routes.js";
 
 
 const app = express();
@@ -17,5 +18,6 @@ app.get("/health", (req, res) => { // testar se está on
 app.use("/api/users", usersRoutes);
 app.use("/api/aquapoints", aquaPointsRoutes);
 app.use("/api/favorites", favoritesRoutes);
+app.use("/api/reports", reportsRoutes);
 
 export default app;
