@@ -65,13 +65,31 @@ export async function updateUser(req, res) {
       [name, email, profilePicture, userId]
     );
 
-    if(result.affectedRows === 0) return res.status(500).json({ error: `There was a problem updating the user with ID: ${userId}`});
-
     res.json({ message: `User with ID: ${userId} updated successfully` });
   }
   catch(err){
     res.status(500).json({ error: err.message })
   }
+}
+
+// PUT /users/{id}/change-isadmin
+export async function changeIsAdmin(req, res) {
+    const userId = Number(req.params.id)
+    
+    try{
+      const findUser = await findUserById(userId)
+      if(!findUser) return res.status(404).json({ error: "User not found" })
+    
+      const[result] = await pool.query(
+      'UPDATE users SET isAdmin = ? WHERE id = ?',
+      [req.body.isAdmin, userId]
+    );
+      
+    res.json({ message: `User with ID: ${userId} updated successfully` });    
+    }
+    catch(err){
+      res.status(500).json({ error: err.message })
+    }
 }
 
 // DELETE /users/{id}
