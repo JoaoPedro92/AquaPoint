@@ -27,6 +27,7 @@
                     <button class="btn btn-sm btn-primary mt-1 me-2" @click="editUser(user)">Editar</button>
                     <button class="btn btn-sm btn-danger mt-1 me-2" @click="deleteUser(user.id)">Eliminar</button>
                     <button v-if="!user.isAdmin" class="btn btn-sm btn-success mt-1" @click="markUserAsAdmin(user.id)">Marcar como Admin</button>
+                    <button v-else-if="user.isAdmin && user.id !== Auth.user.id" class="btn btn-sm btn-warning mt-1" @click="markUserAsAdmin(user.id, user.isAdmin)">Remover como admin</button>
                 </td>
                 </tr>
                 
@@ -37,18 +38,17 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useToast } from 'vue-toastification';
 import { userService } from '../../services/userService' 
+import { useAuth } from '../../utilities/useAuth'
 
 const users = ref([])
+const toast = useToast()
 const loading = ref(true)
+const Auth = useAuth()
 
 onMounted(async () => {
-    /*users.value = [
-        { id: 1, nome: 'João', email: 'teste@gmail.com', role: 'User' },
-        { id: 1, nome: 'Evandro', email: 'teste@gmail.com', role: 'User' },
-        { id: 1, nome: 'Tiago', email: 'teste@gmail.com', role: 'User' },
-        { id: 1, nome: 'Mateus', email: 'teste@gmail.com', role: 'User' },
-    ]*/
+    
    users.value = (await userService.getAll()).data;
 
     loading.value = false
@@ -63,11 +63,15 @@ function deleteUser(userId){
     // enviar para backend para delete
 }
 
-async function markUserAsAdmin(userId){
-    // enviar para backend para marcar o user como admin
-    const response = await userService.changeIsAdmin(3, { isAdmin: true });
-    alert('Changed admin')
-    users.value = (await userService.getAll()).data
+async function markUserAsAdmin(userId, userIsAdmin){
+    try{
+        const response = await userService.changeIsAdmin(3, { isAdmin: !userIsAdmin });
+        toast.success('Permissões alteradas com sucesso.')
+        users.value = (await userService.getAll()).data
+    }
+    catch(err){
+        toast.error('Erro ao alterar as permissões.')
+    }
 
 }
 </script>

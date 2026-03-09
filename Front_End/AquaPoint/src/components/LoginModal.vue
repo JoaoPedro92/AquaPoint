@@ -92,7 +92,7 @@ import { useRouter } from 'vue-router';
             // Chamar API, verificar se existe email e coincide com passwordHash e de seguida fazer o Auth.login
 
             Auth.login(
-                {name: 'Tiago', email: 'tiagofilipe.lanca@gmail.com', role: 'admin' },
+                {id: 8, name: 'Tiago', email: 'tiagofilipe.lanca@gmail.com', isAdmin: 1 },
                 'token-test-123'
             )
 
