@@ -34,7 +34,7 @@
         </table>
     </div>
 
-    <!-- Delete User Modal -->
+    <!-- Delete User Confirmation Modal -->
     <div class="modal fade" id="deleteUserModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -69,7 +69,6 @@ const selectedUser = ref(null)
 onMounted(async () => {
     
     users.value = (await userService.getAll()).data;
-
     loading.value = false
 })
 
@@ -81,8 +80,7 @@ function editUser(user){
 async function deleteUser(userId){
     try{
         await userService.delete(userId)
-        toast.success('Utilizador eliminado com sucesso.')
-        
+        toast.success('Utilizador eliminado com sucesso.')        
     }
     catch(err){
         toast.error(`Erro ao eliminar utilizador: ${err.message}`)

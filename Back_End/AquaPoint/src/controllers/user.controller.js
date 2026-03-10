@@ -1,4 +1,5 @@
 import { pool } from "../db.js";
+import bcrypt from 'bcrypt'
 import { findFavoritesByUserId } from "./favorites.controller.js";
 
 // GET /users
@@ -36,16 +37,17 @@ export async function getUserProfilePicture(req, res){
 
 // POST /users
 export async function createUser(req, res) {
-  const { name, email, passwordHash, isAdmin } = req.body
+  const { name, email, dateBirth, city, password, isAdmin } = req.body
 
-  if(!name || !email || !passwordHash || isAdmin === undefined || isAdmin === null) {
+  if(!name || !email || !dateBirth || !city || !password || isAdmin === undefined || isAdmin === null) {
     return res.status(400).json({ error: 'All fields are required' })
   }
 
   try{
+    const passwordBcrypt = await bcrypt.hash(password, 10)
     const[result] = await pool.query(
-      'INSERT INTO users (name, email, passwordHash, isAdmin) VALUES (?, ?, ?, ?)',
-      [name, email, passwordHash, isAdmin]
+      'INSERT INTO users (name, email, dateBirth, city, passwordHash, isAdmin) VALUES (?, ?, ?, ?, ?, ?)',
+      [name, email, dateBirth, city, passwordBcrypt, isAdmin]
     )
 
     res.status(201).json({ message: 'User created successfully!', id: result.insertId})
@@ -63,7 +65,7 @@ export async function updateUser(req, res) {
     const findUser = await findUserById(userId)
     if(!findUser) return res.status(404).json({ error: "User not found" })
 
-    const { name, email, profilePicture } = req.body
+    const { name, email, dateBirth, city, profilePicture } = req.body
     let profilePictureBlob = null
 
     if(profilePicture){
@@ -71,8 +73,8 @@ export async function updateUser(req, res) {
     }
 
     const[result] = await pool.query(
-      'UPDATE users SET name = ?, email = ?, profilePicture = ? WHERE id = ?',
-      [name, email, profilePictureBlob, userId]
+      'UPDATE users SET name = ?, email = ?, dateBirth = ?, city = ?, profilePicture = ? WHERE id = ?',
+      [name, email, dateBirth, city, profilePictureBlob, userId]
     );
 
     res.json({ message: `User with ID: ${userId} updated successfully` });
@@ -103,6 +105,29 @@ export async function changeIsAdmin(req, res) {
     }
 }
 
+// PUT /users/{id}/update-password
+export async function updatePassword(req, res){
+    const userId = Number(req.params.id)
+    const { password } = req.body
+    const newPasswordHash = await bcrypt.hash(password, 10)
+
+    try{
+      const findUser = await findUserById(userId)
+      if(!findUser) return res.status(404).json({ error: "User not found" })
+
+      const[result] = await pool.query(
+        'UPDATE users SET passwordHash = ? WHERE id = ?',
+        [newPasswordHash, userId]
+      );
+
+      res.json({ message: `User with ID: ${userId} updated successfully` });   
+
+    }
+    catch(err){
+      res.status(500).json({ error: err.message })
+    }
+}
+
 // DELETE /users/{id}
 export async function deleteUser(req, res) { 
   
@@ -126,6 +151,13 @@ export async function findUserById(id){
       "SELECT * FROM users WHERE id = ?",
       [id]
     );
+    return rows[0];
+}
+
+export async function findUserByEmail(email){
+  const [rows] = await pool.query(
+    "SELECT * FROM users WHERE email = ?", email);
+  
     return rows[0];
 }
 
