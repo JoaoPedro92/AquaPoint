@@ -61,8 +61,8 @@
                                     
                                     <div class="col-md-6" style="margin-top: 1vh;"> 
                                         <div class="form-group">
-                                            <label class="label" for="zone">Zona do bebedouro</label>
-                                            <input v-model="zoneValue" type="text" class="form-control edit-form" name="zone" id="zone" placeholder="Zona" tabindex="0" required>
+                                            <label class="label" for="zone">Localização do bebedouro</label>
+                                            <input v-model="localValue" type="text" disabled class="form-control edit-form" name="zone" id="zone" placeholder="Zona" tabindex="0" required>
                                         </div>
                                     </div>
 
@@ -105,6 +105,9 @@
 
 <script setup>
     import { ref, watch, onBeforeUnmount, nextTick } from 'vue'
+    import { aquapointService } from '../services/aquapointService' 
+    import { localsService } from '../services/localsService'
+    import { zonesService } from '../services/zonesService'  
 
     const fileInput = ref(null)
     const mapaRef = ref(null)
@@ -128,7 +131,7 @@
     const trustValue = ref('')
     const latitudeValue = ref('')
     const longitudeValue = ref('')
-    const zoneValue = ref('')
+    const localValue = ref('')
     let marker = null
 
     function ChangeVisibility(value) {
@@ -144,7 +147,7 @@
                 trustValue.value = newValue.point_trust ?? ''
                 latitudeValue.value = newValue.latitude ?? ''
                 longitudeValue.value = newValue.longitude ?? ''
-                zoneValue.value = newValue.zone_name ?? ''
+                localValue.value = newValue.local_name ?? ''
                 newAquapointImage.value = newValue.image ?? '/src/assets/images/defaultPointImage.jpg'
             } else {
                 nameValue.value = ''
@@ -152,7 +155,7 @@
                 trustValue.value = ''
                 latitudeValue.value = ''
                 longitudeValue.value = ''
-                zoneValue.value = ''
+                localValue.value = ''
                 newAquapointImage.value = '/src/assets/images/defaultPointImage.jpg'
             }
         },
@@ -196,19 +199,29 @@
             accessToken: 'BumVzniBYxFsvv2lUwvsZ8fQMn6WdPC2sS5bAqyeSyDrROwuULnZrt0lE1uKPHrT'
         }).addTo(mapaRef.value)
 
-        mapaRef.value.on('click', (e) => {
+        mapaRef.value.on('click', async (e) => {
+            const map = mapaRef.value
+            if (!map) return
+
             const { lat, lng } = e.latlng
+
             latitudeValue.value = lat
             longitudeValue.value = lng
 
             if (marker) {
                 marker.setLatLng([lat, lng])
             } else {
-                marker = L.marker([lat, lng]).addTo(mapaRef.value)
+                marker = L.marker([lat, lng]).addTo(map)
             }
 
-            marker.bindPopup(props.aquapoint.point_name || 'Bebedouro').openPopup()
-            mapaRef.value.setView([lat, lng], 13)
+            map.setView([lat, lng], 16, { animate: false })
+
+            const localData = await GetPlaceDataByCoords(lat, lng)
+
+            if (!mapaRef.value || mapaRef.value !== map) return
+
+            localValue.value = localData.zone
+            marker.bindPopup(localValue.value || 'Bebedouro').openPopup()
         })
 
         setTimeout(() => {
@@ -224,38 +237,130 @@
     }
 
     function DestroyMap() {
+        if (marker) {
+            marker.remove()
+            marker = null
+        }
+
         if (mapaRef.value) {
             mapaRef.value.remove()
             mapaRef.value = null
         }
     }
 
-    function UpdateAquaPointData() {
-        console.log("Dados a submeter:", {
-            id: props.aquapoint.id,
-            point_name: nameValue.value,
-            state_id: stateValue.value,
-            point_trust: trustValue.value,
-            latitude: latitudeValue.value,
-            longitude: longitudeValue.value,
-            local_id: zoneValue.value,
-            image: newAquapointImage.value
+    function GetPlaceDataByCoords(lat, lng) {
+        return fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+        )
+        .then(response => response.json())
+        .then(data => {
+            return {
+                city: data.address.city || data.address.town || '',
+                zone: data.address.village || data.address.town || data.address.neighbourhood || data.address.hamlet || data.display_name || ''
+            }
         })
-        /*aquapointService.update({
-            id: props.aquapoint.id,
-            name: nameValue.value,
-            state: stateValue.value,
-            trust: trustValue.value,
-            latitude: latitudeValue.value,
-            longitude: longitudeValue.value,
-            zone: zoneValue.value,
-            image: newAquapointImage.value
-        }).then(() => {
-            ChangeVisibility(false)
-        }).catch(error => {
-            console.error("Erro ao atualizar bebedouro:", error)
-        })*/
+        .catch(error => {
+            console.error("Erro ao obter dados de zona:", error)
+            return ''
+        })
+    }
+
+    async function UpdateAquaPointData() {
+        var zoneData = await GetLocalFromBackEnd(localValue.value)
+        var localId = null
+
+        if (!zoneData || !zoneData.id) {
+            const coordsData = await GetPlaceDataByCoords(latitudeValue.value, longitudeValue.value)
+            let cityName = coordsData?.city || 'Desconhecido'
+
+            var zoneId = await GetZoneByName(cityName)
+
+            if (!zoneId) {
+                zoneId = await CreateNewZone(cityName)
+            }
+
+            localId = await CreateNewLocal(localValue.value, zoneId)
+        } else {
+            localId = zoneData.id
+        }
+
+        if (localId) {
+            /*console.log("Dados a submeter:", {
+                id: props.aquapoint.id,
+                point_name: nameValue.value,
+                state_id: stateValue.value,
+                point_trust: trustValue.value,
+                latitude: latitudeValue.value,
+                longitude: longitudeValue.value,
+                local_id: localId,
+                image: newAquapointImage.value
+            })*/
+            aquapointService.update(props.aquapoint.id, {
+                point_name: nameValue.value,
+                state_id: stateValue.value,
+                point_trust: trustValue.value,
+                latitude: latitudeValue.value,
+                longitude: longitudeValue.value,
+                local_id: localId,
+                image: newAquapointImage.value
+            }).then(() => {
+                ChangeVisibility(false)
+
+                setTimeout(() => {
+                    window.location.reload()
+                }, 100)
+            }).catch(error => {
+                console.error("Erro ao atualizar bebedouro:", error)
+            })
+        }
     }   
+
+    async function GetLocalFromBackEnd(local) {
+        try {
+
+            const { data } = await localsService.getByName(local)
+
+            return data
+
+        } catch (error) {
+
+            if (error.response?.status === 404) {
+                return false
+            }
+
+            return false
+        }
+    }
+
+    async function CreateNewLocal(local_name, zone_id) {
+        try {
+            const { data } = await localsService.create({ name: local_name, zone_id: zone_id })
+
+            return data.id
+        } catch (error) {
+            return null
+        }
+    }
+
+    async function GetZoneByName(name) {
+        try {
+            const { data } = await zonesService.getByName(name)
+
+            return data.id
+        } catch (error) {
+            return null
+        }
+    }
+
+    async function CreateNewZone(zone_name) {
+        try {
+            const { data } = await zonesService.create({ name: zone_name })
+
+            return data.id
+        } catch (error) {
+            return null
+        }
+    }
 
     onBeforeUnmount(() => {
         DestroyMap()
