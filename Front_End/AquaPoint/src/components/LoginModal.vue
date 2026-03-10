@@ -90,7 +90,6 @@ import { authService } from '../services/authService.js'
         if(!isPasswordFilled || emailError) return
 
         try {
-            // Chamar API, verificar se existe email e coincide com passwordHash e de seguida fazer o Auth.login
             const response = await authService.authenticateUser({ email: emailUser.value, password: passwordUser.value })
 
             const loggedUser = response.data.user

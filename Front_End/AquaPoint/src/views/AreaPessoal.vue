@@ -203,9 +203,11 @@
     import { useToast } from 'vue-toastification';
     import { userService } from '../services/userService';
     import { VueDatePicker } from '@vuepic/vue-datepicker';
+    import { useFormValidation } from '../utilities/useFormValidation';
 
     const Auth = useAuth()
     const toast = useToast()
+    const { errors, validate, validateEmail, clearErrors } = useFormValidation()
     const user = ref(null)
     const passwordValue = ref('')
     const passwordRepeatValue = ref('')
@@ -216,15 +218,35 @@
     })
 
     async function UpdateProfileData(){
-        const updatedUser = { ...user.value }
-
-        if(passwordValue){
-            const isPasswordMatching = passwordValue.value === passwordRepeatValue.value
-            if(isPasswordMatching) updatedUser.passwordHash = passwordValue.value
-        }
-        
+        clearErrors()
         try{
+            const updatedUser = { ...user.value }
+
+            if(passwordValue.value){
+                const isPasswordMatching = passwordValue.value === passwordRepeatValue.value
+                if(isPasswordMatching){ 
+                    updatedUser.passwordHash = passwordValue.value
+                }
+                else{
+                    toast.error('As password não coincidem.')
+                    return
+                }
+            }
+            
+            const emailError = validateEmail(updatedUser.email)
+            if(emailError) errors.value.email = emailError
+
+            const requiredFieldsFilled = validate({
+                name: updatedUser.name,
+                dateBirth: updatedUser.dateBirth,
+                city: updatedUser.city
+            })
+
+        
+            if(!requiredFieldsFilled || emailError) return
+
             await userService.update(Auth.user.id, updatedUser)
+            console.log('Updated user')
             passwordValue.value = ''
             passwordRepeatValue.value = ''
             toast.success('Dados atualizados com sucesso.')
