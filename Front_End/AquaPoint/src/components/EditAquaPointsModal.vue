@@ -108,7 +108,9 @@
     import { aquapointService } from '../services/aquapointService' 
     import { localsService } from '../services/localsService'
     import { zonesService } from '../services/zonesService'  
+    import { useToast } from 'vue-toastification';
 
+    const toast = useToast()
     const fileInput = ref(null)
     const mapaRef = ref(null)
     let newAquapointImage = ref(null)
@@ -304,11 +306,12 @@
                 local_id: localId,
                 image: newAquapointImage.value
             }).then(() => {
+                toast.success('Dados atualizados com sucesso.')
                 ChangeVisibility(false)
 
                 setTimeout(() => {
                     window.location.reload()
-                }, 100)
+                }, 2000)
             }).catch(error => {
                 console.error("Erro ao atualizar bebedouro:", error)
             })

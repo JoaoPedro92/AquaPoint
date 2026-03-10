@@ -37,7 +37,7 @@ export async function getAquaPointById(req, res) {
     const findAquapoint = await findAquapointById(id);
     if(!findAquapoint) return res.status(404).json({ error: `Aquapoint with ID: ${id} not found`});
 
-    res.json(findAquapoint.map(formatPoints));
+    res.json(formatPoints(findAquapoint));
   } catch (err) {
     console.error(err);
     res.status(500).json(err.message);
@@ -56,7 +56,7 @@ export async function getUserFavoritePoints(req, res){
       favoriteUserPoints.map((point) => findAquapointById(point.point_id))
     )
 
-    res.json(favoriteAquapoints.map(formatPoints))
+    res.json(formatPoints(favoriteAquapoints))
   }
   catch(err){
     res.status(500).json({ error: err.message })  
@@ -103,9 +103,13 @@ export async function updateAquapoint(req, res) {
     const latitude = req.body.latitude ?? findAquapoint.latitude;
     const longitude = req.body.longitude ?? findAquapoint.longitude;
 
+    if(!point_name || !point_type || !point_trust || !local_id || !state_id || !latitude || !longitude || !image){
+      return res.status(400).json({ error: 'All fields are required' })
+    }
+
     let aquaPointPictureBlob = null
 
-    if(image){
+    if (typeof image === 'string' && image.startsWith('data:image/')) {
       aquaPointPictureBlob = Buffer.from(image.split(',')[1], 'base64')
     }
 
