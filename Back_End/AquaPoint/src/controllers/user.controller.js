@@ -65,16 +65,21 @@ export async function updateUser(req, res) {
     const findUser = await findUserById(userId)
     if(!findUser) return res.status(404).json({ error: "User not found" })
 
-    const { name, email, dateBirth, city, profilePicture } = req.body
+    const { name, email, dateBirth, city, password, profilePicture } = req.body
     let profilePictureBlob = null
+    let passwordHash = findUser.passwordHash
+
+    if(password){
+      passwordHash = await bcrypt.hash(password, 10)
+    }
 
     if(profilePicture){
       profilePictureBlob = Buffer.from(profilePicture.split(',')[1], 'base64')
     }
 
     const[result] = await pool.query(
-      'UPDATE users SET name = ?, email = ?, dateBirth = ?, city = ?, profilePicture = ? WHERE id = ?',
-      [name, email, dateBirth, city, profilePictureBlob, userId]
+      'UPDATE users SET name = ?, email = ?, dateBirth = ?, city = ?, passwordHash = ?, profilePicture = ? WHERE id = ?',
+      [name, email, dateBirth, city, passwordHash, profilePictureBlob, userId]
     );
 
     res.json({ message: `User with ID: ${userId} updated successfully` });
