@@ -57,6 +57,14 @@ export async function createUser(req, res) {
   }
 }
 
+// POST /users/compare-passwords
+export async function comparePasswords(req, res){
+  const { inputPassword, userPassword } = req.body
+
+  const isValid = await bcrypt.compare(inputPassword, userPassword)
+  res.json({ isValid })
+}
+
 // PUT /users/{id}  - Doesn't change password neither isAdmin (there is another endpoint to change those)
 export async function updateUser(req, res) {
   const userId = Number(req.params.id)
@@ -65,12 +73,13 @@ export async function updateUser(req, res) {
     const findUser = await findUserById(userId)
     if(!findUser) return res.status(404).json({ error: "User not found" })
 
-    const { name, email, dateBirth, city, password, profilePicture } = req.body
+    const { name, email, dateBirth, city, passwordHash, profilePicture } = req.body
     let profilePictureBlob = null
-    let passwordHash = findUser.passwordHash
+    let passwordHashed = findUser.passwordHash
 
-    if(password){
-      passwordHash = await bcrypt.hash(password, 10)
+    if(passwordHash){
+      passwordHashed = await bcrypt.hash(passwordHash, 10)
+      console.log(passwordHash)
     }
 
     if(profilePicture){
@@ -79,7 +88,7 @@ export async function updateUser(req, res) {
 
     const[result] = await pool.query(
       'UPDATE users SET name = ?, email = ?, dateBirth = ?, city = ?, passwordHash = ?, profilePicture = ? WHERE id = ?',
-      [name, email, dateBirth, city, passwordHash, profilePictureBlob, userId]
+      [name, email, dateBirth, city, passwordHashed, profilePictureBlob, userId]
     );
 
     res.json({ message: `User with ID: ${userId} updated successfully` });
