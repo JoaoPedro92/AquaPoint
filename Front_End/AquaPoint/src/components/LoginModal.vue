@@ -59,6 +59,7 @@ import { useFormValidation } from '../utilities/useFormValidation';
 import { useAuth } from '../utilities/useAuth';
 import { useModalStore } from '../utilities/modal';
 import { useRouter } from 'vue-router';
+import { authService } from '../services/authService.js'
 
 
     defineProps({
@@ -76,7 +77,7 @@ import { useRouter } from 'vue-router';
     const passwordUser = ref('')
    
 
-    function ProcessLogin(){
+    async function ProcessLogin(){
         clearErrors()
         
         const emailError = validateEmail(emailUser.value)
@@ -89,11 +90,12 @@ import { useRouter } from 'vue-router';
         if(!isPasswordFilled || emailError) return
 
         try {
-            // Chamar API, verificar se existe email e coincide com passwordHash e de seguida fazer o Auth.login
+            const response = await authService.authenticateUser({ email: emailUser.value, password: passwordUser.value })
 
+            const loggedUser = response.data.user
             Auth.login(
-                {id: 8, name: 'Tiago', email: 'tiagofilipe.lanca@gmail.com', isAdmin: 1 },
-                'token-test-123'
+                {id: loggedUser.id, name: loggedUser.name, email: loggedUser.email, isAdmin: loggedUser.isAdmin },
+                response.data.token
             )
 
             loginModal.closeLoginModal()
@@ -101,8 +103,8 @@ import { useRouter } from 'vue-router';
 
         catch (e){
             errors.value.email = 'Email ou password incorretos'
+            console.log(e.message)
         }
-        console.log(`Email: ${emailUser.value}\nPassword: ${passwordUser.value}`)
     }
 
     function GoToRegistNewAccount(){

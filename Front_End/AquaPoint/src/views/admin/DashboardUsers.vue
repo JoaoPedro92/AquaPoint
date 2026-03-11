@@ -4,7 +4,7 @@
     <h1>Dashboard Users</h1>
 
     <!-- Loading -->
-        <div v-if="loading">A carregar...</div>
+    <div v-if="loading">A carregar...</div>
 
         <!-- Users table-->
         <table v-else class="table table-striped table-hover mt-3">
@@ -25,13 +25,32 @@
                     <td>{{ user.isAdmin ? 'Admin' : 'User' }}</td>
                     <td class="text-start pe-0" style="width: 30%;">
                         <button class="btn btn-sm btn-primary mt-1 me-2" @click="editUser(user)">Editar</button>
-                        <button class="btn btn-sm btn-danger mt-1 me-2" @click="deleteUser(user.id)">Eliminar</button>
-                        <button v-if="!user.isAdmin" class="btn btn-sm btn-success mt-1" @click="markUserAsAdmin(user.id)">Marcar como Admin</button>
+                        <button class="btn btn-sm btn-danger mt-1 me-2" @click="selectedUser = user"  data-bs-toggle="modal" data-bs-target="#deleteUserModal">Eliminar</button>
+                        <button v-if="!user.isAdmin" class="btn btn-sm btn-success mt-1" @click="markUserAsAdmin(user.id, user.isAdmin)">Marcar como Admin</button>
                         <button v-else-if="user.isAdmin && user.id !== Auth.user.id" class="btn btn-sm btn-warning mt-1" @click="markUserAsAdmin(user.id, user.isAdmin)">Remover como admin</button>
                     </td>
                 </tr>                
             </tbody>
         </table>
+    </div>
+
+    <!-- Delete User Confirmation Modal -->
+    <div class="modal fade" id="deleteUserModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h1 class="modal-title fs-5" id="staticBackdropLabel">Eliminar Utilizador</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            Tem a certeza que pretende eliminar o utilizador {{ selectedUser?.name }}?
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-success" data-bs-dismiss="modal" @click="deleteUser(selectedUser.id)">Sim</button>
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Não</button>
+        </div>
+        </div>
+    </div>
     </div>
 </template>
 
@@ -45,11 +64,11 @@ const users = ref([])
 const toast = useToast()
 const loading = ref(true)
 const Auth = useAuth()
+const selectedUser = ref(null)
 
 onMounted(async () => {
     
     users.value = (await userService.getAll()).data;
-
     loading.value = false
 })
 
@@ -58,13 +77,26 @@ function editUser(user){
     // abrir popup para editar user
 }
 
-function deleteUser(userId){
-    // enviar para backend para delete
+async function deleteUser(userId){
+    try{
+        await userService.delete(userId)
+        toast.success('Utilizador eliminado com sucesso.')        
+    }
+    catch(err){
+        toast.error(`Erro ao eliminar utilizador: ${err.message}`)
+    }
+
+    try{
+        users.value = (await userService.getAll()).data
+    }
+    catch(err){
+        toast.error(`Erro ao carregar utilizadores: ${err.message}`)
+    }
 }
 
 async function markUserAsAdmin(userId, userIsAdmin){
     try{
-        const response = await userService.changeIsAdmin(3, { isAdmin: !userIsAdmin });
+        await userService.changeIsAdmin(userId, { isAdmin: !userIsAdmin });        
         toast.success('Permissões alteradas com sucesso.')
         users.value = (await userService.getAll()).data
     }

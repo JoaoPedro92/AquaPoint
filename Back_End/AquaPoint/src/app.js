@@ -4,6 +4,7 @@ import usersRoutes from "./routes/user.routes.js";
 import aquaPointsRoutes from "./routes/aquapoints.routes.js";
 import favoritesRoutes from "./routes/favorites.routes.js";
 import reportsRoutes from "./routes/reports.routes.js";
+import authRoutes from "./routes/auth.routes.js"
 import localsRoutes from "./routes/locals.routes.js";
 import zonesRoutes from "./routes/zones.routes.js";
 
@@ -22,6 +23,7 @@ app.use("/api/users", usersRoutes);
 app.use("/api/aquapoints", aquaPointsRoutes);
 app.use("/api/favorites", favoritesRoutes);
 app.use("/api/reports", reportsRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/locals", localsRoutes);
 app.use("/api/zones", zonesRoutes);
 

@@ -47,7 +47,7 @@
             </div>
 
             <div class="form-group mb-3">
-  <label class="form-label">Criar Password</label>
+  <label class="form-label">Password</label>
 
   <div class="password-wrapper">
 
