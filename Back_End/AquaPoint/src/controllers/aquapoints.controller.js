@@ -7,7 +7,7 @@ import { findFavoritesByUserId } from "./favorites.controller.js";
 export async function getAllAquapoints(req, res) {
   try {
     const [rows] = await returnAllAquapoints();
-    res.json(rows);
+    res.json(rows.map(formatPoints));
   } catch (err) {
     console.error(err);
     res.status(500).json(err);
@@ -37,7 +37,7 @@ export async function getAquaPointById(req, res) {
     const findAquapoint = await findAquapointById(id);
     if(!findAquapoint) return res.status(404).json({ error: `Aquapoint with ID: ${id} not found`});
 
-    res.json(findAquapoint);
+    res.json(formatPoints(findAquapoint));
   } catch (err) {
     console.error(err);
     res.status(500).json(err.message);
@@ -56,7 +56,7 @@ export async function getUserFavoritePoints(req, res){
       favoriteUserPoints.map((point) => findAquapointById(point.point_id))
     )
 
-    res.json(favoriteAquapoints)
+    res.json(formatPoints(favoriteAquapoints))
   }
   catch(err){
     res.status(500).json({ error: err.message })  
@@ -103,9 +103,19 @@ export async function updateAquapoint(req, res) {
     const latitude = req.body.latitude ?? findAquapoint.latitude;
     const longitude = req.body.longitude ?? findAquapoint.longitude;
 
+    if(!point_name || !point_type || !point_trust || !local_id || !state_id || !latitude || !longitude || !image){
+      return res.status(400).json({ error: 'All fields are required' })
+    }
+
+    let aquaPointPictureBlob = null
+
+    if (typeof image === 'string' && image.startsWith('data:image/')) {
+      aquaPointPictureBlob = Buffer.from(image.split(',')[1], 'base64')
+    }
+
     const[result] = await pool.query(
       'UPDATE aqua_points set point_name = ?, point_type = ?, point_trust = ?, local_id = ?, state_id = ?, image = ?, latitude = ?, longitude = ? WHERE id = ?',
-      [point_name, point_type, point_trust, local_id, state_id, image, latitude, longitude, findAquapoint.id]
+      [point_name, point_type, point_trust, local_id, state_id, aquaPointPictureBlob, latitude, longitude, findAquapoint.id]
     )
 
     if(result.affectedRows === 0) return res.status(500).json({ error: `There was a problem updating the aquapoint with ID: ${findAquapoint.id}`})
@@ -168,7 +178,7 @@ async function returnAllAquapoints(){
         l.local_name,
         z.zone_name,
         trust.trust_name,
-        AVG(r.rating) AS ratingAVG,
+        ROUND(AVG(r.rating), 1) AS ratingAVG,
         COUNT(r.id) AS ratingsAmount
       FROM aqua_points ap
       INNER JOIN states s
@@ -197,7 +207,7 @@ async function findAquapointById(id){
         l.local_name,
         z.zone_name,
         trust.trust_name,
-        AVG(r.rating) AS ratingAVG,
+        ROUND(AVG(r.rating), 1) AS ratingAVG,
         COUNT(r.id) AS ratingsAmount
       FROM aqua_points ap
       LEFT JOIN states s
@@ -220,3 +230,10 @@ async function findAquapointById(id){
   return rows[0];
 }
 
+export function formatPoints(aquaPoint){
+  if(aquaPoint.image){
+    aquaPoint.image = `data:image/jpeg;base64,${aquaPoint.image.toString('base64')}`
+  }
+
+  return aquaPoint
+}

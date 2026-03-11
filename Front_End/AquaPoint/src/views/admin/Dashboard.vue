@@ -150,14 +150,14 @@ const bestFountain = ref({
     name: "Praça Central",
     rating: 4.8,
     reviews: 52,
-    image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg"
+    image: "/src/assets/images/defaultPointImage.jpg"
 })
 
 const worstFountain = ref({
     name: "Zona Industrial",
     rating: 1.8,
     reviews: 12,
-    image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg"
+    image: "/src/assets/images/defaultPointImage.jpg"
 })
 
 const topFountains = ref([
