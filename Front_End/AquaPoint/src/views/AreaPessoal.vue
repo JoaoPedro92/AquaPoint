@@ -55,17 +55,17 @@
                         </div>
                         <br>
 
-                        <!-- Password -->
+                        <!-- Password Atual -->
                         <div class="form-group">
-                            <label for="exampleInputPassword1">Password</label>
-                            <input type="password" v-model="passwordValue" class="form-control contact-form" id="exampleInputPassword1" placeholder="Password">
+                            <label for="exampleInputPassword1">Password Atual</label>
+                            <input type="password" v-model="actualPassword" class="form-control contact-form" id="exampleInputPassword1" placeholder="Password">
                         </div>
                         <br>
 
-                        <!-- Repetir Password -->
+                        <!-- Nova Password -->
                         <div class="form-group">
-                            <label for="exampleInputPassword1">Repetir Password</label>
-                            <input type="password" v-model="passwordRepeatValue" class="form-control contact-form" id="exampleInputPassword1" placeholder="Password">
+                            <label for="exampleInputPassword1">Nova Password</label>
+                            <input type="password" v-model="newPassword" class="form-control contact-form" id="exampleInputPassword1" placeholder="Password">
                         </div>
                         <br>                       
                         
@@ -209,8 +209,8 @@
     const toast = useToast()
     const { errors, validate, validateEmail, clearErrors } = useFormValidation()
     const user = ref(null)
-    const passwordValue = ref('')
-    const passwordRepeatValue = ref('')
+    const actualPassword = ref('')
+    const newPassword = ref('')
 
 
    onMounted(async () => {
@@ -219,18 +219,23 @@
 
     async function UpdateProfileData(){
         clearErrors()
+
         try{
             const updatedUser = { ...user.value }
 
-            if(passwordValue.value){
-                const isPasswordMatching = passwordValue.value === passwordRepeatValue.value
-                if(isPasswordMatching){ 
-                    updatedUser.passwordHash = passwordValue.value
-                }
-                else{
-                    toast.error('As password não coincidem.')
+            if(actualPassword.value){
+                const response = await userService.comparePasswords(actualPassword.value, user.value.passwordHash)
+                if(!response.data.isValid){
+                    toast.error('A password atual está errada.')
                     return
                 }
+
+                if(!newPassword.value){ 
+                    toast.error('Insira uma nova password.')
+                    return
+                }
+
+                updatedUser.passwordHash = newPassword.value
             }
             
             const emailError = validateEmail(updatedUser.email)
@@ -244,11 +249,12 @@
 
         
             if(!requiredFieldsFilled || emailError) return
-
+            console.log(updatedUser)
             await userService.update(Auth.user.id, updatedUser)
+
             console.log('Updated user')
-            passwordValue.value = ''
-            passwordRepeatValue.value = ''
+            actualPassword.value = ''
+            newPassword.value = ''
             toast.success('Dados atualizados com sucesso.')
         }
 
@@ -263,7 +269,7 @@
         
         const reader = new FileReader()
         reader.onload = (e) => {
-            user.profilePicture.value = e.target.result
+            user.value.profilePicture = e.target.result
         }
         reader.readAsDataURL(file)
 

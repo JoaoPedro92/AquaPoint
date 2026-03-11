@@ -98,7 +98,6 @@ import { authService } from '../services/authService.js'
                 response.data.token
             )
 
-            console.log(response.data.token)
             loginModal.closeLoginModal()
         }
 

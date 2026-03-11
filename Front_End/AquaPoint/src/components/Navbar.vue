@@ -68,11 +68,13 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import LoginModal from './LoginModal.vue';
 import { useAuth } from '../utilities/useAuth';
 import { useModalStore } from '../utilities/modal';
 
 const loginModal = useModalStore()
+const router = useRouter()
 const Auth = useAuth()
 const loginModalVisible = ref(false)
 const showUserMenu = ref(false)
@@ -80,6 +82,7 @@ const showUserMenu = ref(false)
 function LogoutUser(){
     try{
         Auth.logout()
+        router.push('/')
     }
     catch (e){
         alert(e)
