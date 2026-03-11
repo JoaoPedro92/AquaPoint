@@ -180,6 +180,15 @@ async function findReviewsByAquapointId(id){
   return rows
 }
 
+async function findReviewById(id){
 
+  const [rows] = await pool.query(`
+    SELECT *
+    FROM reviews
+    WHERE id = ?
+  `,[id])
+
+  return rows[0]
+}
 
 
