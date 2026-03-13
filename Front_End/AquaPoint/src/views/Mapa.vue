@@ -21,6 +21,9 @@
 
             <!-- Imagem Bebedouro e informações -->
             <img :src="selectedAquapoint.image" width="100%" height="300" alt="Imagem do bebedouro" style=" border-radius: 12px 12px 0 0;">
+            
+            <br><br>
+
             <div class="d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center mt-2">
                     <h4>{{ selectedAquapoint.point_name }}</h4>
@@ -36,7 +39,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <i class="bi bi-star-fill text-warning"></i>
-                    <span class="ms-1">{{ selectedAquapoint.ratingAvg|| 0.0}}</span> <span class="ms-1" style="font-size:0.8rem"> - {{selectedAquapoint.ratingsAmount|| 0.0 }} opiniões</span>
+                    <span class="ms-1">{{ selectedAquapoint.ratingAVG|| 0.0}}</span> <span class="ms-1" style="font-size:0.8rem"> - {{selectedAquapoint.ratingsAmount|| 0.0 }} opiniões</span>
                 </div>
                 <span>15min - 3,8km</span>
             </div>
@@ -83,17 +86,17 @@
                     <div v-for="review in reviews" :key="review.id">
                         <div class="user-review-card">
                             <div class="d-flex align-items-center">
-                                <img src="/src/assets/images/user_image.png" width="20" height="20" alt="imagem utilizador">
-                                <span class="ms-2">{{ review.userNome }}</span>
-                                <span class="ms-auto" style="font-size:0.8rem">{{ review.createdDate }}</span>
+                                <img :src="review.profilePicture || '/src/assets/images/user_image.png'" width="20" height="20" alt="imagem utilizador" style="background-color: white; border-radius: 50%; object-fit: cover;">
+                                <span class="ms-2">{{ review.name }}</span>
+                                <span class="ms-auto" style="font-size:0.8rem">{{ review.created_at }}</span>
                             </div>
 
                             <!-- Stars Rating -->
-                            <span :title="review.pontuacao + ' estrelas'">
-                                <StarsRating :rating="review.pontuacao" :isReadonly="true"></StarsRating> 
+                            <span :title="review.rating + ' estrelas'">
+                                <StarsRating :rating="review.rating" :isReadonly="true"></StarsRating> 
                             </span>
 
-                            <p class="mb-0">{{ review.descrição }}</p>
+                            <p class="mb-0">{{ review.comment }}</p>
                         </div>
                     </div>
                 </div>
@@ -105,6 +108,9 @@
              <p class="mb-1" style="font-size: 0.9rem; color:gray;">Partilha a tua experiência</p>
 
              <StarsRating v-model:rating="newReviewNumber" ></StarsRating>
+             
+             <br><br>
+
              <textarea v-model="reviewText" class="form-control mt-1" placeholder="Escreve um comentário" id="exampleFormControlTextarea1" rows="4"></textarea>
              <button class="btn btn-primary mt-3" style="width:100%;" v-on:click="SubmitReview">SUBMETER</button>
              <!---------------------------------->
@@ -137,8 +143,8 @@
                 <!-- Tipo de bebedouro -->
                 <h6>Tipo de Bebedouro:</h6>
                 <button v-for="type in aquapointTypes" :key="type.id" 
-                :class="newAquapointType === type.nome ? 'btn bg-aquapoint-blue text-white shadow-sm' : 'btn bg-aquapoint-gray'"
-                 v-on:click="newAquapointType = type.nome"> {{ type.nome }}</button>
+                :class="newAquapointType === type.id ? 'btn bg-aquapoint-blue text-white shadow-sm' : 'btn bg-aquapoint-gray'"
+                 v-on:click="newAquapointType = type.id"> {{ type.nome }}</button>
                  <!----------------------->
             </div>
 
@@ -166,6 +172,9 @@
     import { userService } from '../services/userService';
     import { aquapointService } from '../services/aquapointService' 
     import { reviewsService } from '../services/reviewsService' 
+    import { localsService } from '../services/localsService';
+    import { zonesService } from '../services/zonesService';
+    import { point } from 'leaflet';
 
     const loginModal = useModalStore()
     const Auth = useAuth()
@@ -187,13 +196,14 @@
         { id: 2, nome: 'Animais' },
         { id: 3, nome: 'Ambos' }
     ]
-    const newAquapointType = ref('Pessoas')
+    const newAquapointType = ref(1)
     const fileInput = ref(null)
     const fileName = ref('')
     const newAquapointImagePreview = ref(null)
     const newAquapointName = ref('')
     const offcanvasClosedBySubmitButton = ref(false)
     const aquapointsList = ref([])
+    const localValue = ref('')
 
 
     onMounted(async() => {
@@ -212,17 +222,26 @@
             accessToken: 'BumVzniBYxFsvv2lUwvsZ8fQMn6WdPC2sS5bAqyeSyDrROwuULnZrt0lE1uKPHrT'
         }).addTo(mapaRef.value)
 
-        mapaRef.value.on('click', (e) => {
+        mapaRef.value.on('click', async (e) => {
             if(!AddNewMode.value) return 
 
             const { lat, lng } = e.latlng
 
             newMarkerAquapoint.value = L.marker([lat, lng], { icon: getAddNewMarkerIcon()})
             .addTo(mapaRef.value)
-            .bindPopup(`Lat: ${lat.toFixed(5)} <br> Lng: ${lng.toFixed(5)}`)
-            .openPopup()
 
             openOffcanvas()
+
+            try {
+                const localData = await GetPlaceDataByCoords(lat, lng)
+                localValue.value = localData.zone
+
+                newMarkerAquapoint.value
+                    .bindPopup(localValue.value)
+                    .openPopup()
+            } catch (err) {
+                console.error('Erro ao obter localização:', err)
+            }
         })
 
         if (aquapointsList) {
@@ -258,7 +277,7 @@
         .addTo(mapaRef.value)
         .on('click', async () => {
             reviews.value = await GetReviewsByPointId(point.id)
-            console.log(reviews.value)
+  
             selectedAquapoint.value = point
             showAquapointPopup.value = true
             showTrustLevelVote.value = false
@@ -322,9 +341,10 @@
         newMarkerAquapoint.value = null
 
         AddNewMode.value = false
-        newAquapointType.value = 'Pessoas'
+        newAquapointType.value = 1
         newAquapointName.value = null
         newAquapointImagePreview.value = null
+        localValue.value = ''
     }
 
     function onFileChange(e) {
@@ -340,7 +360,7 @@
         
     }
 
-    function SubmitNewAquapoint(){
+    async function SubmitNewAquapoint(){
         if (!newAquapointName.value || newAquapointName.value.trim() === ''){
             // failed
             console.log('Failed to submit, name is null')
@@ -351,12 +371,118 @@
         //offcanvasClosedBySubmitButton.value = true
 
         const coords = newMarkerAquapoint.value.getLatLng()
-        const newPoint = { id: aquapointsList.length + 1, nome: newAquapointName.value, image: newAquapointImagePreview.value, estado: 'Ativo', lat: coords.lat, lng: coords.lng, ratingAvg: 0, nrReviews: 0, trustLevel: 1 }
-        aquapointsList.value.push(newPoint)
 
-        AddMarkerToMap(newPoint)
-        offcanvasInstance.hide()
-        toast.success('Aquapoint criado com sucesso!')
+        var zoneData = await GetLocalFromBackEnd(localValue.value)
+        var localId = null
+
+        if (!zoneData || !zoneData.id) {
+            const coordsData = await GetPlaceDataByCoords(coords.lat, coords.lng)
+            let cityName = coordsData?.city || 'Desconhecido'
+
+            var zoneId = await GetZoneByName(cityName)
+
+            if (!zoneId) {
+                zoneId = await CreateNewZone(cityName)
+            }
+
+            localId = await CreateNewLocal(localValue.value, zoneId)
+        } else {
+            localId = zoneData.id
+        }
+  
+        const newPoint = { 
+            point_name: newAquapointName.value, 
+            image: newAquapointImagePreview.value, 
+            point_type: newAquapointType.value,
+            point_trust: 2,
+            local_id: localId,
+            state_id: 3, // Pendente
+            latitude: coords.lat, 
+            longitude: coords.lng
+        }
+
+        AddNewAquaPoint(newPoint)
+    }
+
+    async function GetPlaceDataByCoords(lat, lng) {
+        return fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+        )
+        .then(response => response.json())
+        .then(data => {
+            return {
+                city: data.address.city || data.address.town || '',
+                zone: data.address.village || data.address.town || data.address.neighbourhood || data.address.hamlet || data.display_name || ''
+            }
+        })
+        .catch(error => {
+            console.error("Erro ao obter dados de zona:", error)
+            return ''
+        })
+    }
+
+    async function GetLocalFromBackEnd(local) {
+        try {
+
+            const { data } = await localsService.getByName(local)
+
+            return data
+
+        } catch (error) {
+
+            if (error.response?.status === 404) {
+                return false
+            }
+
+            return false
+        }
+    }
+
+    async function CreateNewLocal(local_name, zone_id) {
+        try {
+            const { data } = await localsService.create({ name: local_name, zone_id: zone_id })
+
+            return data.id
+        } catch (error) {
+            return null
+        }
+    }
+
+    async function GetZoneByName(name) {
+        try {
+            const { data } = await zonesService.getByName(name)
+
+            return data.id
+        } catch (error) {
+            return null
+        }
+    }
+
+    async function CreateNewZone(zone_name) {
+        try {
+            const { data } = await zonesService.create({ name: zone_name })
+
+            return data.id
+        } catch (error) {
+            return null
+        }
+    }
+
+    async function AddNewAquaPoint(newPoint) {
+        try {
+            const createdPoint = await aquapointService.create(newPoint)
+            if (createdPoint) {
+                toast.warning('Bebedouro pendente de aprovação da administração!')
+                closeOffcanvas()
+                offcanvasInstance.hide()
+
+                aquapointsList.value = await GetAquapointsList()
+            }
+        } catch (err) {
+            console.log("Status:", err.response?.status)
+            console.log("Data:", err.response?.data)
+            console.log("Headers:", err.response?.headers)
+        }
     }
 
     function getMarkerIcon(color = 'blue') {
@@ -397,7 +523,7 @@
         background: white;
         padding: 2rem;
         border-radius: 8px;
-        width: 500px;
+        width: 900px;
         max-height: 95%;
         position: relative;
         overflow-y: auto;
@@ -434,5 +560,9 @@
         left: 25%;
         border-radius: 8px;
         object-fit: contain;
+    }
+
+    .modal-box > img {
+        object-fit: cover;
     }
 </style>
