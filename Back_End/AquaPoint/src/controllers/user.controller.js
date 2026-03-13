@@ -37,17 +37,22 @@ export async function getUserProfilePicture(req, res){
 
 // POST /users
 export async function createUser(req, res) {
-  const { name, email, dateBirth, city, password, isAdmin } = req.body
+  const { name, email, dateBirth, city, profilePicture, password, isAdmin } = req.body
 
-  if(!name || !email || !dateBirth || !city || !password || isAdmin === undefined || isAdmin === null) {
+  if(!name || !email || !dateBirth || !city || !password) {
     return res.status(400).json({ error: 'All fields are required' })
   }
 
   try{
     const passwordBcrypt = await bcrypt.hash(password, 10)
+    let profilePictureBlob = null
+    if(profilePicture){
+      profilePictureBlob = Buffer.from(profilePicture.split(',')[1], 'base64')
+    }
+
     const[result] = await pool.query(
-      'INSERT INTO users (name, email, dateBirth, city, passwordHash, isAdmin) VALUES (?, ?, ?, ?, ?, ?)',
-      [name, email, dateBirth, city, passwordBcrypt, isAdmin]
+      'INSERT INTO users (name, email, dateBirth, city, profilePicture, passwordHash, isAdmin) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [name, email, dateBirth, city, profilePictureBlob, passwordBcrypt, isAdmin]
     )
 
     res.status(201).json({ message: 'User created successfully!', id: result.insertId})
