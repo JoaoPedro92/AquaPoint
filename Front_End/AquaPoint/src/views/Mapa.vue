@@ -214,8 +214,6 @@
             closeOffcanvas()
         })
 
-        aquapointsList.value = await GetAquapointsList()
-
         mapaRef.value = L.map('mapa').setView([38.781558, -9.102584], 13)
         L.tileLayer('https://tile.jawg.io/jawg-lagoon/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
             attribution: '© Jawg Maps',
@@ -244,6 +242,8 @@
             }
         })
 
+        aquapointsList.value = await GetAquapointsList()
+        
         if (aquapointsList) {
             aquapointsList.value.forEach(point => {
                 if (point.state_name != "Pendente") {
