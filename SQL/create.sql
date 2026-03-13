@@ -41,7 +41,7 @@ create table users (
     name text not null,
     email text not null,
     passwordHash text not null,
-    profilePicture BLOB default NULL,
+    profilePicture LONGBLOB default NULL,
     createdAt date not null,
     isAdmin TINYINT not null,
     primary key (id)
@@ -76,7 +76,7 @@ create table aqua_points (
     point_trust int not null,       
     local_id int not null,      
     state_id int not null,     
-    image BLOB default NULL,    
+    image LONGBLOB default NULL,    
     latitude double not null,
     longitude double not null,
     primary key (id)

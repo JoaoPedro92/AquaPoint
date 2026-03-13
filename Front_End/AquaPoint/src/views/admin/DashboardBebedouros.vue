@@ -24,17 +24,21 @@
                 </thead>
                 <tbody>
                     <tr v-for="aquapoint  in aquapoints" :key="aquapoint.id">
-                    <td class="text-center"><img :src="aquapoint.image" class="rounded-circle" width="40" height="40"></td>
+                    <td class="text-center">
+                        <img :src="aquapoint.image || '/src/assets/images/defaultPointImage.jpg'" class="rounded-circle" width="40" height="40">
+                    </td>
                     <td >{{ aquapoint.point_name }}</td>
-                    <td>{{ typeDict[aquapoint.point_type] }}</td>
-                    <td class="text-center">{{ aquapoint.ratingAVG }}</td>
+                    <td>{{ aquapoint.point_type }}</td>
+                    <td class="text-center">{{ aquapoint.ratingAVG || 0.0}}</td>
                     <td class="text-center">{{ aquapoint.ratingsAmount }}</td>
-                    <td class="text-center">{{ stateDict[aquapoint.state_id] }}</td>
-                    <td>{{ trustLevelDict[aquapoint.point_trust] }}</td>
+                    <td>{{ aquapoint.state_name }}</td>
+                    <td>{{ aquapoint.trust_name }}</td>
                     <td class="text-center">
                         <button class="btn btn-sm btn-primary mt-1 me-2" @click="editAquaPoint(aquapoint)">Editar</button>
                         <button class="btn btn-sm btn-danger mt-1 me-2" @click="deleteAquaPoint(aquapoint.id)">Eliminar</button>
-                        <button class="btn btn-sm btn-success mt-1" @click="changePointState(aquapoint.id)">Marcar como Ativo / Inativo</button>
+                        <button v-if="aquapoint.state_id == 1" class="btn btn-sm btn-success mt-1" @click="changePointState(aquapoint)">Marcar como ativo</button>
+                        <button v-if="aquapoint.state_id == 2" class="btn btn-sm btn-warning mt-1" @click="changePointState(aquapoint)">Marcar como inativo</button>
+                        <button v-if="aquapoint.state_id == 3" class="btn btn-sm btn-success mt-1" @click="changePointState(aquapoint)">Marcar como ativo</button>
                     </td>
                     </tr>
                     
@@ -43,124 +47,66 @@
         </div>
         <!-- Users table-->
     </div>
+
+    <EditModal v-model:visible="showEditModal" :aquapoint="selectedAquaPoint"></EditModal>
 </template>
 
 <script setup>
+
     import { ref, onMounted } from 'vue'
-    import { AquaPoint } from "/src/models/AquaPoint"
+    import { aquapointService } from '../../services/aquapointService' 
+    import EditModal from '/src/components/EditAquaPointsModal.vue'
 
     const aquapoints = ref([])
     const loading = ref(true)
+    const showEditModal = ref(false)
+    const selectedAquaPoint = ref(null)
 
-    let trustLevelDict = {
-        [1]: "Existe mas com pouca certeza",
-        [2]: "Existe com alguma certeza",
-        [3]: "Existe 100% certeza",
-    }
-
-    let typeDict = {
-        [0]: "Humanos",
-        [1]: "Animais",
-        [2]: "Ambos",
-    }
-
-    let stateDict = {
-        [0]: "Inativo",
-        [1]: "Funcional",
-        [2]: "Pendente"
-    }
-
-    onMounted(() => {
-        aquapoints.value = [
-            new AquaPoint({
-                id: 1,
-                point_name: "Bebedouro Praça Central",
-                image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
-                point_type: 0,
-                longitude: -8.6110,
-                latitude: 41.1496,
-                state_id: 1,
-                ratingAVG: 4.2,
-                local_id: 1,
-                ratingsAmount: 5,
-                point_trust: 2,
-            }),
-
-            new AquaPoint({
-                id: 2,
-                point_name: "Bebedouro Jardim Norte",
-                image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
-                point_type: 0,
-                longitude: -8.6125,
-                latitude: 41.1502,
-                state_id: 2,
-                ratingAVG: 3.2,
-                local_id: 1,
-                ratingsAmount: 9,
-                point_trust: 1,
-            }),
-
-            new AquaPoint({
-                id: 3,
-                point_name: "Bebedouro Escola Secundária",
-                image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
-                point_type: 1,
-                longitude: -8.6098,
-                latitude: 41.1489,
-                state_id: 0,
-                ratingAVG: 1.5,
-                local_id: 1,
-                ratingsAmount: 9,
-                point_trust: 3,
-            }),
-
-            new AquaPoint({
-                id: 4,
-                point_name: "Bebedouro Parque Sul",
-                image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
-                point_type: 1,
-                longitude: -8.6133,
-                latitude: 41.1475,
-                state_id: 2,
-                ratingAVG: 3.24, 
-                local_id: 1,
-                ratingsAmount: 52,
-                point_trust: 1,
-            }),
-
-            new AquaPoint({
-                id: 5,
-                point_name: "Bebedouro Câmara Municipal",
-                image: "/src/assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg",
-                point_type: 2,
-                longitude: -8.6087,
-                latitude: 41.1510,
-                state_id: 0,
-                ratingAVG: 2.2,
-                local_id: 1,
-                ratingsAmount: 8,
-                point_trust: 3,
-            })
-        ]
-
-        loading.value = false
+    onMounted(async () => {
+        loadAquapoints()
     })
 
-
     function GetInactiveAquaPoints() {
-         return aquapoints.value.filter(a => a.state_id === 2).length
+        return aquapoints.value.filter(a => a.state_id === 3).length
     }
 
     function editAquaPoint(aquapoint){
-        console.log('editar', aquapoint)
-        // abrir popup para editar user
+        selectedAquaPoint.value = { ...aquapoint }
+        showEditModal.value = true
     }
 
     function deleteAquaPoint(pointId){
-        // enviar para backend para delete
+        if (pointId) {
+            try {
+                aquapointService.delete(pointId)
+                loadAquapoints()
+            } catch (error) {
+                console.error("Erro ao eliminar bebedouro:", error)
+            }
+        }
     }
 
-    function changePointState(pointId){
-        // enviar para backend para marcar o user como admin
+    async function changePointState(aquapoint) {
+        if (aquapoint) {
+            if (aquapoint.state_id == 1) {
+                aquapoint.state_id = 2
+            } else {
+                aquapoint.state_id = 1
+            }
+
+            try {
+                await aquapointService.update(aquapoint.id, aquapoint)
+
+                loadAquapoints()
+            } catch (error) {
+                console.error("Erro ao atualizar estado:", error)
+            }
+        }
+    }
+
+    async function loadAquapoints() {
+        loading.value = true
+        aquapoints.value = (await aquapointService.getAll()).data
+        loading.value = false
     }
 </script>
