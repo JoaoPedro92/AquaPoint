@@ -26,6 +26,7 @@ insert into type (id, type_name) values (3, 'Ambos');
 insert into states (id, state_name) values (1, 'Necessita manutenção');
 insert into states (id, state_name) values (2, 'Bom estado');
 insert into states (id, state_name) values (3, 'Pendente');
+insert into states (id, state_name) values (4, 'Inativo');
 
 -- -------------------------------------------------------
 -- TRUST LEVELS

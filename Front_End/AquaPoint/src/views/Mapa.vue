@@ -23,8 +23,9 @@
             <img :src="selectedAquapoint.image" width="100%" height="300" alt="Imagem do bebedouro" style=" border-radius: 12px 12px 0 0;">
             <div class="d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center mt-2">
-                    <h4>{{ selectedAquapoint.nome }}</h4>
-                    <i v-if="selectedAquapoint.estado === 'Inativo'" class="bi bi-exclamation-octagon-fill text-warning ms-2" title="Estado Inativo"></i>
+                    <h4>{{ selectedAquapoint.point_name }}</h4>
+                    <i v-if="selectedAquapoint.state_name == 'Inativo'" class="bi bi-exclamation-octagon-fill text-danger ms-2" title="Estado Inativo"></i>
+                    <i v-if="selectedAquapoint.state_name == 'Necessita manutenção'" class="bi bi-exclamation-octagon-fill text-warning ms-2" title="Estado Necessita manutenção"></i>
                 </div>
                 <!-- Flag Reportar -->
                 <div class="hex-bg">
@@ -35,7 +36,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <i class="bi bi-star-fill text-warning"></i>
-                    <span class="ms-1">{{ selectedAquapoint.ratingAvg}}</span> <span class="ms-1" style="font-size:0.8rem"> - {{selectedAquapoint.nrReviews }} opiniões</span>
+                    <span class="ms-1">{{ selectedAquapoint.ratingAvg|| 0.0}}</span> <span class="ms-1" style="font-size:0.8rem"> - {{selectedAquapoint.ratingsAmount|| 0.0 }} opiniões</span>
                 </div>
                 <span>15min - 3,8km</span>
             </div>
@@ -164,6 +165,7 @@
     import ReportProblemModal from '../components/ReportProblemModal.vue';
     import { userService } from '../services/userService';
     import { aquapointService } from '../services/aquapointService' 
+    import { reviewsService } from '../services/reviewsService' 
 
     const loginModal = useModalStore()
     const Auth = useAuth()
@@ -202,26 +204,17 @@
             closeOffcanvas()
         })
 
-        const imageBase64 = await imageUrlToBase64('https://scontent.flis9-2.fna.fbcdn.net/v/t1.6435-9/159226417_4049432591747023_5551976901920941269_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=13d280&_nc_ohc=4TYKScNiGWcQ7kNvwG6mRlw&_nc_oc=Adm-YNxGSIhNyQEL__HCr0HaqbtYLWFQRDxQh-ZanvMnr1WhLlaOMVN_j5R1mnU-P-M&_nc_zt=23&_nc_ht=scontent.flis9-2.fna&_nc_gid=7kr_Wj2Nkj7EQ0-dPZgkNw&oh=00_Afs7y1Mqp73JXjFta-li0d-usavddpMIJPW9lXojh3RGyQ&oe=69C8F988')
-        const image2Base64 = await imageUrlToBase64('https://pbs.twimg.com/media/EPSkJ3GXUAAYjuI.jpg')
-
-
         aquapointsList.value = await GetAquapointsList()
-
-        reviews.value = [
-            { id: 1, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 3, createdDate: '25/02/2026' },
-            { id: 2, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 5 , createdDate: '25/02/2026'},
-            { id: 3, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 4, createdDate: '25/02/2026' },
-        ]
 
         mapaRef.value = L.map('mapa').setView([38.781558, -9.102584], 13)
         L.tileLayer('https://tile.jawg.io/jawg-lagoon/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
-        attribution: '© Jawg Maps',
-        accessToken: 'BumVzniBYxFsvv2lUwvsZ8fQMn6WdPC2sS5bAqyeSyDrROwuULnZrt0lE1uKPHrT'
+            attribution: '© Jawg Maps',
+            accessToken: 'BumVzniBYxFsvv2lUwvsZ8fQMn6WdPC2sS5bAqyeSyDrROwuULnZrt0lE1uKPHrT'
         }).addTo(mapaRef.value)
 
         mapaRef.value.on('click', (e) => {
             if(!AddNewMode.value) return 
+
             const { lat, lng } = e.latlng
 
             newMarkerAquapoint.value = L.marker([lat, lng], { icon: getAddNewMarkerIcon()})
@@ -233,7 +226,6 @@
         })
 
         if (aquapointsList) {
-            console.log('Aquapoints List:', aquapointsList.value) // Verificar os dados recebidos
             aquapointsList.value.forEach(point => {
                 if (point.state_name != "Pendente") {
                     AddMarkerToMap(point)
@@ -249,9 +241,24 @@
     })
 
     function AddMarkerToMap(point){
-        L.marker([point.latitude, point.longitude], { icon: getMarkerIcon(point.state_name == 'Necessita manutenção' ? 'var(--aquapoint-marker-blue)' : 'orange') })
+        var markerColor = 'var(--aquapoint-marker-blue)'
+
+        if (point.state_name == 'Inativo') {
+            markerColor = 'red'
+        } else if (point.state_name == 'Necessita manutenção') {
+            markerColor = 'orange'
+        }
+
+        L.marker(
+            [point.latitude, point.longitude], 
+            { 
+                icon: getMarkerIcon(markerColor) 
+            }
+        )
         .addTo(mapaRef.value)
-        .on('click', () => {
+        .on('click', async () => {
+            reviews.value = await GetReviewsByPointId(point.id)
+            console.log(reviews.value)
             selectedAquapoint.value = point
             showAquapointPopup.value = true
             showTrustLevelVote.value = false
@@ -263,6 +270,16 @@
 
         if (aquapoints) {
             return aquapoints.data
+        }
+
+        return null
+    }
+
+    async function GetReviewsByPointId(pointId){
+        var reviews = await reviewsService.getByPointId(pointId)
+
+        if (reviews) {
+            return reviews.data
         }
 
         return null
@@ -366,58 +383,56 @@
 </script>
 
 <style scoped>
-.modal-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-.modal-box {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    width: 500px;
-    max-height: 95%;
-    position: relative;
-    overflow-y: auto;
-}
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    .modal-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 500px;
+        max-height: 95%;
+        position: relative;
+        overflow-y: auto;
+    }
 
-.btn-close {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-}
+    .btn-close {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+    }
 
-.user-review-card {
-    background-color: rgb(216, 216, 216);
-    padding: 10px;
-    margin: 10px 0px 10px 0px;
-    border-radius: 12px;
-    border: 1px solid #e9ecef;
-    transition: box-shadow 0.2s;
-}
+    .user-review-card {
+        background-color: rgb(216, 216, 216);
+        padding: 10px;
+        margin: 10px 0px 10px 0px;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        transition: box-shadow 0.2s;
+    }
 
-.user-review-card:hover{
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
+    .user-review-card:hover{
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
 
-.btn-trustLevelVote{
-    padding: 2px 5px;
-    font-size: 0.7rem;
-}
+    .btn-trustLevelVote{
+        padding: 2px 5px;
+        font-size: 0.7rem;
+    }
 
-.aquapoint-image-preview {
-    position: relative;
-    margin-bottom: 10px;
-    width: 50%;
-    left: 25%;
-    border-radius: 8px;
-    object-fit: contain;
-}
-
-
+    .aquapoint-image-preview {
+        position: relative;
+        margin-bottom: 10px;
+        width: 50%;
+        left: 25%;
+        border-radius: 8px;
+        object-fit: contain;
+    }
 </style>
