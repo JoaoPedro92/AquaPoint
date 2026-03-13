@@ -7,6 +7,7 @@ import reportsRoutes from "./routes/reports.routes.js";
 import authRoutes from "./routes/auth.routes.js"
 import localsRoutes from "./routes/locals.routes.js";
 import zonesRoutes from "./routes/zones.routes.js";
+import reviewsRoutes from "./routes/reviews.routes.js";
 
 const app = express();
 
@@ -26,5 +27,6 @@ app.use("/api/reports", reportsRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/locals", localsRoutes);
 app.use("/api/zones", zonesRoutes);
+app.use("/api/reviews", reviewsRoutes);
 
 export default app;
