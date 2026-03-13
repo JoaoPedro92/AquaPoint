@@ -18,9 +18,23 @@
 </template>
 
 <script setup>
+import { onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
 import Footer from './components/Footer.vue';
 import NavBar from './components/NavBar.vue';
 import LoginModal from './components/LoginModal.vue';
+
+const route = useRoute()
+const router = useRouter()
+const toast = useToast()
+
+watch(() => route.query.error, (error) => {
+    if (error === 'acesso-negado') {
+        toast.error('Acesso negado.')
+        router.replace({ query: {} })
+    }
+}, { immediate: true })
 </script>
 
 <style scoped>

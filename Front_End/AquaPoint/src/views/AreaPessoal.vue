@@ -249,7 +249,6 @@
 
         
             if(!requiredFieldsFilled || emailError) return
-            console.log(updatedUser)
             await userService.update(Auth.user.id, updatedUser)
 
             console.log('Updated user')
@@ -272,7 +271,6 @@
             user.value.profilePicture = e.target.result
         }
         reader.readAsDataURL(file)
-
     }
 </script>
 

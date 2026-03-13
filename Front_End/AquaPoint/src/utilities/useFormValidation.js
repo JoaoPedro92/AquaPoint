@@ -27,6 +27,16 @@ export function useFormValidation(){
         return null
     }
 
+    function validatePassword(password){
+        if(!password) return 'A password é obrigatória'
+        if(password.length < 6) return 'A password deve ter pelo o menos 6 caracteres.'
+        if(!/[A-Z]/.test(password)) return 'A password deve ter pelo menos uma maiúscula.'
+        if(!/[0-9]/.test(password)) return 'A password deve ter pelo menos um número.'
+        if(!/[!@#$%^&*()_+\-=\[\]{};:"\\|,.<>\/?]/.test(password)) return 'A password deve ter pelo menos um carácter especial.'
+
+        return null
+    }
+
     function clearErrors(){
         errors.value = {}
     }

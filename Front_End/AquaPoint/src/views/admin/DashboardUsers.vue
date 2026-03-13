@@ -5,9 +5,41 @@
 
     <!-- Loading -->
     <div v-if="loading">A carregar...</div>
+    
+    <div v-else>
 
-        <!-- Users table-->
-        <table v-else class="table table-striped table-hover mt-3">
+        <!-- Mobile: Cards -->
+        <div class="d-md-none d-flex flex-column gap-3">
+            <div v-for="user in users" :key="user.id" class="bg-white border rounded-3 p-3" >
+
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <img :src="user.profilePicture || '/src/assets/images/user_image.png'" width="44" height="44"
+                        class="rounded-2 object-fit-cover flex-shrink-0"/>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="fw-medium mb-0 small text-dark">{{ user.name }}</p>
+                        <p class="text-muted mb-0" style="font-size: 12px;">{{ user.email }}</p>
+                    </div>
+                    <span class="badge rounded-2 text-nowrap" :class="user.isAdmin ? 'bg-success' : 'bg-secondary'">
+                        {{ user.isAdmin ? 'Admin' : 'User' }}
+                    </span>
+                </div>
+
+                <!-- Botões -->
+                <div class="d-flex gap-2 flex-wrap">
+                    <button @click="editUser(user)" class="btn btn-sm btn-primary flex-fill">Editar</button>
+                    <button @click="selectedUser = user" data-bs-toggle="modal" data-bs-target="#deleteUserModal" class="btn btn-sm btn-danger flex-fill">Eliminar</button>
+                    <button v-if="!user.isAdmin" @click="markUserAsAdmin(user.id, user.isAdmin)" class="btn btn-sm btn-success w-100">
+                        Marcar como Admin
+                    </button>
+                    <button  v-else-if="user.isAdmin && user.id !== Auth.user.id" @click="markUserAsAdmin(user.id, user.isAdmin)" class="btn btn-sm btn-warning w-100">
+                        Remover como Admin
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop: Users table-->
+        <table class="d-none d-md-table w-100 table table-striped table-hover mt-3">
             <thead>
                 <tr>
                 <th scope="col" class="text-center">Imagem Perfil</th>
@@ -32,6 +64,7 @@
                 </tr>                
             </tbody>
         </table>
+    </div>
     </div>
 
     <!-- Delete User Confirmation Modal -->

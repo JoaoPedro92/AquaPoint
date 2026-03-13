@@ -54,7 +54,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useFormValidation } from '../utilities/useFormValidation';
 import { useAuth } from '../utilities/useAuth';
 import { useModalStore } from '../utilities/modal';
@@ -76,6 +76,15 @@ import { authService } from '../services/authService.js'
     const emailUser = ref('')
     const passwordUser = ref('')
    
+
+    onMounted(() => {
+        const modal = document.getElementById('loginModal')
+        if(!modal) return
+        modal.addEventListener('show.bs.modal', () => {
+            emailUser.value = ''
+            passwordUser.value = ''
+        })
+    })
 
     async function ProcessLogin(){
         clearErrors()
@@ -102,7 +111,8 @@ import { authService } from '../services/authService.js'
         }
 
         catch (e){
-            errors.value.email = 'Email ou password incorretos'
+            errors.value.email = ' '
+            errors.value.password = 'Email ou password incorretos'
             console.log(e.message)
         }
     }
