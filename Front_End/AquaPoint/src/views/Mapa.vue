@@ -151,213 +151,218 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import addNewMarkerImg from '../assets/images/map-markers/add_new_aqua_point_marker.png'
-import { Offcanvas } from 'bootstrap';
-import L, { icon } from 'leaflet'
-import 'leaflet/dist/leaflet.css'
-import StarsRating from '../components/StarsRating.vue'
-import { imageUrlToBase64 } from '../utilities/tools';
-import { useToast } from 'vue-toastification';
-import { useAuth } from '../utilities/useAuth';
-import { useModalStore } from '../utilities/modal';
-import ReportProblemModal from '../components/ReportProblemModal.vue';
-import { userService } from '../services/userService';
+    import { ref, onMounted, watch } from 'vue';
+    import addNewMarkerImg from '../assets/images/map-markers/add_new_aqua_point_marker.png'
+    import { Offcanvas } from 'bootstrap';
+    import L, { icon } from 'leaflet'
+    import 'leaflet/dist/leaflet.css'
+    import StarsRating from '../components/StarsRating.vue'
+    import { imageUrlToBase64 } from '../utilities/tools';
+    import { useToast } from 'vue-toastification';
+    import { useAuth } from '../utilities/useAuth';
+    import { useModalStore } from '../utilities/modal';
+    import ReportProblemModal from '../components/ReportProblemModal.vue';
+    import { userService } from '../services/userService';
+    import { aquapointService } from '../services/aquapointService' 
 
-const loginModal = useModalStore()
-const Auth = useAuth()
-const toast = useToast()
-const reviews = ref([])
-const mapaRef = ref(null)
-const newReviewNumber = ref(0)
-const reviewText = ref('')
-const selectedAquapoint = ref(null)
-const showAquapointPopup = ref(false)
-const showReportProblemModal = ref(false)
-const showTrustLevelVote = ref(false)
-const AddNewMode = ref(false)
-const offcanvasRef = ref(null)
-let offcanvasInstance = null
-const newMarkerAquapoint = ref(null)
-const aquapointTypes = [
-    { id: 1, nome: 'Pessoas' },
-    { id: 2, nome: 'Animais' },
-    { id: 3, nome: 'Ambos' }
-]
-const newAquapointType = ref('Pessoas')
-const fileInput = ref(null)
-const fileName = ref('')
-const newAquapointImagePreview = ref(null)
-const newAquapointName = ref('')
-const offcanvasClosedBySubmitButton = ref(false)
-const aquapointsList = ref([])
-
-
-onMounted(async() => {
-    // Inicializa o offcanvas das informações no momento de adicionar um novo bebedouro
-    offcanvasInstance = new Offcanvas(offcanvasRef.value)
-    offcanvasRef.value.addEventListener('hide.bs.offcanvas', () => {
-        console.log('offcanvas fechado')
-        closeOffcanvas()
-    })
-
-    const imageBase64 = await imageUrlToBase64('https://scontent.flis9-2.fna.fbcdn.net/v/t1.6435-9/159226417_4049432591747023_5551976901920941269_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=13d280&_nc_ohc=4TYKScNiGWcQ7kNvwG6mRlw&_nc_oc=Adm-YNxGSIhNyQEL__HCr0HaqbtYLWFQRDxQh-ZanvMnr1WhLlaOMVN_j5R1mnU-P-M&_nc_zt=23&_nc_ht=scontent.flis9-2.fna&_nc_gid=7kr_Wj2Nkj7EQ0-dPZgkNw&oh=00_Afs7y1Mqp73JXjFta-li0d-usavddpMIJPW9lXojh3RGyQ&oe=69C8F988')
-    const image2Base64 = await imageUrlToBase64('https://pbs.twimg.com/media/EPSkJ3GXUAAYjuI.jpg')
-
-    aquapointsList.value = [
-        { id: 1, nome: 'Aquapoint 1', image: imageBase64, estado: 'Ativo', lat: 38.781558, lng: -9.102584, ratingAvg: 4.7, nrReviews: 400, trustLevel: 3 },
-        { id: 2, nome: 'Aquapoint 2', image: image2Base64, estado: 'Inativo', lat: 38.780195, lng: -9.104723, ratingAvg: 3.0, nrReviews: 52, trustLevel: 2 }
+    const loginModal = useModalStore()
+    const Auth = useAuth()
+    const toast = useToast()
+    const reviews = ref([])
+    const mapaRef = ref(null)
+    const newReviewNumber = ref(0)
+    const reviewText = ref('')
+    const selectedAquapoint = ref(null)
+    const showAquapointPopup = ref(false)
+    const showReportProblemModal = ref(false)
+    const showTrustLevelVote = ref(false)
+    const AddNewMode = ref(false)
+    const offcanvasRef = ref(null)
+    let offcanvasInstance = null
+    const newMarkerAquapoint = ref(null)
+    const aquapointTypes = [
+        { id: 1, nome: 'Pessoas' },
+        { id: 2, nome: 'Animais' },
+        { id: 3, nome: 'Ambos' }
     ]
+    const newAquapointType = ref('Pessoas')
+    const fileInput = ref(null)
+    const fileName = ref('')
+    const newAquapointImagePreview = ref(null)
+    const newAquapointName = ref('')
+    const offcanvasClosedBySubmitButton = ref(false)
+    const aquapointsList = ref([])
 
-    reviews.value = [
-         { id: 1, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 3, createdDate: '25/02/2026' },
-         { id: 2, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 5 , createdDate: '25/02/2026'},
-         { id: 3, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 4, createdDate: '25/02/2026' },
-    ]
 
-    mapaRef.value = L.map('mapa').setView([38.781558, -9.102584], 13)
-    L.tileLayer('https://tile.jawg.io/jawg-lagoon/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
-    attribution: '© Jawg Maps',
-    accessToken: 'BumVzniBYxFsvv2lUwvsZ8fQMn6WdPC2sS5bAqyeSyDrROwuULnZrt0lE1uKPHrT'
-    }).addTo(mapaRef.value)
-
-    mapaRef.value.on('click', (e) => {
-        if(!AddNewMode.value) return 
-        const { lat, lng } = e.latlng
-
-        newMarkerAquapoint.value = L.marker([lat, lng], { icon: getAddNewMarkerIcon()})
-        .addTo(mapaRef.value)
-        .bindPopup(`Lat: ${lat.toFixed(5)} <br> Lng: ${lng.toFixed(5)}`)
-        .openPopup()
-
-        openOffcanvas()
-    })
-
-    aquapointsList.value.forEach(point => {
-        L.marker([point.lat, point.lng], { icon: getMarkerIcon(point.estado == 'Ativo' ? 'var(--aquapoint-marker-blue)' : 'orange') })
-            .addTo(mapaRef.value)
-            .on('click', () => {
-                selectedAquapoint.value = point
-                showAquapointPopup.value = true
-                showTrustLevelVote.value = false
-            })
+    onMounted(async() => {
+        // Inicializa o offcanvas das informações no momento de adicionar um novo bebedouro
+        offcanvasInstance = new Offcanvas(offcanvasRef.value)
+        offcanvasRef.value.addEventListener('hide.bs.offcanvas', () => {
+            console.log('offcanvas fechado')
+            closeOffcanvas()
         })
 
-})
-
-// Fica a aguardar que a variavel modoAdicionar altere e reaja à mudança mudando o tipo de cursor
-watch(AddNewMode, (val) => {
-    if (!mapaRef.value) return
-    mapaRef.value.getContainer().style.cursor = val ? 'crosshair' : ''
-})
+        const imageBase64 = await imageUrlToBase64('https://scontent.flis9-2.fna.fbcdn.net/v/t1.6435-9/159226417_4049432591747023_5551976901920941269_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=13d280&_nc_ohc=4TYKScNiGWcQ7kNvwG6mRlw&_nc_oc=Adm-YNxGSIhNyQEL__HCr0HaqbtYLWFQRDxQh-ZanvMnr1WhLlaOMVN_j5R1mnU-P-M&_nc_zt=23&_nc_ht=scontent.flis9-2.fna&_nc_gid=7kr_Wj2Nkj7EQ0-dPZgkNw&oh=00_Afs7y1Mqp73JXjFta-li0d-usavddpMIJPW9lXojh3RGyQ&oe=69C8F988')
+        const image2Base64 = await imageUrlToBase64('https://pbs.twimg.com/media/EPSkJ3GXUAAYjuI.jpg')
 
 
-function AddOrCancelMarkerClick(){
-    if(!Auth.isLoggedIn){
-        loginModal.openLoginModal()
-        return
-    }
+        aquapointsList.value = await GetAquapointsList()
 
-    AddNewMode.value = !AddNewMode.value
-}
-function SubmitReview(){
-    console.log('Rating: ' + newReviewNumber.value + '\nReview: ' + reviewText.value)
-    newReviewNumber.value = 0
-    reviewText.value = ''
-}
+        reviews.value = [
+            { id: 1, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 3, createdDate: '25/02/2026' },
+            { id: 2, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 5 , createdDate: '25/02/2026'},
+            { id: 3, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 4, createdDate: '25/02/2026' },
+        ]
 
-function ReportProblem(){
-    console.log('Report Problem clicked')
+        mapaRef.value = L.map('mapa').setView([38.781558, -9.102584], 13)
+        L.tileLayer('https://tile.jawg.io/jawg-lagoon/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
+        attribution: '© Jawg Maps',
+        accessToken: 'BumVzniBYxFsvv2lUwvsZ8fQMn6WdPC2sS5bAqyeSyDrROwuULnZrt0lE1uKPHrT'
+        }).addTo(mapaRef.value)
 
-    showReportProblemModal.value = true
-}
+        mapaRef.value.on('click', (e) => {
+            if(!AddNewMode.value) return 
+            const { lat, lng } = e.latlng
 
-function VoteTrustLevel(){
-    console.log('VoteTrustLevel clicked')
-    showTrustLevelVote.value = !showTrustLevelVote.value
-}
+            newMarkerAquapoint.value = L.marker([lat, lng], { icon: getAddNewMarkerIcon()})
+            .addTo(mapaRef.value)
+            .bindPopup(`Lat: ${lat.toFixed(5)} <br> Lng: ${lng.toFixed(5)}`)
+            .openPopup()
 
-function openOffcanvas(){
-    newAquapointImagePreview.value = '/src/assets/images/add_new_point.png'
-    offcanvasInstance.show()
-}
+            openOffcanvas()
+        })
 
-function closeOffcanvas(){
-    if(!newMarkerAquapoint.value) return;    
+        if (aquapointsList) {
+            console.log('Aquapoints List:', aquapointsList.value) // Verificar os dados recebidos
+            aquapointsList.value.forEach(point => {
+                if (point.state_name != "Pendente") {
+                    AddMarkerToMap(point)
+                }
+            })
+        }
+    })
 
-    mapaRef.value.removeLayer(newMarkerAquapoint.value)
-    newMarkerAquapoint.value = null
+    // Fica a aguardar que a variavel modoAdicionar altere e reaja à mudança mudando o tipo de cursor
+    watch(AddNewMode, (val) => {
+        if (!mapaRef.value) return
+        mapaRef.value.getContainer().style.cursor = val ? 'crosshair' : ''
+    })
 
-    AddNewMode.value = false
-    newAquapointType.value = 'Pessoas'
-    newAquapointName.value = null
-    newAquapointImagePreview.value = null
-}
-
-function onFileChange(e) {
-    const file = e.target.files[0]
-    if(!file) return
-    
-    fileName.value = file.name
-    const reader = new FileReader()
-    reader.onload = (e) => {
-        newAquapointImagePreview.value = e.target.result
-    }
-    reader.readAsDataURL(file)
-    
-}
-
-function SubmitNewAquapoint(){
-    if (!newAquapointName.value || newAquapointName.value.trim() === ''){
-        // failed
-        console.log('Failed to submit, name is null')
-        return;
-    }
-
-    console.log(`${newAquapointName.value} \n${newAquapointType.value}`)
-    //offcanvasClosedBySubmitButton.value = true
-
-    const coords = newMarkerAquapoint.value.getLatLng()
-    const newPoint = { id: aquapointsList.length + 1, nome: newAquapointName.value, image: newAquapointImagePreview.value, estado: 'Ativo', lat: coords.lat, lng: coords.lng, ratingAvg: 0, nrReviews: 0, trustLevel: 1 }
-    aquapointsList.value.push(newPoint)
-
-    AddMarkerToMap(newPoint)
-    offcanvasInstance.hide()
-    toast.success('Aquapoint criado com sucesso!')
-}
-
-function AddMarkerToMap(point){
-    L.marker([point.lat, point.lng], { icon: getMarkerIcon(point.estado === 'Ativo' ? 'green' : 'orange') })
+    function AddMarkerToMap(point){
+        L.marker([point.latitude, point.longitude], { icon: getMarkerIcon(point.state_name == 'Necessita manutenção' ? 'var(--aquapoint-marker-blue)' : 'orange') })
         .addTo(mapaRef.value)
         .on('click', () => {
             selectedAquapoint.value = point
             showAquapointPopup.value = true
             showTrustLevelVote.value = false
         })
-}
+    }
 
-function getMarkerIcon(color = 'blue') {
-    return L.divIcon({
-        className: '',
-        html: `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="60" viewBox="0 0 24 24">
-            <path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-        </svg>`,
-        iconSize: [100, 60],
-        iconAnchor: [15, 40],
-        popupAnchor: [0, -40]
-    })
-}
+    async function GetAquapointsList(){
+        var aquapoints = await aquapointService.getAll()
 
-function getAddNewMarkerIcon(){
-    return L.divIcon({
-        className: '',
-        html: `<img src="${addNewMarkerImg}" style="width: 50px; height: 50px;">`,
-        iconSize: [100, 60],
-        iconAnchor: [15, 40],
-        popupAnchor: [0, -40]
-    })
-}
+        if (aquapoints) {
+            return aquapoints.data
+        }
 
+        return null
+    }
+
+    function AddOrCancelMarkerClick(){
+        if(!Auth.isLoggedIn){
+            loginModal.openLoginModal()
+            return
+        }
+
+        AddNewMode.value = !AddNewMode.value
+    }
+    function SubmitReview(){
+        console.log('Rating: ' + newReviewNumber.value + '\nReview: ' + reviewText.value)
+        newReviewNumber.value = 0
+        reviewText.value = ''
+    }
+
+    function ReportProblem(){
+        console.log('Report Problem clicked')
+
+        showReportProblemModal.value = true
+    }
+
+    function VoteTrustLevel(){
+        console.log('VoteTrustLevel clicked')
+        showTrustLevelVote.value = !showTrustLevelVote.value
+    }
+
+    function openOffcanvas(){
+        newAquapointImagePreview.value = '/src/assets/images/add_new_point.png'
+        offcanvasInstance.show()
+    }
+
+    function closeOffcanvas(){
+        if(!newMarkerAquapoint.value) return;    
+
+        mapaRef.value.removeLayer(newMarkerAquapoint.value)
+        newMarkerAquapoint.value = null
+
+        AddNewMode.value = false
+        newAquapointType.value = 'Pessoas'
+        newAquapointName.value = null
+        newAquapointImagePreview.value = null
+    }
+
+    function onFileChange(e) {
+        const file = e.target.files[0]
+        if(!file) return
+        
+        fileName.value = file.name
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            newAquapointImagePreview.value = e.target.result
+        }
+        reader.readAsDataURL(file)
+        
+    }
+
+    function SubmitNewAquapoint(){
+        if (!newAquapointName.value || newAquapointName.value.trim() === ''){
+            // failed
+            console.log('Failed to submit, name is null')
+            return;
+        }
+
+        console.log(`${newAquapointName.value} \n${newAquapointType.value}`)
+        //offcanvasClosedBySubmitButton.value = true
+
+        const coords = newMarkerAquapoint.value.getLatLng()
+        const newPoint = { id: aquapointsList.length + 1, nome: newAquapointName.value, image: newAquapointImagePreview.value, estado: 'Ativo', lat: coords.lat, lng: coords.lng, ratingAvg: 0, nrReviews: 0, trustLevel: 1 }
+        aquapointsList.value.push(newPoint)
+
+        AddMarkerToMap(newPoint)
+        offcanvasInstance.hide()
+        toast.success('Aquapoint criado com sucesso!')
+    }
+
+    function getMarkerIcon(color = 'blue') {
+        return L.divIcon({
+            className: '',
+            html: `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="60" viewBox="0 0 24 24">
+                <path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>`,
+            iconSize: [100, 60],
+            iconAnchor: [15, 40],
+            popupAnchor: [0, -40]
+        })
+    }
+
+    function getAddNewMarkerIcon(){
+        return L.divIcon({
+            className: '',
+            html: `<img src="${addNewMarkerImg}" style="width: 50px; height: 50px;">`,
+            iconSize: [100, 60],
+            iconAnchor: [15, 40],
+            popupAnchor: [0, -40]
+        })
+    }
 </script>
 
 <style scoped>
