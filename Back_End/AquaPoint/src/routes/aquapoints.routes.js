@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { getAllAquapoints, getAquaPointById, getUserFavoritePoints, createAquapoint, updateAquapoint, changeAquapointState, deleteAquapoint } from "../controllers/aquapoints.controller.js";
+import { getAllAquapoints, getAquaPointById, getUserFavoritePoints, getCountPendingAquapoints, getPendingPoints, createAquapoint, updateAquapoint, changeAquapointState, deleteAquapoint } from "../controllers/aquapoints.controller.js";
 
 const router = Router();
 
-router.get("/", getAllAquapoints);       
+router.get("/", getAllAquapoints);    
+router.get("/pending-points", getPendingPoints);    
+router.get("/pending-points-count", getCountPendingAquapoints);
 router.get("/:id", getAquaPointById);  
 router.get("/user/:id/favorites", getUserFavoritePoints);
 router.post("/", createAquapoint);

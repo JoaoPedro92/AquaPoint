@@ -37,7 +37,7 @@ export async function getAquaPointById(req, res) {
     const findAquapoint = await findAquapointById(id);
     if(!findAquapoint) return res.status(404).json({ error: `Aquapoint with ID: ${id} not found`});
 
-    res.json(formatPoints(findAquapoint));
+    res.json(findAquapoint.map(formatPoints));
   } catch (err) {
     console.error(err);
     res.status(500).json(err.message);
@@ -56,10 +56,37 @@ export async function getUserFavoritePoints(req, res){
       favoriteUserPoints.map((point) => findAquapointById(point.point_id))
     )
 
-    res.json(formatPoints(favoriteAquapoints))
+    res.json(favoriteAquapoints.map(formatPoints))
   }
   catch(err){
     res.status(500).json({ error: err.message })  
+  }
+}
+
+// GET /aquapoints/pending-points
+export async function getPendingPoints(req, res){
+  try{
+    
+    const [rows] = await returnAllAquapoints()
+    const pendingPoints = rows.filter(ap => ap.state_id === 3);
+
+    res.json(pendingPoints.map(formatPoints))
+  }
+  catch(err){
+    res.status(500).json({ error: err.message })  
+  }
+}
+
+// GET /aquapoints/pending-points-count
+export async function getCountPendingAquapoints(req, res){
+  try{
+    const [rows] = await pool.query(
+      `SELECT count(*) as total_pending FROM aqua_points WHERE state_id = 3`
+    )
+    res.json(rows[0])
+  }
+  catch(err){
+    res.status(500).json({ error: err.message })
   }
 }
 

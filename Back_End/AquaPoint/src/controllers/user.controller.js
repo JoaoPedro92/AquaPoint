@@ -34,7 +34,6 @@ export async function getUserProfilePicture(req, res){
 }
 
 
-
 // POST /users
 export async function createUser(req, res) {
   const { name, email, dateBirth, city, profilePicture, password, isAdmin } = req.body
@@ -70,7 +69,7 @@ export async function comparePasswords(req, res){
   res.json({ isValid })
 }
 
-// PUT /users/{id}  - Doesn't change password neither isAdmin (there is another endpoint to change those)
+// PUT /users/{id}  - Doesn't change isAdmin (there is another endpoint to change these)
 export async function updateUser(req, res) {
   const userId = Number(req.params.id)
   
