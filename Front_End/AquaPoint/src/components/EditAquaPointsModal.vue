@@ -28,21 +28,39 @@
                                     <div class="col-md-6"> 
                                         <div class="form-group">
                                             <label class="label" for="state">Estado do bebedouro</label>
-                                            <select v-model="stateValue" class="form-control edit-form" name="state" id="state" required>
-                                                
-                                                <option value="1">Ativo</option>
-                                                <option value="2">Inativo</option>
-                                                <option value="3">Pendente</option>
-                                            </select>
+                                            <v-select v-model="stateValue" :options="allStates" label="state_name" :reduce="state => state.id" placeholder="Seleciona um estado">
+                                                <template #option="option">
+                                                    <i class="bi bi-check-circle-fill text-success me-2"></i>{{ option.state_name }}
+                                                </template>
+                                                <template #selected-option="option">
+                                                    <i class="me-2" :class="{
+                                                    'bi bi-check-circle-fill text-success': option.state_name === 'Funcional',
+                                                    'bi bi-clock-fill text-warning': option.state_name === 'Pendente',
+                                                    'bi bi-slash-circle-fill text-danger': option.state_name === 'Inativo'
+                                                    }"></i>
+                                                    {{ option.state_name }}
+                                                </template>
+                                            </v-select>
+                                            
                                         </div>
                                     </div>
                                     
                                     <div class="col-md-6" style="margin-top: 1vh;">
                                         <div class="form-group">
                                             <label class="label" for="trust">Nível de confiança</label>
-                                            <select v-model="trustValue" class="form-control edit-form" name="trust" id="trust" required>
-                                                <option v-for="trust in allTrustLevels" :value="trust.id">{{ trust.trust_name }}</option>
-                                            </select>
+                                            <v-select v-model="trustValue" :options="allTrustLevels" label="trust_name" :reduce="trust => trust.id" placeholder="Seleciona um nivel">
+                                                <template #option="option">
+                                                    <i class="bi bi-check-circle-fill text-success me-2"></i>{{ option.trust_name }}
+                                                </template>
+                                                <template #selected-option="option">
+                                                    <i class="me-2" :class="{
+                                                    'bi bi-check-circle-fill text-success': option.trust_name === 'Alta',
+                                                    'bi bi-clock-fill text-warning': option.trust_name === 'Média',
+                                                    'bi bi-slash-circle-fill text-danger': option.trust_name === 'Baixa'
+                                                    }"></i>
+                                                    {{ option.trust_name }}
+                                                </template>
+                                            </v-select>
                                         </div>
                                     </div>
                                     
@@ -96,7 +114,10 @@
     import { localsService } from '../services/localsService'
     import { zonesService } from '../services/zonesService'  
     import { trustLevelService } from '../services/trustLevelsService'
+    import { statesService } from '../services/statesService'
     import { useToast } from 'vue-toastification';
+    import vSelect from 'vue3-select'
+    import 'vue3-select/dist/vue3-select.css'
 
     const toast = useToast()
     const fileInput = ref(null)
@@ -124,6 +145,7 @@
     const stateValue = ref('')
     const trustValue = ref('')
     const allTrustLevels = ref(null)
+    const allStates = ref(null)
     const latitudeValue = ref('')
     const longitudeValue = ref('')
     const localValue = ref('')
@@ -135,6 +157,7 @@
 
     onMounted(async () => {
         allTrustLevels.value = (await trustLevelService.getAll()).data
+        allStates.value = (await statesService.getAll()).data
     })
 
     watch(
