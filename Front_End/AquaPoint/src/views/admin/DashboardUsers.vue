@@ -39,14 +39,16 @@
         </div>
 
         <!-- Desktop: Users table-->
-        <table class="d-none d-md-table w-100 table table-striped table-hover mt-3">
+        <table class="d-none d-md-table table table-striped table-hover mt-3">
             <thead>
                 <tr>
                 <th scope="col" class="text-center">Imagem Perfil</th>
                 <th scope="col">Nome</th>
                 <th scope="col">Email</th>
-                <th scope="col" style="padding-right: 40px;">Função</th>
-                <th scope="col" class="text-center">Opções</th>
+                <th scope="col">Função</th>
+                <th scope="col" class="text-center" style="width:380px">
+                    <i class="bi bi-gear me-1"></i>Opções
+                </th>
                 </tr>
             </thead>
             <tbody>
@@ -55,7 +57,7 @@
                     <td>{{ user.name }}</td>
                     <td>{{ user.email }}</td>
                     <td>{{ user.isAdmin ? 'Admin' : 'User' }}</td>
-                    <td class="text-start pe-0" style="width: 30%;">
+                    <td class="text-start ps-5">
                         <button class="btn btn-sm btn-primary mt-1 me-2" @click="editUser(user)">Editar</button>
                         <button class="btn btn-sm btn-danger mt-1 me-2" @click="selectedUser = user"  data-bs-toggle="modal" data-bs-target="#deleteUserModal">Eliminar</button>
                         <button v-if="!user.isAdmin" class="btn btn-sm btn-success mt-1" @click="markUserAsAdmin(user.id, user.isAdmin)">Marcar como Admin</button>
