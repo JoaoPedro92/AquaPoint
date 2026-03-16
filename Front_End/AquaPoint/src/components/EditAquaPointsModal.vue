@@ -11,21 +11,9 @@
 
                     <div class="row">
                         <div class="col-lg-6 mt-5 mt-lg-0">
-                            <img
-                                :src="newAquapointImage"
-                                alt="defaultPointImage"
-                                class="edit-zone-image"
-                                @click="openFileInput"
-                                style="cursor:pointer"
-                            >
+                            <img :src="newAquapointImage" alt="defaultPointImage" class="edit-zone-image" @click="openFileInput" :style="{ cursor: props.viewOnly ? 'default' : 'pointer' }">
 
-                            <input
-                                type="file"
-                                ref="fileInput"
-                                style="display:none"
-                                @change="onFileChange"
-                                accept="image/*"
-                            >
+                            <input v-if="!viewOnly" type="file" ref="fileInput" style="display:none" @change="onFileChange" accept="image/*">
                         </div>
                        
                         <div class="col-lg-6">
@@ -81,7 +69,7 @@
                                     </div>
 
                                     
-                                    <div class="col-md-12">
+                                    <div v-if="!viewOnly" class="col-md-12">
                                         <div class="form-group">
                                             <input type="submit" value="Submeter" class="btn btn-form bg-primary" style="width: 100% !important; height: 40px !important; margin-top: 4%; color: white;" tabindex="0">
                                         </div>
@@ -117,6 +105,10 @@
 
     const props = defineProps({
         visible: {
+            type: Boolean,
+            default: false
+        },
+        viewOnly: {
             type: Boolean,
             default: false
         },
@@ -205,25 +197,27 @@
             const map = mapaRef.value
             if (!map) return
 
-            const { lat, lng } = e.latlng
+            if(!props.viewOnly){
+                const { lat, lng } = e.latlng
 
-            latitudeValue.value = lat
-            longitudeValue.value = lng
+                latitudeValue.value = lat
+                longitudeValue.value = lng
 
-            if (marker) {
-                marker.setLatLng([lat, lng])
-            } else {
-                marker = L.marker([lat, lng]).addTo(map)
+                if (marker) {
+                    marker.setLatLng([lat, lng])
+                } else {
+                    marker = L.marker([lat, lng]).addTo(map)
+                }
+
+                map.setView([lat, lng], 16, { animate: false })
+
+                const localData = await GetPlaceDataByCoords(lat, lng)
+
+                if (!mapaRef.value || mapaRef.value !== map) return
+
+                localValue.value = localData.zone
+                marker.bindPopup(localValue.value || 'Bebedouro').openPopup()
             }
-
-            map.setView([lat, lng], 16, { animate: false })
-
-            const localData = await GetPlaceDataByCoords(lat, lng)
-
-            if (!mapaRef.value || mapaRef.value !== map) return
-
-            localValue.value = localData.zone
-            marker.bindPopup(localValue.value || 'Bebedouro').openPopup()
         })
 
         setTimeout(() => {

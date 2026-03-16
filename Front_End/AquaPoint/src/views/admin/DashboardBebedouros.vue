@@ -9,8 +9,7 @@
         <div v-else>
             <button v-if="!showPendingOnly" type="button" class="btn btn-warning mb-4"
                 @click="showPendingAquapoints">({{ pendingPointsCount }}) Bebedouros Pendentes</button>
-            <button v-else type="button" class="btn btn-warning mb-4" @click="showNotPendingAquapoints">({{
-                pendingPointsCount }}) Todos Bebedouros</button>
+            <button v-else type="button" class="btn btn-warning mb-4" @click="showNotPendingAquapoints">Todos Bebedouros</button>
 
             <!-- Mobile: Cards -->
             <div class="d-md-none d-flex flex-column gap-3">
@@ -24,8 +23,7 @@
                             <p class="text-muted mb-0" style="font-size: 12px;">{{ aquapoint.type_name }}</p>
                         </div>
                         <span class="badge rounded-2 text-nowrap" :style="pointStateStyles(aquapoint.state_name)">
-                            <i v-if="aquapoint.state_id == '1'" class="bi bi-exclamation-triangle-fill text-warning"></i>
-                            <i v-else-if="aquapoint.state_id == '3'" class="bi bi-clock"></i>
+                            <i :class="pointStateIcon(aquapoint.state_name)"></i>
                             {{ aquapoint.state_name }}
                         </span>
                     </div>
@@ -57,7 +55,7 @@
                         <div v-if="!showPendingOnly">
                             <button @click="editAquaPoint(aquapoint)"
                                 class="btn btn-sm btn-primary flex-fill me-2">Editar</button>
-                            <button @click="deleteAquapoint(aquapoint.id)" class="btn btn-sm btn-danger flex-fill me-2">
+                            <button @click="selectedAquaPoint = aquapoint"  data-bs-toggle="modal" data-bs-target="#deleteAquapointModal" class="btn btn-sm btn-danger flex-fill me-2">
                                 Eliminar
                             </button>
                             <button @click="changePointState(aquapoint)" class="btn btn-sm flex-fill text-white me-2" :class="{
@@ -90,7 +88,9 @@
                     <th scope="col">Nº Reviews</th>
                     <th scope="col">Estado</th>
                     <th scope="col">Credibilidade</th>
-                    <th scope="col" class="text-center">Opções</th>
+                    <th scope="col" class="text-center">
+                        <i class="bi bi-gear me-1"></i>Opções
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -103,20 +103,32 @@
                     <td>{{ aquapoint.point_type }}</td>
                     <td class="text-center">{{ aquapoint.ratingAVG || 0.0 }}</td>
                     <td class="text-center">{{ aquapoint.ratingsAmount }}</td>
-                    <td>{{ aquapoint.state_name }}</td>
+                    <td>
+                        <span class="badge rounded-2 text-nowrap" :style="pointStateStyles(aquapoint.state_name)">
+                            <i :class="pointStateIcon(aquapoint.state_name)"></i>
+                            {{ aquapoint.state_name }}
+                        </span>
+                    </td>
                     <td>{{ aquapoint.trust_name }}</td>
+
+                    <!-- Options Buttons -->
                     <td class="text-center">
                         <div v-if="showPendingOnly">
+                            <button class="btn btn-sm btn-secondary mt-1 me-2" @click="editAquaPoint(aquapoint, true)">
+                                <i class="bi bi-search me-1"></i>Ver
+                            </button>
                             <button class="btn btn-sm btn-success mt-1 me-2"
-                                @click="acceptPendingPoint(aquapoint)">Aceitar</button>
+                                @click="acceptPendingPoint(aquapoint)">
+                                <i class="bi bi-check2 me-1"></i>Aceitar</button>
                             <button class="btn btn-sm btn-danger mt-1 me-2"
-                                @click="declinePendingPoint(aquapoint.id)">Recusar</button>
+                                @click="declinePendingPoint(aquapoint.id)">
+                                <i class="bi bi-x-lg me-1"></i>Recusar</button>
                         </div>
                         <div v-else>
                             <button class="btn btn-sm btn-primary mt-1 me-2"
                                 @click="editAquaPoint(aquapoint)">Editar</button>
                             <button class="btn btn-sm btn-danger mt-1 me-2"
-                                @click="deleteAquaPoint(aquapoint.id)">Eliminar</button>
+                                @click="selectedAquaPoint = aquapoint"  data-bs-toggle="modal" data-bs-target="#deleteAquapointModal">Eliminar</button>
 
                             <button v-if="aquapoint.state_id == 3 || aquapoint.state_id == 4"
                                 class="btn btn-sm btn-success mt-1" @click="changePointState(aquapoint)">Marcar como
@@ -129,11 +141,29 @@
 
             </tbody>
         </table>
+        <!-- Delete Aquapoints Confirmation Modal -->
+        <div class="modal fade" id="deleteAquapointModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Eliminar Bebedouro</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Tem a certeza que pretende eliminar o bebedouro <strong>"{{ selectedAquaPoint?.point_name }}"</strong>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal" @click="deleteAquaPoint(selectedAquaPoint.id)">Sim</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Não</button>
+            </div>
+            </div>
+        </div>
+        </div>
     </div>
-    <!-- Users table-->
+    <!-- Aquapoints table-->
     </div>
 
-    <EditModal v-model:visible="showEditModal" :aquapoint="selectedAquaPoint"></EditModal>
+    <EditModal v-model:visible="showEditModal" :viewOnly="editAquapointViewOnly" :aquapoint="selectedAquaPoint"></EditModal>
 </template>
 
 <script setup>
@@ -147,6 +177,7 @@ const allAquapoints = ref([])
 const aquapoints = ref([])
 const loading = ref(true)
 const showEditModal = ref(false)
+const editAquapointViewOnly = ref(false)
 const selectedAquaPoint = ref(null)
 const pendingPointsCount = ref(0)
 const showPendingOnly = ref(false)
@@ -164,8 +195,9 @@ async function GetPendingAquaPointsCount() {
     pendingPointsCount.value = (await aquapointService.getPendingCount()).data.total_pending
 }
 
-function editAquaPoint(aquapoint) {
+function editAquaPoint(aquapoint, modalViewOnly = false) {
     selectedAquaPoint.value = { ...aquapoint }
+    editAquapointViewOnly.value = modalViewOnly
     showEditModal.value = true
 }
 
@@ -202,7 +234,8 @@ async function loadAquapoints() {
     loading.value = true
     allAquapoints.value = (await aquapointService.getAll()).data
     pendingPointsCount.value = allAquapoints.value.filter(a => a.state_id === 3).length
-    if(showPendingOnly){ aquapoints.value = allAquapoints.value.filter(a => a.state_id === 3) }
+    console.log(showPendingOnly.value)
+    if(showPendingOnly.value){ aquapoints.value = allAquapoints.value.filter(a => a.state_id === 3) }
     else{ aquapoints.value = allAquapoints.value.filter(a => a.state_id !== 3) }
 
     loading.value = false
@@ -226,6 +259,16 @@ function pointStateStyles(state) {
         'Inativo': { backgroundColor: '#b91c1c', color: '#fee2e2' }
     }
     return styles[state] || {}
+}
+
+function pointStateIcon(state){
+    const icons = {
+        'Necessita manutenção': "bi bi-exclamation-triangle-fill text-warning",
+        'Pendente': "bi bi-clock",
+        'Funcional': "bi bi-check2",
+        'Inativo': "bi bi-slash-circle-fill"
+    }
+    return icons[state] || {}
 }
 
 async function acceptPendingPoint(aquapoint){
