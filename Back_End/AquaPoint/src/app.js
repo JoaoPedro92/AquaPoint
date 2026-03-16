@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.routes.js"
 import localsRoutes from "./routes/locals.routes.js";
 import zonesRoutes from "./routes/zones.routes.js";
 import reviewsRoutes from "./routes/reviews.routes.js";
+import trustlevelsRoutes from "./routes/trustLevels.routes.js"
 
 const app = express();
 
@@ -28,5 +29,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/locals", localsRoutes);
 app.use("/api/zones", zonesRoutes);
 app.use("/api/reviews", reviewsRoutes);
+app.use("/api/trustlevels", trustlevelsRoutes);
 
 export default app;

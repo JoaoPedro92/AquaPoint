@@ -29,6 +29,7 @@
                                         <div class="form-group">
                                             <label class="label" for="state">Estado do bebedouro</label>
                                             <select v-model="stateValue" class="form-control edit-form" name="state" id="state" required>
+                                                
                                                 <option value="1">Ativo</option>
                                                 <option value="2">Inativo</option>
                                                 <option value="3">Pendente</option>
@@ -40,9 +41,7 @@
                                         <div class="form-group">
                                             <label class="label" for="trust">Nível de confiança</label>
                                             <select v-model="trustValue" class="form-control edit-form" name="trust" id="trust" required>
-                                                <option value="2">Existe mas com pouca certeza</option>
-                                                <option value="3">Existe com alguma certeza</option>
-                                                <option value="4">Verificado</option>
+                                                <option v-for="trust in allTrustLevels" :value="trust.id">{{ trust.trust_name }}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -92,10 +91,11 @@
 </template>
 
 <script setup>
-    import { ref, watch, onBeforeUnmount, nextTick } from 'vue'
+    import { ref, onMounted, watch, onBeforeUnmount, nextTick } from 'vue'
     import { aquapointService } from '../services/aquapointService' 
     import { localsService } from '../services/localsService'
     import { zonesService } from '../services/zonesService'  
+    import { trustLevelService } from '../services/trustLevelsService'
     import { useToast } from 'vue-toastification';
 
     const toast = useToast()
@@ -123,6 +123,7 @@
     const nameValue = ref('')
     const stateValue = ref('')
     const trustValue = ref('')
+    const allTrustLevels = ref(null)
     const latitudeValue = ref('')
     const longitudeValue = ref('')
     const localValue = ref('')
@@ -131,6 +132,10 @@
     function ChangeVisibility(value) {
         emit('update:visible', value)
     }
+
+    onMounted(async () => {
+        allTrustLevels.value = (await trustLevelService.getAll()).data
+    })
 
     watch(
         () => props.aquapoint,
