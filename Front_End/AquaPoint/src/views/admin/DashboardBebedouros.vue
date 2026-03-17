@@ -22,8 +22,8 @@
                             <p class="fw-medium mb-0 small">{{ aquapoint.point_name }}</p>
                             <p class="text-muted mb-0" style="font-size: 12px;">{{ aquapoint.type_name }}</p>
                         </div>
-                        <span class="badge rounded-2 text-nowrap" :style="pointStateStyles(aquapoint.state_name)">
-                            <i :class="pointStateIcon(aquapoint.state_name)"></i>
+                        <span class="badge rounded-2 text-nowrap" :style="GetPointStateStyles(aquapoint.state_name)">
+                            <i :class="GetPointStateIcon(aquapoint.state_name)"></i>
                             {{ aquapoint.state_name }}
                         </span>
                     </div>
@@ -104,8 +104,8 @@
                     <td class="text-center">{{ aquapoint.ratingAVG || 0.0 }}</td>
                     <td class="text-center">{{ aquapoint.ratingsAmount }}</td>
                     <td>
-                        <span class="badge rounded-2 text-nowrap" :style="pointStateStyles(aquapoint.state_name)">
-                            <i :class="pointStateIcon(aquapoint.state_name)"></i>
+                        <span class="badge rounded-2 text-nowrap" :style="GetPointStateStyles(aquapoint.state_name)">
+                            <i :class="GetPointStateIcon(aquapoint.state_name,)"></i>
                             {{ aquapoint.state_name }}
                         </span>
                     </td>
@@ -171,6 +171,7 @@
 import { ref, onMounted } from 'vue'
 import { useToast } from 'vue-toastification';
 import { aquapointService } from '../../services/aquapointService'
+import { GetPointStateIcon, GetPointStateStyles, GetTrustLevelIcon } from '../../utilities/tools';
 import EditModal from '/src/components/EditAquaPointsModal.vue'
 
 const allAquapoints = ref([])
@@ -249,26 +250,6 @@ async function showPendingAquapoints() {
 async function showNotPendingAquapoints() {
     showPendingOnly.value = false
     aquapoints.value = allAquapoints.value.filter(a => a.state_id !== 3)
-}
-
-function pointStateStyles(state) {
-    const styles = {
-        'Funcional': { backgroundColor: '#166534', color: '#c1ebbc' },
-        'Pendente': { backgroundColor: '#fef9c3', color: '#854d0e' },
-        'Necessita manutenção': { backgroundColor: '#f97316', color: '#ffff' },
-        'Inativo': { backgroundColor: '#b91c1c', color: '#fee2e2' }
-    }
-    return styles[state] || {}
-}
-
-function pointStateIcon(state){
-    const icons = {
-        'Necessita manutenção': "bi bi-exclamation-triangle-fill text-warning",
-        'Pendente': "bi bi-clock",
-        'Funcional': "bi bi-check2",
-        'Inativo': "bi bi-slash-circle-fill"
-    }
-    return icons[state] || {}
 }
 
 async function acceptPendingPoint(aquapoint){

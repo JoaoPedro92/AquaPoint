@@ -22,42 +22,33 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label class="label" for="name">Nome do bebedouro</label>
-                                            <input v-model="nameValue" type="text" class="form-control edit-form" name="name" id="name" placeholder="Nome do bebedouro" tabindex="0" required>
+                                            <input v-model="nameValue" :disabled="viewOnly" type="text" class="form-control edit-form" name="name" id="name" placeholder="Nome do bebedouro" tabindex="0" required>
                                         </div>
                                     </div>
                                     <div class="col-md-6"> 
                                         <div class="form-group">
                                             <label class="label" for="state">Estado do bebedouro</label>
-                                            <v-select v-model="stateValue" :options="allStates" label="state_name" :reduce="state => state.id" placeholder="Seleciona um estado">
+                                            <v-select v-model="stateValue" :options="allStates" :disabled="viewOnly"  label="state_name" :reduce="state => state.id" placeholder="Seleciona um estado">
                                                 <template #option="option">
-                                                    <i class="bi bi-check-circle-fill text-success me-2"></i>{{ option.state_name }}
+                                                    <i class="me-2" :class="GetPointStateIcon(option.state_name, true)"></i>{{ option.state_name }}
                                                 </template>
                                                 <template #selected-option="option">
-                                                    <i class="me-2" :class="{
-                                                    'bi bi-check-circle-fill text-success': option.state_name === 'Funcional',
-                                                    'bi bi-clock-fill text-warning': option.state_name === 'Pendente',
-                                                    'bi bi-slash-circle-fill text-danger': option.state_name === 'Inativo'
-                                                    }"></i>
+                                                    <i :class="GetPointStateIcon(option.state_name, true)" class="me-2"></i>
                                                     {{ option.state_name }}
                                                 </template>
-                                            </v-select>
-                                            
+                                            </v-select>                                            
                                         </div>
                                     </div>
                                     
                                     <div class="col-md-6" style="margin-top: 1vh;">
                                         <div class="form-group">
                                             <label class="label" for="trust">Nível de confiança</label>
-                                            <v-select v-model="trustValue" :options="allTrustLevels" label="trust_name" :reduce="trust => trust.id" placeholder="Seleciona um nivel">
+                                            <v-select v-model="trustValue" :options="allTrustLevels" :disabled="viewOnly" label="trust_name" :reduce="trust => trust.id" placeholder="Seleciona um nivel">
                                                 <template #option="option">
-                                                    <i class="bi bi-check-circle-fill text-success me-2"></i>{{ option.trust_name }}
+                                                    <i class="me-2" :class="GetTrustLevelIcon(option.trust_name)"></i>{{ option.trust_name }}
                                                 </template>
                                                 <template #selected-option="option">
-                                                    <i class="me-2" :class="{
-                                                    'bi bi-check-circle-fill text-success': option.trust_name === 'Alta',
-                                                    'bi bi-clock-fill text-warning': option.trust_name === 'Média',
-                                                    'bi bi-slash-circle-fill text-danger': option.trust_name === 'Baixa'
-                                                    }"></i>
+                                                    <i class="me-2" :class="GetTrustLevelIcon(option.trust_name)"></i>
                                                     {{ option.trust_name }}
                                                 </template>
                                             </v-select>
@@ -116,6 +107,7 @@
     import { trustLevelService } from '../services/trustLevelsService'
     import { statesService } from '../services/statesService'
     import { useToast } from 'vue-toastification';
+    import { GetPointStateIcon, GetTrustLevelIcon } from '../utilities/tools'
     import vSelect from 'vue3-select'
     import 'vue3-select/dist/vue3-select.css'
 
@@ -390,6 +382,8 @@
     onBeforeUnmount(() => {
         DestroyMap()
     })
+
+    
 </script>
 
 <style scoped>
@@ -416,5 +410,9 @@
         position: absolute;
         top: 5px;
         right: 5px;
+    }
+
+    .text-orange {
+        color: #fd7e14;
     }
 </style>
