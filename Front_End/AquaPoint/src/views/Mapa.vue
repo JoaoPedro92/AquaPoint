@@ -30,8 +30,7 @@
                     <i v-if="selectedAquapoint.state_name == 'Inativo'" class="bi bi-exclamation-octagon-fill text-danger ms-2" title="Estado Inativo"></i>
                     <i v-if="selectedAquapoint.state_name == 'Necessita manutenção'" class="bi bi-exclamation-octagon-fill text-warning ms-2" title="Estado Necessita manutenção"></i>
                     <!-- Favorite Button -->
-                    <i :class="isHeartHover ? 'bi bi-heart-fill text-danger': 'bi bi-heart text-danger'"  class="mb-1 ms-2"
-                        v-on:mouseover="isHeartHover = true" v-on:mouseleave="isHeartHover = false" style="font-size: 20px; cursor: pointer"></i>
+                    <i :class="isFavorite ? 'bi bi-heart-fill text-danger': 'bi bi-heart text-danger'"  class="mb-1 ms-2" style="font-size: 20px; cursor: pointer"></i>
                     
                    
                 </div>
@@ -196,6 +195,7 @@
     const reviewText = ref('')
     const selectedAquapoint = ref(null)
     const showAquapointPopup = ref(false)
+    const isFavorite = ref(false)
     const showReportProblemModal = ref(false)
     const showTrustLevelVote = ref(false)
     const AddNewMode = ref(false)
@@ -215,7 +215,6 @@
     const offcanvasClosedBySubmitButton = ref(false)
     const aquapointsList = ref([])
     const localValue = ref('')
-    const isHeartHover = ref(false)
 
     const userFavoritePoints = ref([])
 
@@ -316,6 +315,8 @@
         .addTo(mapaRef.value)
         .on('click', async () => {
             reviews.value = await GetReviewsByPointId(point.id)
+
+            isFavorite.value = userFavoritePoints.value.find(p => p.point_id === point.id)
   
             selectedAquapoint.value = point
             showAquapointPopup.value = true
