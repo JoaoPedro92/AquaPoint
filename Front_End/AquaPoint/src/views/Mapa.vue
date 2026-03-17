@@ -379,8 +379,35 @@
 
         AddNewMode.value = !AddNewMode.value
     }
-    function SubmitReview(){
-        console.log('Rating: ' + newReviewNumber.value + '\nReview: ' + reviewText.value)
+
+    async function SubmitReview(){
+        if (!Auth.isLoggedIn) {
+            loginModal.openLoginModal()
+            return
+        }
+
+        if (reviewText.value.trim() === '') {
+            toast.error('Por favor, escreva um comentário antes de submeter a sua opinião.')
+            return
+        }
+
+        try {
+            await reviewsService.create({
+                user_id: Auth.user.id,
+                point_id: selectedAquapoint.value.id,
+                rating: newReviewNumber.value,
+                comment: reviewText.value
+            })
+
+            toast.success('Obrigado pela sua opinião!')
+
+            // Refresh das reviews para mostrar a nova review submetida
+            reviews.value = await GetReviewsByPointId(selectedAquapoint.value.id)
+
+        } catch (error) {
+            toast.error('Ocorreu um erro ao submeter a sua opinião. Por favor, tente novamente.')
+        }
+        
         newReviewNumber.value = 0
         reviewText.value = ''
     }
