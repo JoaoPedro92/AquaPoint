@@ -20,19 +20,28 @@
             <button class="btn-close" @click="showAquapointPopup = false"></button>
 
             <!-- Imagem Bebedouro e informações -->
-            <img :src="selectedAquapoint.image" width="100%" height="300" alt="Imagem do bebedouro" style=" border-radius: 12px 12px 0 0;">
+            <img :src="selectedAquapoint.image" height="300px" alt="Imagem do bebedouro" style=" border-radius: 12px 12px 0 0; object-fit: fill;">
             
             <br><br>
 
             <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center mt-2">
+                <div class="d-flex align-items-center">
                     <h4>{{ selectedAquapoint.point_name }}</h4>
                     <i v-if="selectedAquapoint.state_name == 'Inativo'" class="bi bi-exclamation-octagon-fill text-danger ms-2" title="Estado Inativo"></i>
                     <i v-if="selectedAquapoint.state_name == 'Necessita manutenção'" class="bi bi-exclamation-octagon-fill text-warning ms-2" title="Estado Necessita manutenção"></i>
+                    <i :class="isHeartHover ? 'bi bi-heart-fill text-danger': 'bi bi-heart text-danger'"  class="mb-1 ms-2"
+                        v-on:mouseover="isHeartHover = true" v-on:mouseleave="isHeartHover = false" style="font-size: 20px; cursor: pointer"></i>
+                    
+                   
                 </div>
-                <!-- Flag Reportar -->
-                <div class="hex-bg">
-                    <i class="bi bi-flag-fill text-white" style="font-size: 0.7rem" title="Reportar" v-on:click="ReportProblem"></i>
+                <!-- Favorito e Flag Reportar -->
+                <div class="d-flex align-items-center gap-2 mb-2">
+                     <a  :href="`https://www.google.com/maps/dir/?api=1&destination=${selectedAquapoint.latitude},${selectedAquapoint.longitude}&travelmode=driving`">
+                        <i class="bi bi-geo-alt-fill text-primary ms-2" style="font-size: 20px; cursor: pointer;"></i>
+                    </a>
+                    <div class="hex-bg">                        
+                        <i class="bi bi-flag-fill text-white" style="font-size: 0.7rem" title="Reportar" v-on:click="ReportProblem"></i>
+                    </div>
                 </div>
                 <!------------------->
             </div>
@@ -204,6 +213,7 @@
     const offcanvasClosedBySubmitButton = ref(false)
     const aquapointsList = ref([])
     const localValue = ref('')
+    const isHeartHover = ref(false)
 
 
     onMounted(async() => {
@@ -524,6 +534,10 @@
         showTrustLevelVote.value = false;
         selectedAquapoint.value = { ... (await aquapointService.getById(selectedAquapoint.value.id)).data }
     }
+
+    function GoToGoogleMaps(){
+        window.open('https://www.google.com/maps/@38.6008316,-9.0898432,14')
+    }
 </script>
 
 <style scoped>
@@ -541,7 +555,7 @@
         background: white;
         padding: 2rem;
         border-radius: 8px;
-        width: 900px;
+        width: 40%;
         max-height: 95%;
         position: relative;
         overflow-y: auto;
