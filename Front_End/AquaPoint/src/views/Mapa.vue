@@ -163,7 +163,7 @@
         </div>
     </div>
 
-    <ReportProblemModal v-model:visible="showReportProblemModal"></ReportProblemModal>
+    <ReportProblemModal v-model:visible="showReportProblemModal" :aquapoint="selectedAquapoint?.id"></ReportProblemModal>
 </template>
 
 <script setup>
