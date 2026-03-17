@@ -37,8 +37,8 @@
                 </div>
                 <!-- Google Maps Directions and Report Flag -->
                 <div class="d-flex align-items-center gap-2 mb-2">
-                     <a  :href="`https://www.google.com/maps/dir/?api=1&destination=${selectedAquapoint.latitude},${selectedAquapoint.longitude}&travelmode=driving`">
-                        <i class="bi bi-geo-alt-fill ms-2" style="font-size: 20px; cursor: pointer; color: var(--aquapoint-marker-blue);"></i>
+                     <a  target="_blank" :href="`https://www.google.com/maps/dir/?api=1&destination=${selectedAquapoint.latitude},${selectedAquapoint.longitude}&travelmode=driving`">
+                        <i class="bi bi-geo-alt-fill ms-2" style="font-size: 20px; cursor: pointer; color: var(--aquapoint-logo-blue);"></i>
                     </a>
                     <div class="hex-bg">                        
                         <i class="bi bi-flag-fill text-white" style="font-size: 0.7rem" title="Reportar" v-on:click="ReportProblem"></i>
@@ -122,7 +122,7 @@
              <br><br>
 
              <textarea v-model="reviewText" class="form-control mt-1" placeholder="Escreve um comentário" id="exampleFormControlTextarea1" rows="4"></textarea>
-             <button class="btn btn-primary mt-3" style="width:100%;" v-on:click="SubmitReview">SUBMETER</button>
+             <button class="btn btn-primary mt-3" style="width:100%; background-color: var(--aquapoint-logo-blue); border: none;" v-on:click="SubmitReview">SUBMETER</button>
              <!---------------------------------->
         </div>
     </div>
@@ -185,6 +185,7 @@
     import { localsService } from '../services/localsService';
     import { zonesService } from '../services/zonesService';
     import { point } from 'leaflet';
+    import { favoriteService } from '../services/favoriteService';
 
     const loginModal = useModalStore()
     const Auth = useAuth()
@@ -215,6 +216,8 @@
     const aquapointsList = ref([])
     const localValue = ref('')
     const isHeartHover = ref(false)
+
+    const userFavoritePoints = ref([])
 
 
     onMounted(async() => {
@@ -253,6 +256,12 @@
             }
         })
 
+        if (Auth.isLoggedIn) {
+            let favorites = await GetUserFavoritePoints()
+            
+            userFavoritePoints.value = favorites || []
+        }
+
         aquapointsList.value = await GetAquapointsList()
         
         if (aquapointsList) {
@@ -279,10 +288,29 @@
             markerColor = 'orange'
         }
 
+        let markerIcon = getMarkerIcon(markerColor)
+
+        if (userFavoritePoints.value.find(p => p.point_id === point.id)) {
+            let image = 'src/assets/images/map-markers/favorite_working.png'
+
+            if (point.state_name == 'Inativo') {
+                image = 'src/assets/images/map-markers/favorite_broken.png'
+            } else if (point.state_name == 'Necessita manutenção') {
+                image = 'src/assets/images/map-markers/favorite_not_working.png'
+            } else {
+                image = 'src/assets/images/map-markers/favorite_working.png'
+            }
+
+            markerIcon = L.icon({
+                iconUrl: image,
+                iconSize: [50, 50],
+            });
+        }
+
         L.marker(
             [point.latitude, point.longitude], 
             { 
-                icon: getMarkerIcon(markerColor) 
+                icon: markerIcon 
             }
         )
         .addTo(mapaRef.value)
@@ -293,6 +321,16 @@
             showAquapointPopup.value = true
             showTrustLevelVote.value = false
         })
+    }
+
+    async function GetUserFavoritePoints(){
+        var favorites = await favoriteService.getByUserId(Auth.user.id)
+
+        if (favorites) {
+            return favorites.data
+        }
+
+        return null
     }
 
     async function GetAquapointsList(){
@@ -534,10 +572,6 @@
 
         showTrustLevelVote.value = false;
         selectedAquapoint.value = { ... (await aquapointService.getById(selectedAquapoint.value.id)).data }
-    }
-
-    function GoToGoogleMaps(){
-        window.open('https://www.google.com/maps/@38.6008316,-9.0898432,14')
     }
 </script>
 
