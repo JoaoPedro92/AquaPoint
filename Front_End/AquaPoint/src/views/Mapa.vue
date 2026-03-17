@@ -47,15 +47,15 @@
 
             <!-- Nivel de Credibilidade -->
             <div class="mt-3">
-                <span style="font-size: 0.8rem">Nivel de Credibilidade</span>
+                <span style="font-size: 0.8rem">Nivel de Credibilidade: <strong>({{ selectedAquapoint.trust_name }})</strong></span>
                 <div class="d-flex">
-                    <div class="progress" style="height: 12px; width: 30%; cursor:pointer;" title="Clicar para votar na credibilidade" v-on:click="VoteTrustLevel">
+                    <div class="progress" style="height: 12px; width: 30%; cursor:pointer;" title="Clicar para votar na credibilidade" v-on:click="ShowVoteTrustLevel">
                         <div 
                             class="progress-bar" 
                             :class="{ 
-                                'bg-orange': selectedAquapoint?.point_trust === 1,
-                                'bg-warning': selectedAquapoint?.point_trust === 2,
-                                'bg-success': selectedAquapoint?.point_trust === 3
+                                'bg-orange': selectedAquapoint?.point_trust === 2,
+                                'bg-warning': selectedAquapoint?.point_trust === 3,
+                                'bg-success': selectedAquapoint?.point_trust === 4
                             }"
                             style="width: 100%;">
                         </div>
@@ -63,10 +63,10 @@
 
                     <div v-if="showTrustLevelVote" class="vote-trustLevelBox">
                         <div class="d-flex gap-2 ms-2">
-                            <button class="btn btn-sm btn-success btn-trustLevelVote">
+                            <button class="btn btn-sm btn-success btn-trustLevelVote" v-on:click="VoteTrustLevel(true)">
                                 <i class="bi bi-hand-thumbs-up-fill me-1"></i>Existe</button>
-                            <button class="btn btn-sm btn-danger btn-trustLevelVote">
-                               <i class="bi bi-hand-thumbs-down-fill me-1"></i>Não Existe</button>
+                            <button class="btn btn-sm btn-danger btn-trustLevelVote" v-on:click="VoteTrustLevel(false)">
+                               <i class="bi bi-hand-thumbs-down-fill me-1" ></i>Não Existe</button>
 
                         </div>
                     </div>
@@ -324,7 +324,7 @@
         showReportProblemModal.value = true
     }
 
-    function VoteTrustLevel(){
+    function ShowVoteTrustLevel(){
         console.log('VoteTrustLevel clicked')
         showTrustLevelVote.value = !showTrustLevelVote.value
     }
@@ -505,6 +505,25 @@
             iconAnchor: [15, 40],
             popupAnchor: [0, -40]
         })
+    }
+
+    async function VoteTrustLevel(vote){
+        if(vote === true){
+            if(selectedAquapoint.value.point_trust < 4){
+                await aquapointService.changeTrustLevel(selectedAquapoint.value.id, { point_trust: selectedAquapoint.value.point_trust + 1 })
+                toast.info('Voto realizado com sucesso. Obrigado pelo contributo.')
+                showTrustLevelVote.value = false;
+                selectedAquapoint.value = { ... (await aquapointService.getById(selectedAquapoint.value.id)).data }
+            }
+        }
+        else{
+            if(selectedAquapoint.value.point_trust > 1){
+                await aquapointService.changeTrustLevel(selectedAquapoint.value.id, { point_trust: selectedAquapoint.value.point_trust - 1 })
+                toast.info('Voto realizado com sucesso. Obrigado pelo contributo.')
+                showTrustLevelVote.value = false;
+                selectedAquapoint.value = { ... (await aquapointService.getById(selectedAquapoint.value.id)).data }
+            }
+        }
     }
 </script>
 

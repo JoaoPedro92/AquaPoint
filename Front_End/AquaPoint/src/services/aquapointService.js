@@ -7,5 +7,6 @@ export const aquapointService = {
   getPendingCount: () => api.get(`/aquapoints/pending-points-count`),
   create: (data) => api.post('/aquapoints', data),
   update: (id, data) => api.put(`/aquapoints/${id}`, data),
+  changeTrustLevel: (id, trustLevel) => api.put(`/aquapoints/${id}/change-trust-level`, trustLevel),
   delete: (id) => api.delete(`/aquapoints/${id}`),
 }
