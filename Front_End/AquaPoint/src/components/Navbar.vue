@@ -54,6 +54,7 @@
                     <li>
                         <router-link to="/user/personal-area" class="dropdown-item">Perfil</router-link>
                     </li>
+                    <li><router-link to="/user/personal-area" class="dropdown-item">Ver Favoritos</router-link></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item text-danger" style="cursor:pointer;" @click="LogoutUser">Logout</a></li>
                 </ul>

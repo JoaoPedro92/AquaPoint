@@ -19,7 +19,7 @@
         <div class="modal-box" @click.stop>
             <button class="btn-close" @click="showAquapointPopup = false"></button>
 
-            <!-- Imagem Bebedouro e informações -->
+            <!-- Aquapoint image and infos -->
             <img :src="selectedAquapoint.image" height="300px" alt="Imagem do bebedouro" style=" border-radius: 12px 12px 0 0; object-fit: fill;">
             
             <br><br>
@@ -29,15 +29,16 @@
                     <h4>{{ selectedAquapoint.point_name }}</h4>
                     <i v-if="selectedAquapoint.state_name == 'Inativo'" class="bi bi-exclamation-octagon-fill text-danger ms-2" title="Estado Inativo"></i>
                     <i v-if="selectedAquapoint.state_name == 'Necessita manutenção'" class="bi bi-exclamation-octagon-fill text-warning ms-2" title="Estado Necessita manutenção"></i>
+                    <!-- Favorite Button -->
                     <i :class="isHeartHover ? 'bi bi-heart-fill text-danger': 'bi bi-heart text-danger'"  class="mb-1 ms-2"
                         v-on:mouseover="isHeartHover = true" v-on:mouseleave="isHeartHover = false" style="font-size: 20px; cursor: pointer"></i>
                     
                    
                 </div>
-                <!-- Favorito e Flag Reportar -->
+                <!-- Google Maps Directions and Report Flag -->
                 <div class="d-flex align-items-center gap-2 mb-2">
                      <a  :href="`https://www.google.com/maps/dir/?api=1&destination=${selectedAquapoint.latitude},${selectedAquapoint.longitude}&travelmode=driving`">
-                        <i class="bi bi-geo-alt-fill text-primary ms-2" style="font-size: 20px; cursor: pointer;"></i>
+                        <i class="bi bi-geo-alt-fill ms-2" style="font-size: 20px; cursor: pointer; color: var(--aquapoint-marker-blue);"></i>
                     </a>
                     <div class="hex-bg">                        
                         <i class="bi bi-flag-fill text-white" style="font-size: 0.7rem" title="Reportar" v-on:click="ReportProblem"></i>
