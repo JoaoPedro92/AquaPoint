@@ -37,7 +37,7 @@ export async function getAquaPointById(req, res) {
     const findAquapoint = await findAquapointById(id);
     if(!findAquapoint) return res.status(404).json({ error: `Aquapoint with ID: ${id} not found`});
 
-    res.json(findAquapoint.map(formatPoints));
+    res.json(formatPoints(findAquapoint));
   } catch (err) {
     console.error(err);
     res.status(500).json(err.message);
@@ -145,6 +145,7 @@ export async function updateAquapoint(req, res) {
     if (typeof image === 'string' && image.startsWith('data:image/')) {
       aquaPointPictureBlob = Buffer.from(image.split(',')[1], 'base64')
     }
+    else{ aquaPointPictureBlob = findAquapoint.image }
 
     const[result] = await pool.query(
       'UPDATE aqua_points set point_name = ?, point_type = ?, point_trust = ?, local_id = ?, state_id = ?, image = ?, latitude = ?, longitude = ? WHERE id = ?',
@@ -161,7 +162,7 @@ export async function updateAquapoint(req, res) {
   }
 }
 
-// PUT /aquapoints/change-state/{id}
+// PUT /aquapoints/{id}/change-state
 export async function changeAquapointState(req, res){
   try{
     const id = Number(req.params.id)
@@ -180,6 +181,37 @@ export async function changeAquapointState(req, res){
     res.json({ message: `Aquapoint '${point_name}' updated successfully` })
   }
   catch(err){
+    res.status(500).json({ error: err.message })
+  }
+}
+
+// PUT /aquapoints/{id}/change-trust-level
+export async function changeTrustLevel(req, res){
+  const pointId = Number(req.params.id)
+
+  try{
+    const findAquapoint = await findAquapointById(pointId)
+    if(!findAquapoint) return res.status(404).json({ error: `Aquapoint not found with id ${pointId}`})
+
+    const { point_trust } = req.body
+
+    const[result] = await pool.query(
+        'UPDATE aqua_points set point_trust = ? WHERE id = ?',
+        [point_trust, findAquapoint.id]
+      )
+
+      if(result.affectedRows === 0) return res.status(500).json({ error: `There was a problem updating the aquapoint with ID: ${findAquapoint.id}`})
+
+      if(point_trust === 1){
+        const[result] = await pool.query(
+          'UPDATE aqua_points set state_id = ? WHERE id = ?',
+          [4, findAquapoint.id]
+        )
+      }
+      res.json({ message: `Aquapoint '${findAquapoint.name}' has changed trust level` })
+  }
+  catch(err){
+    console.log(err)
     res.status(500).json({ error: err.message })
   }
 }
