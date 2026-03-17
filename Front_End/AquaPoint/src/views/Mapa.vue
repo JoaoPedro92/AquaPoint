@@ -512,14 +512,12 @@
             if(selectedAquapoint.value.point_trust < 4){
                 await aquapointService.changeTrustLevel(selectedAquapoint.value.id, { point_trust: selectedAquapoint.value.point_trust + 1 })
                 toast.info('Voto realizado com sucesso. Obrigado pelo contributo.')
-                electedAquapoint.value = { ... (await aquapointService.getById(selectedAquapoint.value.id)).data }
             }
         }
         else{
             if(selectedAquapoint.value.point_trust > 1){
                 await aquapointService.changeTrustLevel(selectedAquapoint.value.id, { point_trust: selectedAquapoint.value.point_trust - 1 })
                 toast.info('Voto realizado com sucesso. Obrigado pelo contributo.')
-                
             }
         }
 
