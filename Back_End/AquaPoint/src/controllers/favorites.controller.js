@@ -58,16 +58,17 @@ export async function createFavorite(req, res){
     }
 }
 
-// DELETE /favorites/{id}
+// DELETE /favorites/{data}
 export async function deleteFavorite(req, res){
 
   try{
     const { user_id, point_id } = req.body
+
     if(!user_id || !point_id) return res.status(400).json({ error: 'All fields are required' })
-    
+
     await pool.query('DELETE FROM favorites WHERE user_id = ? AND point_id = ?', [user_id, point_id])
 
-    res.json({ message: `Favorite '${favorite.id}' was deleted successfully` })
+    res.json({ message: `Favorite deleted successfully` })
   }
   catch(err){
     res.status(500).json({ error: err.message })

@@ -17,7 +17,7 @@
     <!-- Modal detalhes do bebedouro selecionado -->
     <div v-if="showAquapointPopup" class="modal-overlay" @click="showAquapointPopup = false">
         <div class="modal-box" @click.stop>
-            <button class="btn-close" @click="showAquapointPopup = false"></button>
+            <button class="btn-close" @click="CloseAquaPointPopUp()"></button>
 
             <!-- Aquapoint image and infos -->
             <img :src="selectedAquapoint.image" height="300px" alt="Imagem do bebedouro" style=" border-radius: 12px 12px 0 0; object-fit: fill;">
@@ -30,7 +30,7 @@
                     <i v-if="selectedAquapoint.state_name == 'Inativo'" class="bi bi-exclamation-octagon-fill text-danger ms-2" title="Estado Inativo"></i>
                     <i v-if="selectedAquapoint.state_name == 'Necessita manutenção'" class="bi bi-exclamation-octagon-fill text-warning ms-2" title="Estado Necessita manutenção"></i>
                     <!-- Favorite Button -->
-                    <i :class="isFavorite ? 'bi bi-heart-fill text-danger': 'bi bi-heart text-danger'"  class="mb-1 ms-2" style="font-size: 20px; cursor: pointer"></i>
+                    <i :class="isFavorite ? 'bi bi-heart-fill text-danger': 'bi bi-heart text-danger'" v-on:click="ChangeFavoriteState()"  class="mb-1 ms-2" style="font-size: 20px; cursor: pointer"></i>
                     
                    
                 </div>
@@ -216,8 +216,8 @@
     const aquapointsList = ref([])
     const localValue = ref('')
 
+    const selectedMarker = ref(null)
     const userFavoritePoints = ref([])
-
 
     onMounted(async() => {
         // Inicializa o offcanvas das informações no momento de adicionar um novo bebedouro
@@ -261,15 +261,7 @@
             userFavoritePoints.value = favorites || []
         }
 
-        aquapointsList.value = await GetAquapointsList()
-        
-        if (aquapointsList) {
-            aquapointsList.value.forEach(point => {
-                if (point.state_name != "Pendente") {
-                    AddMarkerToMap(point)
-                }
-            })
-        }
+        SetUpAquapointsOnMap()
     })
 
     // Fica a aguardar que a variavel modoAdicionar altere e reaja à mudança mudando o tipo de cursor
@@ -279,6 +271,26 @@
     })
 
     function AddMarkerToMap(point){
+        const marker = L.marker(
+            [point.latitude, point.longitude], 
+            { 
+                icon: GetAquapointMarker(point) 
+            }
+        )
+        .addTo(mapaRef.value)
+        .on('click', async () => {
+            reviews.value = await GetReviewsByPointId(point.id)
+
+            isFavorite.value = userFavoritePoints.value.find(p => p.point_id === point.id)
+  
+            selectedMarker.value = marker
+            selectedAquapoint.value = point
+            showAquapointPopup.value = true
+            showTrustLevelVote.value = false
+        })
+    }
+
+    function GetAquapointMarker(point) {
         var markerColor = 'var(--aquapoint-marker-blue)'
 
         if (point.state_name == 'Inativo') {
@@ -306,21 +318,14 @@
             });
         }
 
-        L.marker(
-            [point.latitude, point.longitude], 
-            { 
-                icon: markerIcon 
-            }
-        )
-        .addTo(mapaRef.value)
-        .on('click', async () => {
-            reviews.value = await GetReviewsByPointId(point.id)
+        return markerIcon;
+    }
 
-            isFavorite.value = userFavoritePoints.value.find(p => p.point_id === point.id)
-  
-            selectedAquapoint.value = point
-            showAquapointPopup.value = true
-            showTrustLevelVote.value = false
+    function ClearMapMarkers() {
+        mapaRef.value.eachLayer((layer) => {
+            if (layer instanceof L.Marker) {
+                mapaRef.value.removeLayer(layer)
+            }
         })
     }
 
@@ -354,6 +359,18 @@
         return null
     }
 
+    async function SetUpAquapointsOnMap() {
+        aquapointsList.value = await GetAquapointsList()
+        
+        if (aquapointsList) {
+            aquapointsList.value.forEach(point => {
+                if (point.state_name != "Pendente") {
+                    AddMarkerToMap(point)
+                }
+            })
+        }
+    }
+
     function AddOrCancelMarkerClick(){
         if(!Auth.isLoggedIn){
             loginModal.openLoginModal()
@@ -372,6 +389,15 @@
         console.log('Report Problem clicked')
 
         showReportProblemModal.value = true
+    }
+
+    async function CloseAquaPointPopUp(){
+        showAquapointPopup.value = false
+        isFavorite.value = false
+
+        /// funciona mas dá um pequeno delay e um efeito estranho de os marcadores desaparecerem e voltarem a aparecer, por isso optei por não limpar os marcadores ao fechar o popup
+        /*ClearMapMarkers()
+        SetUpAquapointsOnMap()*/
     }
 
     function ShowVoteTrustLevel(){
@@ -408,6 +434,33 @@
         }
         reader.readAsDataURL(file)
         
+    }
+
+    async function ChangeFavoriteState(){
+        if (!Auth.isLoggedIn) {
+            loginModal.openLoginModal()
+            return
+        }
+
+        if (isFavorite.value) {
+            await favoriteService.delete({ user_id: Auth.user.id, point_id: selectedAquapoint.value.id })
+            toast.info('Bebedouro removido dos favoritos.')
+        } else {
+            await favoriteService.create({ user_id: Auth.user.id, point_id: selectedAquapoint.value.id })
+            toast.success('Bebedouro adicionado aos favoritos.') 
+        }
+
+        isFavorite.value = !isFavorite.value
+
+        if (Auth.isLoggedIn) {
+            let favorites = await GetUserFavoritePoints()
+            
+            userFavoritePoints.value = favorites || []
+        }
+
+        if (selectedMarker.value) {
+            selectedMarker.value.setIcon(GetAquapointMarker(selectedAquapoint.value))
+        }
     }
 
     async function SubmitNewAquapoint(){
