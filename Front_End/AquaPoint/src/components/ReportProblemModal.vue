@@ -7,18 +7,18 @@
                 <div class="hex-bg mb-1 me-2">
                     <i class="bi bi-flag-fill text-white" style="font-size: 0.7rem" title="Reportar" v-on:click="ReportProblem"></i>
                 </div>
-                <h5>Report Problem</h5>
+                <h5>Reportar Problema</h5>
             </div>
-            
+            <br>
 
-            <div class="form-floating mb-3 mt-4">
+            <!--<div class="form-floating mb-3 mt-4">
                 <input v-model="userEmail" type="email" class="form-control" :class="{ 'is-invalid': errors.email }" id="floatingInput" placeholder="name@example.com">
                 <label for="floatingInput">Email</label>
                 <div class="invalid-feedback">{{  errors.email }}</div>
-            </div>
+            </div>-->
             <div class="form-floating">
                 <textarea v-model="reportDescription" class="form-control" :class="{ 'is-invalid': errors.description}" id="floatingPassword" placeholder="Descrição" rows="6" style="min-height: 150px;"></textarea>
-                <label for="floatingPassword">Descrição</label>
+                <label for="floatingPassword">Dê-nos mais informações</label>
                 <div class="invalid-feedback">{{  errors.description }}</div>
             </div>
 
@@ -30,20 +30,37 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useFormValidation } from '../utilities/useFormValidation'
+    import { ref, watch } from 'vue'
+    import { useFormValidation } from '../utilities/useFormValidation'
+    import { reportsService } from '../services/reportsService';
+    import { useAuth } from '../utilities/useAuth';
+    import { useToast } from 'vue-toastification';
 
-const { errors, validate, validateEmail, clearErrors } = useFormValidation()
-const userEmail = ref('')
-const reportDescription = ref('')
+    const { errors, validate, validateEmail, clearErrors } = useFormValidation()
+    //const userEmail = ref('')
+    const reportDescription = ref('')
+    const Auth = useAuth()
+    const toast = useToast()
+    const pointId = ref(null)
 
-
-    defineProps({
+    const props = defineProps({
         visible: {
             type: Boolean,
             default: false
+        },
+        aquapoint: {
+            type: Number,
+            default: null
         }
     })
+
+    watch(
+        () => props.aquapoint,
+        (newValue) => {
+            pointId.value = newValue ?? null
+        },
+        { immediate: true }
+    )
 
     const emit = defineEmits(['update:visible'])
 
@@ -51,45 +68,70 @@ const reportDescription = ref('')
         emit('update:visible', value)
     }
 
-    function ReportProblem(){
+    async function ReportProblem(){
         clearErrors()
-        const emailError = validateEmail(userEmail.value)
-        if(emailError) errors.value.email = emailError
+        //const emailError = validateEmail(userEmail.value)
+       // if(emailError) errors.value.email = emailError
 
         const isValid = validate({
             description: reportDescription.value
         })
 
-        if(!isValid || emailError) return
+        //if(!isValid || emailError) return
+        if(!isValid) return
 
-        console.log(`Email: ${userEmail.value}\nDescrição: ${reportDescription.value}`)
+        if (!Auth.isLoggedIn) {
+            loginModal.openLoginModal()
+            return
+        }
+
+        if (!pointId.value) {
+            toast.error('Ponto de água não identificado. Por favor, tente novamente.')
+            return
+        }
+
+        try {
+            await reportsService.create({
+                user_id: Auth.user.id,
+                point_id: pointId.value,
+                comment: reportDescription.value
+            })
+
+            toast.success('Report enviado com sucesso!')
+
+            ChangeVisibility(false)
+        } catch (error) {
+            toast.error('Ocorreu um erro ao submeter o seu report. Por favor, tente novamente.')
+        }
+
+        //console.log(`Email: ${userEmail.value}\nDescrição: ${reportDescription.value}`)
     }
 </script>
 
 <style scoped>
-.modal-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-.modal-box {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    width: 550px;
-    max-height: 95%;
-    position: relative;
-    overflow-y: auto;
-}
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    .modal-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 550px;
+        max-height: 95%;
+        position: relative;
+        overflow-y: auto;
+    }
 
-.btn-close {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-}
+    .btn-close {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+    }
 </style>

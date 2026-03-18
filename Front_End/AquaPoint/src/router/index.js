@@ -12,6 +12,7 @@ import Dashboard from '../views/admin/Dashboard.vue'
 import AdminUsers from '../views/admin/DashboardUsers.vue'
 import AdminBebedouros from '../views/admin/DashboardBebedouros.vue'
 import AreaPessoal from '../views/AreaPessoal.vue'
+import { useAuth } from '../utilities/useAuth'
 
 const routes = [
     { path: '/', component: Home },
@@ -22,17 +23,17 @@ const routes = [
     { 
         path: '/admin/dashboard', 
         component: Dashboard,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, requiresAdmin: true }
     },
     { 
         path: '/admin/dashboard-users', 
         component: AdminUsers,
-        meta: { requiresAuth: false }
+        meta: { requiresAuth: true, requiresAdmin: true }
     },
     { 
         path: '/admin/dashboard-bebedouros', 
         component: AdminBebedouros,
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, requiresAdmin: true }
     },
     { 
         path: '/user/personal-area', 
@@ -46,12 +47,18 @@ const router = createRouter({
     routes
 })
 
-router.beforeEach((to, from, next) => {
-    if (to.meta.requiresAuth && !localStorage.getItem('token')) {
-        next('/');
-    } else {
-        next();
+router.beforeEach((to) => {
+    const Auth = useAuth()
+
+    if (to.meta.requiresAuth && !Auth.isLoggedIn) {
+       return { path: '/' }
+    } 
+
+    if(to.meta.requiresAdmin && !Auth.isAdmin){
+        return { path: '/', query: { error: 'acesso-negado' } }
     }
+
+    return true
 })
 
 export default router

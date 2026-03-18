@@ -54,6 +54,7 @@
                     <li>
                         <router-link to="/user/personal-area" class="dropdown-item">Perfil</router-link>
                     </li>
+                    <li><router-link to="/user/personal-area" class="dropdown-item">Ver Favoritos</router-link></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item text-danger" style="cursor:pointer;" @click="LogoutUser">Logout</a></li>
                 </ul>
@@ -68,11 +69,13 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import LoginModal from './LoginModal.vue';
 import { useAuth } from '../utilities/useAuth';
 import { useModalStore } from '../utilities/modal';
 
 const loginModal = useModalStore()
+const router = useRouter()
 const Auth = useAuth()
 const loginModalVisible = ref(false)
 const showUserMenu = ref(false)
@@ -80,6 +83,7 @@ const showUserMenu = ref(false)
 function LogoutUser(){
     try{
         Auth.logout()
+        router.push('/')
     }
     catch (e){
         alert(e)

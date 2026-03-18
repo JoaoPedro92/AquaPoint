@@ -1,7 +1,7 @@
 <template>
     <template v-if="isReadonly === true">
         <span v-for="n in 5" :key="n">
-            <i :class="n <= rating ? 'bi bi-star-fill text-warning ms-1' : 'bi bi-star ms-1'"></i>
+            <i :class="n <= rating ? 'bi bi-star-fill text-warning ms-1' : 'bi bi-star ms-1 text-warning'"></i>
         </span>
     </template>
     <template v-else>

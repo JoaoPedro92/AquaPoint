@@ -7,7 +7,7 @@ import { findFavoritesByUserId } from "./favorites.controller.js";
 export async function getAllAquapoints(req, res) {
   try {
     const [rows] = await returnAllAquapoints();
-    res.json(rows);
+    res.json(rows.map(formatPoints));
   } catch (err) {
     console.error(err);
     res.status(500).json(err);
@@ -37,7 +37,7 @@ export async function getAquaPointById(req, res) {
     const findAquapoint = await findAquapointById(id);
     if(!findAquapoint) return res.status(404).json({ error: `Aquapoint with ID: ${id} not found`});
 
-    res.json(findAquapoint);
+    res.json(formatPoints(findAquapoint));
   } catch (err) {
     console.error(err);
     res.status(500).json(err.message);
@@ -55,26 +55,59 @@ export async function getUserFavoritePoints(req, res){
     const favoriteAquapoints = await Promise.all(
       favoriteUserPoints.map((point) => findAquapointById(point.point_id))
     )
-
-    res.json(favoriteAquapoints)
+    
+    res.json(favoriteAquapoints.map(formatPoints))
   }
   catch(err){
     res.status(500).json({ error: err.message })  
   }
 }
 
+// GET /aquapoints/pending-points
+export async function getPendingPoints(req, res){
+  try{
+    
+    const [rows] = await returnAllAquapoints()
+    const pendingPoints = rows.filter(ap => ap.state_id === 3);
+
+    res.json(pendingPoints.map(formatPoints))
+  }
+  catch(err){
+    res.status(500).json({ error: err.message })  
+  }
+}
+
+// GET /aquapoints/pending-points-count
+export async function getCountPendingAquapoints(req, res){
+  try{
+    const [rows] = await pool.query(
+      `SELECT count(*) as total_pending FROM aqua_points WHERE state_id = 3`
+    )
+    res.json(rows[0])
+  }
+  catch(err){
+    res.status(500).json({ error: err.message })
+  }
+}
+
 // POST /aquapoints
 export async function createAquapoint(req, res){
-  const { point_name, point_type, point_trust, local_id, state_id, image, latitude, longitude } = req.body;
+  const { point_name, image, point_type, point_trust, local_id, state_id, latitude, longitude } = req.body;
 
-  if(!point_name || !point_type || !point_trust || !local_id || !state_id || !latitude || !longitude){
+  if(!point_name || !image || !point_type || !point_trust || !local_id || !state_id || !latitude || !longitude){
     return res.status(400).json({ error: 'All fields are required' })
+  }
+
+  let aquaPointPictureBlob = null
+
+  if (typeof image === 'string' && image.startsWith('data:image/')) {
+    aquaPointPictureBlob = Buffer.from(image.split(',')[1], 'base64')
   }
 
   try{
     const[result] = await pool.query(
-      'INSERT INTO aqua_points (point_name, point_type, point_trust, local_id, state_id, image, latitude, longitude) VALUES(?, ?, ?, ?, ?, ?, ?, ?)',
-      [point_name, point_type, point_trust, local_id, state_id, image, latitude, longitude]
+      'INSERT INTO aqua_points (point_name, image, point_type, point_trust, local_id, state_id, latitude, longitude) VALUES(?, ?, ?, ?, ?, ?, ?, ?)',
+      [point_name, aquaPointPictureBlob, point_type, point_trust, local_id, state_id, latitude, longitude]
     )
 
     res.status(201).json({ message: 'Aquapoint created successfully' })
@@ -103,9 +136,20 @@ export async function updateAquapoint(req, res) {
     const latitude = req.body.latitude ?? findAquapoint.latitude;
     const longitude = req.body.longitude ?? findAquapoint.longitude;
 
+    if(!point_name || !point_type || !point_trust || !local_id || !state_id || !latitude || !longitude || !image){
+      return res.status(400).json({ error: 'All fields are required' })
+    }
+
+    let aquaPointPictureBlob = null
+
+    if (typeof image === 'string' && image.startsWith('data:image/')) {
+      aquaPointPictureBlob = Buffer.from(image.split(',')[1], 'base64')
+    }
+    else{ aquaPointPictureBlob = findAquapoint.image }
+
     const[result] = await pool.query(
       'UPDATE aqua_points set point_name = ?, point_type = ?, point_trust = ?, local_id = ?, state_id = ?, image = ?, latitude = ?, longitude = ? WHERE id = ?',
-      [point_name, point_type, point_trust, local_id, state_id, image, latitude, longitude, findAquapoint.id]
+      [point_name, point_type, point_trust, local_id, state_id, aquaPointPictureBlob, latitude, longitude, findAquapoint.id]
     )
 
     if(result.affectedRows === 0) return res.status(500).json({ error: `There was a problem updating the aquapoint with ID: ${findAquapoint.id}`})
@@ -118,7 +162,7 @@ export async function updateAquapoint(req, res) {
   }
 }
 
-// PUT /aquapoints/change-state/{id}
+// PUT /aquapoints/{id}/change-state
 export async function changeAquapointState(req, res){
   try{
     const id = Number(req.params.id)
@@ -137,6 +181,37 @@ export async function changeAquapointState(req, res){
     res.json({ message: `Aquapoint '${point_name}' updated successfully` })
   }
   catch(err){
+    res.status(500).json({ error: err.message })
+  }
+}
+
+// PUT /aquapoints/{id}/change-trust-level
+export async function changeTrustLevel(req, res){
+  const pointId = Number(req.params.id)
+
+  try{
+    const findAquapoint = await findAquapointById(pointId)
+    if(!findAquapoint) return res.status(404).json({ error: `Aquapoint not found with id ${pointId}`})
+
+    const { point_trust } = req.body
+
+    const[result] = await pool.query(
+        'UPDATE aqua_points set point_trust = ? WHERE id = ?',
+        [point_trust, findAquapoint.id]
+      )
+
+      if(result.affectedRows === 0) return res.status(500).json({ error: `There was a problem updating the aquapoint with ID: ${findAquapoint.id}`})
+
+      if(point_trust === 1){
+        const[result] = await pool.query(
+          'UPDATE aqua_points set state_id = ? WHERE id = ?',
+          [4, findAquapoint.id]
+        )
+      }
+      res.json({ message: `Aquapoint '${findAquapoint.name}' has changed trust level` })
+  }
+  catch(err){
+    console.log(err)
     res.status(500).json({ error: err.message })
   }
 }
@@ -168,7 +243,7 @@ async function returnAllAquapoints(){
         l.local_name,
         z.zone_name,
         trust.trust_name,
-        AVG(r.rating) AS ratingAVG,
+        ROUND(AVG(r.rating), 1) AS ratingAVG,
         COUNT(r.id) AS ratingsAmount
       FROM aqua_points ap
       INNER JOIN states s
@@ -197,7 +272,7 @@ async function findAquapointById(id){
         l.local_name,
         z.zone_name,
         trust.trust_name,
-        AVG(r.rating) AS ratingAVG,
+        ROUND(AVG(r.rating), 1) AS ratingAVG,
         COUNT(r.id) AS ratingsAmount
       FROM aqua_points ap
       LEFT JOIN states s
@@ -220,3 +295,10 @@ async function findAquapointById(id){
   return rows[0];
 }
 
+export function formatPoints(aquaPoint){
+  if(aquaPoint.image){
+    aquaPoint.image = `data:image/jpeg;base64,${aquaPoint.image.toString('base64')}`
+  }
+
+  return aquaPoint
+}

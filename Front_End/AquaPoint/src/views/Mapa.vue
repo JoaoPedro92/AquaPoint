@@ -2,6 +2,11 @@
     <h1>Mapa</h1>
 
     <div style="position: relative">
+        <!-- Loading Spinner while loading markers on map -->
+        <div v-if="loadingMarkers" class="loading-markers-spinner">
+            <img src="/src/assets/images/aqua_point_logo_white.png" class="loading-logo" />
+        </div>
+
         <div id="mapa" style="height: 80vh; width: 100%"></div>
 
         <!-- Botão Adicionar / Cancelar novo bebedouro -->
@@ -17,25 +22,39 @@
     <!-- Modal detalhes do bebedouro selecionado -->
     <div v-if="showAquapointPopup" class="modal-overlay" @click="showAquapointPopup = false">
         <div class="modal-box" @click.stop>
-            <button class="btn-close" @click="showAquapointPopup = false"></button>
+            <button class="btn-close" @click="CloseAquaPointPopUp()"></button>
+            
+            <!-- Aquapoint image and infos -->
+            <div class="text-center">
+                <img :src="selectedAquapoint.image" height="300" width="370" alt="Imagem do bebedouro" class="point-image">
+            </div>
+            <br><br>
 
-            <!-- Imagem Bebedouro e informações -->
-            <img :src="selectedAquapoint.image" width="100%" height="300" alt="Imagem do bebedouro" style=" border-radius: 12px 12px 0 0;">
             <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center mt-2">
-                    <h4>{{ selectedAquapoint.nome }}</h4>
-                    <i v-if="selectedAquapoint.estado === 'Inativo'" class="bi bi-exclamation-octagon-fill text-warning ms-2" title="Estado Inativo"></i>
+                <div class="d-flex align-items-center gap-2">
+                    <h4>{{ selectedAquapoint.point_name }}</h4>
+                    <i v-if="selectedAquapoint.state_name == 'Inativo'" class="bi bi-exclamation-octagon-fill text-danger mb-1" title="Estado Inativo"></i>
+                    <i v-if="selectedAquapoint.state_name == 'Necessita manutenção'" class="bi bi-exclamation-octagon-fill text-warning mb-1" title="Estado Necessita manutenção"></i>
+                    <!-- Favorite Button -->
+                    <i :class="isFavorite ? 'bi bi-heart-fill text-danger': 'bi bi-heart text-danger'" v-on:click="ChangeFavoriteState()"  class="mb-1 ms-2" style="font-size: 20px; cursor: pointer"></i>
+                    
+                   
                 </div>
-                <!-- Flag Reportar -->
-                <div class="hex-bg">
-                    <i class="bi bi-flag-fill text-white" style="font-size: 0.7rem" title="Reportar" v-on:click="ReportProblem"></i>
+                <!-- Google Maps Directions and Report Flag -->
+                <div class="d-flex align-items-center gap-2 mb-2">
+                     <a  :href="`https://www.google.com/maps/dir/?api=1&destination=${selectedAquapoint.latitude},${selectedAquapoint.longitude}&travelmode=walking`" target="_blank">
+                        <i class="bi bi-geo-alt-fill ms-2" style="font-size: 20px; cursor: pointer; color: var(--aquapoint-marker-blue);"></i>
+                    </a>
+                    <div class="hex-bg">                        
+                        <i class="bi bi-flag-fill text-white" style="font-size: 0.7rem" title="Reportar" v-on:click="ReportProblem"></i>
+                    </div>
                 </div>
                 <!------------------->
             </div>
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <i class="bi bi-star-fill text-warning"></i>
-                    <span class="ms-1">{{ selectedAquapoint.ratingAvg}}</span> <span class="ms-1" style="font-size:0.8rem"> - {{selectedAquapoint.nrReviews }} opiniões</span>
+                    <span class="ms-1">{{ selectedAquapoint.ratingAVG|| 0.0}}</span> <span class="ms-1" style="font-size:0.8rem"> - {{selectedAquapoint.ratingsAmount|| 0.0 }} opiniões</span>
                 </div>
                 <span>15min - 3,8km</span>
             </div>
@@ -43,15 +62,15 @@
 
             <!-- Nivel de Credibilidade -->
             <div class="mt-3">
-                <span style="font-size: 0.8rem">Nivel de Credibilidade</span>
+                <span style="font-size: 0.8rem">Nivel de Credibilidade: <strong>({{ selectedAquapoint.trust_name }})</strong></span>
                 <div class="d-flex">
-                    <div class="progress" style="height: 12px; width: 30%; cursor:pointer;" title="Clicar para votar na credibilidade" v-on:click="VoteTrustLevel">
+                    <div class="progress" style="height: 12px; width: 30%; cursor:pointer;" title="Clicar para votar na credibilidade" v-on:click="ShowVoteTrustLevel">
                         <div 
                             class="progress-bar" 
                             :class="{ 
-                                'bg-orange': selectedAquapoint?.point_trust === 1,
-                                'bg-warning': selectedAquapoint?.point_trust === 2,
-                                'bg-success': selectedAquapoint?.point_trust === 3
+                                'bg-orange': selectedAquapoint?.point_trust === 2,
+                                'bg-warning': selectedAquapoint?.point_trust === 3,
+                                'bg-success': selectedAquapoint?.point_trust === 4
                             }"
                             style="width: 100%;">
                         </div>
@@ -59,10 +78,10 @@
 
                     <div v-if="showTrustLevelVote" class="vote-trustLevelBox">
                         <div class="d-flex gap-2 ms-2">
-                            <button class="btn btn-sm btn-success btn-trustLevelVote">
+                            <button class="btn btn-sm btn-success btn-trustLevelVote" v-on:click="VoteTrustLevel(true)">
                                 <i class="bi bi-hand-thumbs-up-fill me-1"></i>Existe</button>
-                            <button class="btn btn-sm btn-danger btn-trustLevelVote">
-                               <i class="bi bi-hand-thumbs-down-fill me-1"></i>Não Existe</button>
+                            <button class="btn btn-sm btn-danger btn-trustLevelVote" v-on:click="VoteTrustLevel(false)">
+                               <i class="bi bi-hand-thumbs-down-fill me-1" ></i>Não Existe</button>
 
                         </div>
                     </div>
@@ -82,17 +101,17 @@
                     <div v-for="review in reviews" :key="review.id">
                         <div class="user-review-card">
                             <div class="d-flex align-items-center">
-                                <img src="/src/assets/images/user_image.png" width="20" height="20" alt="imagem utilizador">
-                                <span class="ms-2">{{ review.userNome }}</span>
-                                <span class="ms-auto" style="font-size:0.8rem">{{ review.createdDate }}</span>
+                                <img :src="review.profilePicture || '/src/assets/images/user_image.png'" width="20" height="20" alt="imagem utilizador" style="background-color: white; border-radius: 50%; object-fit: cover;">
+                                <span class="ms-2">{{ review.name }}</span>
+                                <span class="ms-auto" style="font-size:0.8rem">{{ review.created_at }}</span>
                             </div>
 
                             <!-- Stars Rating -->
-                            <span :title="review.pontuacao + ' estrelas'">
-                                <StarsRating :rating="review.pontuacao" :isReadonly="true"></StarsRating> 
+                            <span :title="review.rating + ' estrelas'">
+                                <StarsRating :rating="review.rating" :isReadonly="true"></StarsRating> 
                             </span>
 
-                            <p class="mb-0">{{ review.descrição }}</p>
+                            <p class="mb-0">{{ review.comment }}</p>
                         </div>
                     </div>
                 </div>
@@ -104,8 +123,11 @@
              <p class="mb-1" style="font-size: 0.9rem; color:gray;">Partilha a tua experiência</p>
 
              <StarsRating v-model:rating="newReviewNumber" ></StarsRating>
-             <textarea v-model="reviewText" class="form-control mt-1" placeholder="Escreve um comentário" id="exampleFormControlTextarea1" rows="4"></textarea>
-             <button class="btn btn-primary mt-3" style="width:100%;" v-on:click="SubmitReview">SUBMETER</button>
+             
+             <br>
+
+             <textarea v-model="reviewText" class="form-control mt-3" placeholder="Escreve um comentário" id="exampleFormControlTextarea1" rows="4"></textarea>
+             <button class="btn btn-primary mt-3" style="width:100%; background-color: var(--aquapoint-logo-blue); border: none;" v-on:click="SubmitReview">SUBMETER</button>
              <!---------------------------------->
         </div>
     </div>
@@ -136,8 +158,8 @@
                 <!-- Tipo de bebedouro -->
                 <h6>Tipo de Bebedouro:</h6>
                 <button v-for="type in aquapointTypes" :key="type.id" 
-                :class="newAquapointType === type.nome ? 'btn bg-aquapoint-blue text-white shadow-sm' : 'btn bg-aquapoint-gray'"
-                 v-on:click="newAquapointType = type.nome"> {{ type.nome }}</button>
+                :class="newAquapointType === type.id ? 'btn bg-aquapoint-blue text-white shadow-sm' : 'btn bg-aquapoint-gray'"
+                 v-on:click="newAquapointType = type.id"> {{ type.nome }}</button>
                  <!----------------------->
             </div>
 
@@ -147,271 +169,587 @@
         </div>
     </div>
 
-    <ReportProblemModal v-model:visible="showReportProblemModal"></ReportProblemModal>
+    <ReportProblemModal v-model:visible="showReportProblemModal" :aquapoint="selectedAquapoint?.id"></ReportProblemModal>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import addNewMarkerImg from '../assets/images/map-markers/add_new_aqua_point_marker.png'
-import { Offcanvas } from 'bootstrap';
-import L, { icon } from 'leaflet'
-import 'leaflet/dist/leaflet.css'
-import StarsRating from '../components/StarsRating.vue'
-import { imageUrlToBase64 } from '../utilities/tools';
-import { useToast } from 'vue-toastification';
-import { useAuth } from '../utilities/useAuth';
-import { useModalStore } from '../utilities/modal';
-import ReportProblemModal from '../components/ReportProblemModal.vue';
+    import { ref, onMounted, watch } from 'vue';
+    import addNewMarkerImg from '../assets/images/map-markers/add_new_aqua_point_marker.png'
+    import { Offcanvas } from 'bootstrap';
+    import L, { icon } from 'leaflet'
+    import 'leaflet/dist/leaflet.css'
+    import StarsRating from '../components/StarsRating.vue'
+    import { imageUrlToBase64 } from '../utilities/tools';
+    import { useToast } from 'vue-toastification';
+    import { useAuth } from '../utilities/useAuth';
+    import { useModalStore } from '../utilities/modal';
+    import ReportProblemModal from '../components/ReportProblemModal.vue';
+    import { userService } from '../services/userService';
+    import { aquapointService } from '../services/aquapointService' 
+    import { reviewsService } from '../services/reviewsService' 
+    import { localsService } from '../services/localsService';
+    import { zonesService } from '../services/zonesService';
+    import { point } from 'leaflet';
+    import { favoriteService } from '../services/favoriteService';
 
-const loginModal = useModalStore()
-const Auth = useAuth()
-const toast = useToast()
-const reviews = ref([])
-const mapaRef = ref(null)
-const newReviewNumber = ref(0)
-const reviewText = ref('')
-const selectedAquapoint = ref(null)
-const showAquapointPopup = ref(false)
-const showReportProblemModal = ref(false)
-const showTrustLevelVote = ref(false)
-const AddNewMode = ref(false)
-const offcanvasRef = ref(null)
-let offcanvasInstance = null
-const newMarkerAquapoint = ref(null)
-const aquapointTypes = [
-    { id: 1, nome: 'Pessoas' },
-    { id: 2, nome: 'Animais' },
-    { id: 3, nome: 'Ambos' }
-]
-const newAquapointType = ref('Pessoas')
-const fileInput = ref(null)
-const fileName = ref('')
-const newAquapointImagePreview = ref(null)
-const newAquapointName = ref('')
-const offcanvasClosedBySubmitButton = ref(false)
-const aquapointsList = ref([])
-
-
-onMounted(async() => {
-    // Inicializa o offcanvas das informações no momento de adicionar um novo bebedouro
-    offcanvasInstance = new Offcanvas(offcanvasRef.value)
-    offcanvasRef.value.addEventListener('hide.bs.offcanvas', () => {
-        console.log('offcanvas fechado')
-        closeOffcanvas()
-    })
-
-    const imageBase64 = await imageUrlToBase64('https://scontent.flis9-2.fna.fbcdn.net/v/t1.6435-9/159226417_4049432591747023_5551976901920941269_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=13d280&_nc_ohc=4TYKScNiGWcQ7kNvwG6mRlw&_nc_oc=Adm-YNxGSIhNyQEL__HCr0HaqbtYLWFQRDxQh-ZanvMnr1WhLlaOMVN_j5R1mnU-P-M&_nc_zt=23&_nc_ht=scontent.flis9-2.fna&_nc_gid=7kr_Wj2Nkj7EQ0-dPZgkNw&oh=00_Afs7y1Mqp73JXjFta-li0d-usavddpMIJPW9lXojh3RGyQ&oe=69C8F988')
-    const image2Base64 = await imageUrlToBase64('https://pbs.twimg.com/media/EPSkJ3GXUAAYjuI.jpg')
-
-    aquapointsList.value = [
-        { id: 1, nome: 'Aquapoint 1', image: imageBase64, estado: 'Ativo', lat: 38.781558, lng: -9.102584, ratingAvg: 4.7, nrReviews: 400, trustLevel: 3 },
-        { id: 2, nome: 'Aquapoint 2', image: image2Base64, estado: 'Inativo', lat: 38.780195, lng: -9.104723, ratingAvg: 3.0, nrReviews: 52, trustLevel: 2 }
+    const loginModal = useModalStore()
+    const Auth = useAuth()
+    const toast = useToast()
+    const reviews = ref([])
+    const mapaRef = ref(null)
+    const newReviewNumber = ref(0)
+    const reviewText = ref('')
+    const selectedAquapoint = ref(null)
+    const showAquapointPopup = ref(false)
+    const isFavorite = ref(false)
+    const showReportProblemModal = ref(false)
+    const showTrustLevelVote = ref(false)
+    const AddNewMode = ref(false)
+    const offcanvasRef = ref(null)
+    let offcanvasInstance = null
+    const newMarkerAquapoint = ref(null)
+    const aquapointTypes = [
+        { id: 1, nome: 'Pessoas' },
+        { id: 2, nome: 'Animais' },
+        { id: 3, nome: 'Ambos' }
     ]
+    const newAquapointType = ref(1)
+    const fileInput = ref(null)
+    const fileName = ref('')
+    const newAquapointImagePreview = ref(null)
+    const newAquapointName = ref('')
+    const offcanvasClosedBySubmitButton = ref(false)
+    const aquapointsList = ref([])
+    const localValue = ref('')
+    const loadingMarkers = ref(false)
+    const selectedMarker = ref(null)
+    const userFavoritePoints = ref([])
 
-    reviews.value = [
-         { id: 1, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 3, createdDate: '25/02/2026' },
-         { id: 2, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 5 , createdDate: '25/02/2026'},
-         { id: 3, descrição: " Gostei muito deste bebedouro, agua de qualidade! boa localização, recomendo!", userNome: "Roberto Matias", pontuacao: 4, createdDate: '25/02/2026' },
-    ]
-
-    mapaRef.value = L.map('mapa').setView([38.781558, -9.102584], 13)
-    L.tileLayer('https://tile.jawg.io/jawg-lagoon/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
-    attribution: '© Jawg Maps',
-    accessToken: 'BumVzniBYxFsvv2lUwvsZ8fQMn6WdPC2sS5bAqyeSyDrROwuULnZrt0lE1uKPHrT'
-    }).addTo(mapaRef.value)
-
-    mapaRef.value.on('click', (e) => {
-        if(!AddNewMode.value) return 
-        const { lat, lng } = e.latlng
-
-        newMarkerAquapoint.value = L.marker([lat, lng], { icon: getAddNewMarkerIcon()})
-        .addTo(mapaRef.value)
-        .bindPopup(`Lat: ${lat.toFixed(5)} <br> Lng: ${lng.toFixed(5)}`)
-        .openPopup()
-
-        openOffcanvas()
-    })
-
-    aquapointsList.value.forEach(point => {
-        L.marker([point.lat, point.lng], { icon: getMarkerIcon(point.estado == 'Ativo' ? 'var(--aquapoint-marker-blue)' : 'orange') })
-            .addTo(mapaRef.value)
-            .on('click', () => {
-                selectedAquapoint.value = point
-                showAquapointPopup.value = true
-                showTrustLevelVote.value = false
-            })
+    onMounted(async() => {
+        // Inicializa o offcanvas das informações no momento de adicionar um novo bebedouro
+        offcanvasInstance = new Offcanvas(offcanvasRef.value)
+        offcanvasRef.value.addEventListener('hide.bs.offcanvas', () => {
+            console.log('offcanvas fechado')
+            closeOffcanvas()
         })
 
-})
+        mapaRef.value = L.map('mapa').setView([38.781558, -9.102584], 13)
+        L.tileLayer('https://tile.jawg.io/jawg-lagoon/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
+            attribution: '© Jawg Maps',
+            accessToken: 'BumVzniBYxFsvv2lUwvsZ8fQMn6WdPC2sS5bAqyeSyDrROwuULnZrt0lE1uKPHrT'
+        }).addTo(mapaRef.value)
 
-// Fica a aguardar que a variavel modoAdicionar altere e reaja à mudança mudando o tipo de cursor
-watch(AddNewMode, (val) => {
-    if (!mapaRef.value) return
-    mapaRef.value.getContainer().style.cursor = val ? 'crosshair' : ''
-})
+        mapaRef.value.on('click', async (e) => {
+            if(!AddNewMode.value) return 
 
+            const { lat, lng } = e.latlng
 
-function AddOrCancelMarkerClick(){
-    if(!Auth.isLoggedIn){
-        loginModal.openLoginModal()
-        return
-    }
+            newMarkerAquapoint.value = L.marker([lat, lng], { icon: getAddNewMarkerIcon()})
+            .addTo(mapaRef.value)
 
-    AddNewMode.value = !AddNewMode.value
-}
-function SubmitReview(){
-    console.log('Rating: ' + newReviewNumber.value + '\nReview: ' + reviewText.value)
-    newReviewNumber.value = 0
-    reviewText.value = ''
-}
+            openOffcanvas()
 
-function ReportProblem(){
-    console.log('Report Problem clicked')
+            try {
+                const localData = await GetPlaceDataByCoords(lat, lng)
+                localValue.value = localData.zone
 
-    showReportProblemModal.value = true
-}
+                newMarkerAquapoint.value
+                    .bindPopup(localValue.value)
+                    .openPopup()
+            } catch (err) {
+                console.error('Erro ao obter localização:', err)
+            }
+        })
 
-function VoteTrustLevel(){
-    console.log('VoteTrustLevel clicked')
-    showTrustLevelVote.value = !showTrustLevelVote.value
-}
+        if (Auth.isLoggedIn) {
+            let favorites = await GetUserFavoritePoints()
+            
+            userFavoritePoints.value = favorites || []
+        }
 
-function openOffcanvas(){
-    newAquapointImagePreview.value = '/src/assets/images/add_new_point.png'
-    offcanvasInstance.show()
-}
+        SetUpAquapointsOnMap()
+    })
 
-function closeOffcanvas(){
-    if(!newMarkerAquapoint.value) return;    
+    // Fica a aguardar que a variavel modoAdicionar altere e reaja à mudança mudando o tipo de cursor
+    watch(AddNewMode, (val) => {
+        if (!mapaRef.value) return
+        mapaRef.value.getContainer().style.cursor = val ? 'crosshair' : ''
+    })
 
-    mapaRef.value.removeLayer(newMarkerAquapoint.value)
-    newMarkerAquapoint.value = null
-
-    AddNewMode.value = false
-    newAquapointType.value = 'Pessoas'
-    newAquapointName.value = null
-    newAquapointImagePreview.value = null
-}
-
-function onFileChange(e) {
-    const file = e.target.files[0]
-    if(!file) return
-    
-    fileName.value = file.name
-    const reader = new FileReader()
-    reader.onload = (e) => {
-        newAquapointImagePreview.value = e.target.result
-    }
-    reader.readAsDataURL(file)
-    
-}
-
-function SubmitNewAquapoint(){
-    if (!newAquapointName.value || newAquapointName.value.trim() === ''){
-        // failed
-        console.log('Failed to submit, name is null')
-        return;
-    }
-
-    console.log(`${newAquapointName.value} \n${newAquapointType.value}`)
-    //offcanvasClosedBySubmitButton.value = true
-
-    const coords = newMarkerAquapoint.value.getLatLng()
-    const newPoint = { id: aquapointsList.length + 1, nome: newAquapointName.value, image: newAquapointImagePreview.value, estado: 'Ativo', lat: coords.lat, lng: coords.lng, ratingAvg: 0, nrReviews: 0, trustLevel: 1 }
-    aquapointsList.value.push(newPoint)
-
-    AddMarkerToMap(newPoint)
-    offcanvasInstance.hide()
-    toast.success('Aquapoint criado com sucesso!')
-}
-
-function AddMarkerToMap(point){
-    L.marker([point.lat, point.lng], { icon: getMarkerIcon(point.estado === 'Ativo' ? 'green' : 'orange') })
+    function AddMarkerToMap(point){
+        const marker = L.marker(
+            [point.latitude, point.longitude], 
+            { 
+                icon: GetAquapointMarker(point) 
+            }
+        )
         .addTo(mapaRef.value)
-        .on('click', () => {
+        .on('click', async () => {
+            reviews.value = await GetReviewsByPointId(point.id)
+
+            isFavorite.value = userFavoritePoints.value.find(p => p.point_id === point.id)
+  
+            selectedMarker.value = marker
             selectedAquapoint.value = point
             showAquapointPopup.value = true
             showTrustLevelVote.value = false
         })
-}
+    }
 
-function getMarkerIcon(color = 'blue') {
-    return L.divIcon({
-        className: '',
-        html: `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="60" viewBox="0 0 24 24">
-            <path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-        </svg>`,
-        iconSize: [100, 60],
-        iconAnchor: [15, 40],
-        popupAnchor: [0, -40]
-    })
-}
+    function GetAquapointMarker(point) {
+        var markerColor = 'var(--aquapoint-marker-blue)'
 
-function getAddNewMarkerIcon(){
-    return L.divIcon({
-        className: '',
-        html: `<img src="${addNewMarkerImg}" style="width: 50px; height: 50px;">`,
-        iconSize: [100, 60],
-        iconAnchor: [15, 40],
-        popupAnchor: [0, -40]
-    })
-}
+        if (point.state_name == 'Inativo') {
+            markerColor = 'red'
+        } else if (point.state_name == 'Necessita manutenção') {
+            markerColor = 'orange'
+        }
 
+        let markerIcon = getMarkerIcon(markerColor)
+
+        if (userFavoritePoints.value.find(p => p.point_id === point.id)) {
+            let image = 'src/assets/images/map-markers/favorite_working.png'
+
+            if (point.state_name == 'Inativo') {
+                image = 'src/assets/images/map-markers/favorite_broken.png'
+            } else if (point.state_name == 'Necessita manutenção') {
+                image = 'src/assets/images/map-markers/favorite_not_working.png'
+            } else {
+                image = 'src/assets/images/map-markers/favorite_working.png'
+            }
+
+            markerIcon = L.icon({
+                iconUrl: image,
+                iconSize: [50, 50],
+            });
+        }
+
+        return markerIcon;
+    }
+
+    function ClearMapMarkers() {
+        mapaRef.value.eachLayer((layer) => {
+            if (layer instanceof L.Marker) {
+                mapaRef.value.removeLayer(layer)
+            }
+        })
+    }
+
+    async function GetUserFavoritePoints(){
+        var favorites = await favoriteService.getByUserId(Auth.user.id)
+console.log(favorites)
+        if (favorites) {
+            return favorites.data
+        }
+
+        return null
+    }
+
+    async function GetAquapointsList(){
+        var aquapoints = await aquapointService.getAll()
+
+        if (aquapoints) {
+            return aquapoints.data
+        }
+
+        return null
+    }
+
+    async function GetReviewsByPointId(pointId){
+        var reviews = await reviewsService.getByPointId(pointId)
+
+        if (reviews) {
+            return reviews.data
+        }
+
+        return null
+    }
+
+    async function SetUpAquapointsOnMap() {
+        loadingMarkers.value = true
+        aquapointsList.value = await GetAquapointsList()
+        console.log(aquapointsList)
+        
+        if (aquapointsList) {
+            aquapointsList.value.forEach(point => {
+                if (point.state_name != "Pendente") {
+                    AddMarkerToMap(point)
+                }
+            })
+        }
+
+        loadingMarkers.value = false
+    }
+
+    function AddOrCancelMarkerClick(){
+        if(!Auth.isLoggedIn){
+            loginModal.openLoginModal()
+            return
+        }
+
+        AddNewMode.value = !AddNewMode.value
+    }
+
+    async function SubmitReview(){
+        if (!Auth.isLoggedIn) {
+            loginModal.openLoginModal()
+            return
+        }
+
+        if (reviewText.value.trim() === '') {
+            toast.error('Por favor, escreva um comentário antes de submeter a sua opinião.')
+            return
+        }
+
+        try {
+            await reviewsService.create({
+                user_id: Auth.user.id,
+                point_id: selectedAquapoint.value.id,
+                rating: newReviewNumber.value,
+                comment: reviewText.value
+            })
+
+            toast.success('Obrigado pela sua opinião!')
+
+            // Refresh das reviews para mostrar a nova review submetida
+            reviews.value = await GetReviewsByPointId(selectedAquapoint.value.id)
+
+        } catch (error) {
+            toast.error('Ocorreu um erro ao submeter a sua opinião. Por favor, tente novamente.')
+        }
+        
+        newReviewNumber.value = 0
+        reviewText.value = ''
+    }
+
+    function ReportProblem(){
+        console.log('Report Problem clicked')
+
+        showReportProblemModal.value = true
+    }
+
+    async function CloseAquaPointPopUp(){
+        showAquapointPopup.value = false
+        isFavorite.value = false
+
+        /// funciona mas dá um pequeno delay e um efeito estranho de os marcadores desaparecerem e voltarem a aparecer, por isso optei por não limpar os marcadores ao fechar o popup
+        /*ClearMapMarkers()
+        SetUpAquapointsOnMap()*/
+    }
+
+    function ShowVoteTrustLevel(){
+        console.log('VoteTrustLevel clicked')
+        showTrustLevelVote.value = !showTrustLevelVote.value
+    }
+
+    function openOffcanvas(){
+        newAquapointImagePreview.value = '/src/assets/images/add_new_point.png'
+        offcanvasInstance.show()
+    }
+
+    function closeOffcanvas(){
+        if(!newMarkerAquapoint.value) return;    
+
+        mapaRef.value.removeLayer(newMarkerAquapoint.value)
+        newMarkerAquapoint.value = null
+
+        AddNewMode.value = false
+        newAquapointType.value = 1
+        newAquapointName.value = null
+        newAquapointImagePreview.value = null
+        localValue.value = ''
+    }
+
+    function onFileChange(e) {
+        const file = e.target.files[0]
+        if(!file) return
+        
+        fileName.value = file.name
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            newAquapointImagePreview.value = e.target.result
+        }
+        reader.readAsDataURL(file)
+        
+    }
+
+    async function ChangeFavoriteState(){
+        if (!Auth.isLoggedIn) {
+            loginModal.openLoginModal()
+            return
+        }
+
+        if (isFavorite.value) {
+            await favoriteService.delete({ user_id: Auth.user.id, point_id: selectedAquapoint.value.id })
+            toast.info('Bebedouro removido dos favoritos.')
+        } else {
+            await favoriteService.create({ user_id: Auth.user.id, point_id: selectedAquapoint.value.id })
+            toast.success('Bebedouro adicionado aos favoritos.') 
+        }
+
+        isFavorite.value = !isFavorite.value
+
+        if (Auth.isLoggedIn) {
+            let favorites = await GetUserFavoritePoints()
+            
+            userFavoritePoints.value = favorites || []
+        }
+
+        if (selectedMarker.value) {
+            selectedMarker.value.setIcon(GetAquapointMarker(selectedAquapoint.value))
+        }
+    }
+
+    async function SubmitNewAquapoint(){
+        if (!newAquapointName.value || newAquapointName.value.trim() === ''){
+            // failed
+            console.log('Failed to submit, name is null')
+            return;
+        }
+
+        console.log(`${newAquapointName.value} \n${newAquapointType.value}`)
+        //offcanvasClosedBySubmitButton.value = true
+
+        const coords = newMarkerAquapoint.value.getLatLng()
+
+        var zoneData = await GetLocalFromBackEnd(localValue.value)
+        var localId = null
+
+        if (!zoneData || !zoneData.id) {
+            const coordsData = await GetPlaceDataByCoords(coords.lat, coords.lng)
+            let cityName = coordsData?.city || 'Desconhecido'
+
+            var zoneId = await GetZoneByName(cityName)
+
+            if (!zoneId) {
+                zoneId = await CreateNewZone(cityName)
+            }
+
+            localId = await CreateNewLocal(localValue.value, zoneId)
+        } else {
+            localId = zoneData.id
+        }
+  
+        const newPoint = { 
+            point_name: newAquapointName.value, 
+            image: newAquapointImagePreview.value, 
+            point_type: newAquapointType.value,
+            point_trust: 2,
+            local_id: localId,
+            state_id: 3, // Pendente
+            latitude: coords.lat, 
+            longitude: coords.lng
+        }
+
+        AddNewAquaPoint(newPoint)
+    }
+
+    async function GetPlaceDataByCoords(lat, lng) {
+        return fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+        )
+        .then(response => response.json())
+        .then(data => {
+            return {
+                city: data.address.city || data.address.town || '',
+                zone: data.address.village || data.address.town || data.address.neighbourhood || data.address.hamlet || data.display_name || ''
+            }
+        })
+        .catch(error => {
+            console.error("Erro ao obter dados de zona:", error)
+            return ''
+        })
+    }
+
+    async function GetLocalFromBackEnd(local) {
+        try {
+
+            const { data } = await localsService.getByName(local)
+
+            return data
+
+        } catch (error) {
+
+            if (error.response?.status === 404) {
+                return false
+            }
+
+            return false
+        }
+    }
+
+    async function CreateNewLocal(local_name, zone_id) {
+        try {
+            const { data } = await localsService.create({ name: local_name, zone_id: zone_id })
+
+            return data.id
+        } catch (error) {
+            return null
+        }
+    }
+
+    async function GetZoneByName(name) {
+        try {
+            const { data } = await zonesService.getByName(name)
+
+            return data.id
+        } catch (error) {
+            return null
+        }
+    }
+
+    async function CreateNewZone(zone_name) {
+        try {
+            const { data } = await zonesService.create({ name: zone_name })
+
+            return data.id
+        } catch (error) {
+            return null
+        }
+    }
+
+    async function AddNewAquaPoint(newPoint) {
+        try {
+            const createdPoint = await aquapointService.create(newPoint)
+            if (createdPoint) {
+                toast.warning('Bebedouro pendente de aprovação da administração!')
+                closeOffcanvas()
+                offcanvasInstance.hide()
+
+                aquapointsList.value = await GetAquapointsList()
+            }
+        } catch (err) {
+            console.log("Status:", err.response?.status)
+            console.log("Data:", err.response?.data)
+            console.log("Headers:", err.response?.headers)
+        }
+    }
+
+    function getMarkerIcon(color = 'blue') {
+        return L.divIcon({
+            className: '',
+            html: `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="60" viewBox="0 0 24 24">
+                <path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>`,
+            iconSize: [100, 60],
+            iconAnchor: [15, 40],
+            popupAnchor: [0, -40]
+        })
+    }
+
+    function getAddNewMarkerIcon(){
+        return L.divIcon({
+            className: '',
+            html: `<img src="${addNewMarkerImg}" style="width: 50px; height: 50px;">`,
+            iconSize: [100, 60],
+            iconAnchor: [15, 40],
+            popupAnchor: [0, -40]
+        })
+    }
+
+    async function VoteTrustLevel(vote){
+        if(vote === true){
+            if(selectedAquapoint.value.point_trust < 4){
+                await aquapointService.changeTrustLevel(selectedAquapoint.value.id, { point_trust: selectedAquapoint.value.point_trust + 1 })
+            }
+        }
+        else{
+            if(selectedAquapoint.value.point_trust > 1){
+                await aquapointService.changeTrustLevel(selectedAquapoint.value.id, { point_trust: selectedAquapoint.value.point_trust - 1 })
+            }
+        }
+
+        toast.info('Voto realizado com sucesso. Obrigado pelo contributo.')
+        showTrustLevelVote.value = false;
+        selectedAquapoint.value = { ... (await aquapointService.getById(selectedAquapoint.value.id)).data }
+    }
 </script>
 
 <style scoped>
-.modal-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-.modal-box {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    width: 500px;
-    max-height: 95%;
-    position: relative;
-    overflow-y: auto;
-}
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    .modal-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 600px;
+        max-height: 95%;
+        position: relative;
+        overflow-y: auto;
+    }
 
-.btn-close {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-}
+    .btn-close {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+    }
 
-.user-review-card {
-    background-color: rgb(216, 216, 216);
-    padding: 10px;
-    margin: 10px 0px 10px 0px;
-    border-radius: 12px;
-    border: 1px solid #e9ecef;
-    transition: box-shadow 0.2s;
-}
+    .user-review-card {
+        background-color: rgb(216, 216, 216);
+        padding: 10px;
+        margin: 10px 0px 10px 0px;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        transition: box-shadow 0.2s;
+    }
 
-.user-review-card:hover{
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
+    .user-review-card:hover{
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
 
-.btn-trustLevelVote{
-    padding: 2px 5px;
-    font-size: 0.7rem;
-}
+    .btn-trustLevelVote{
+        padding: 2px 5px;
+        font-size: 0.7rem;
+    }
 
-.aquapoint-image-preview {
-    position: relative;
-    margin-bottom: 10px;
-    width: 50%;
-    left: 25%;
-    border-radius: 8px;
-    object-fit: contain;
-}
+    .aquapoint-image-preview {
+        position: relative;
+        margin-bottom: 10px;
+        width: 50%;
+        left: 25%;
+        border-radius: 8px;
+        object-fit: contain;
+    }
 
+    .modal-box > img {
+        object-fit: cover;
+    }
 
+    .point-image{
+        border-radius: 12px 12px 0 0; /* Ou 16px */
+        object-fit: cover; /* Ou fill */
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    .loading-markers-spinner{
+        position: absolute; 
+        top: 0; left: 0; 
+        width: 100%; 
+        height: 100%; 
+        background: rgba(106, 106, 106, 0.655); 
+        z-index: 999;
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+    }
+
+    .loading-logo {
+        width: 20%;
+        animation: pulse 1.2s ease-in-out infinite;
+        filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25));
+    }
+
+    @keyframes pulse {
+        0%   { transform: scale(1);    opacity: 1; }
+        50%  { transform: scale(1.2);  opacity: 0.6; }
+        100% { transform: scale(1);    opacity: 1; }
+    }
 </style>

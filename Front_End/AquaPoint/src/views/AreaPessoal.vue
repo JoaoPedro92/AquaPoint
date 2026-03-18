@@ -8,9 +8,9 @@
             <div class="spacer"></div>
 
             <div class="row">
-                <div class="col-lg-6 mt-5 mt-lg-0 d-flex flex-column justify-content-center align-items-center position-relative">
+                <div v-if="user" class="col-lg-6 mt-5 mt-lg-0 d-flex flex-column justify-content-center align-items-center position-relative">
                     <label for="upload-image" style="cursor: pointer;">
-                        <img :src="profileImage"
+                        <img :src="user.profilePicture"
                             alt="userimage" 
                             class="user-profile-image" 
                             id="preview">
@@ -23,28 +23,53 @@
                 </div>
 
                 <div class="col-lg-6">
-                    <form @submit.prevent="UpdateProfileData">
+                    <form v-if="user" @submit.prevent="UpdateProfileData">
+                        <!-- Nome -->
                         <div class="form-group">
                             <label for="exampleInputEmail1">O seu nome</label>
-                            <input type="text" v-model="nameValue" class="form-control contact-form" id="exampleInputEmail1" required>
+                            <input type="text" v-model="user.name" class="form-control contact-form" id="exampleInputEmail1" required>
                         </div>
                         <br>
+
+                        <!-- Email -->
                         <div class="form-group">
                             <label for="exampleInputEmail1">O seu email</label>
-                            <input type="email" v-model="emailValue" class="form-control contact-form" id="exampleInputEmail1" aria-describedby="emailHelp" required>
+                            <input type="email" v-model="user.email" class="form-control contact-form" id="exampleInputEmail1" aria-describedby="emailHelp" required>
                             <small id="emailHelp" class="form-text text-muted">Esta informação nunca será partilhada com ninguém.</small>
                         </div>
                         <br>
+
+                        <!-- Data Nascimento -->
                         <div class="form-group">
-                            <label for="exampleInputPassword1">Password</label>
-                            <input type="password" v-model="passwordValue" class="form-control contact-form" id="exampleInputPassword1" placeholder="Password" required>
+                            <label>Data de Nascimento</label>
+                            <div style="width: 95%;" :class="{ 'is-invalid': !user.dateBirth }">
+                                <VueDatePicker v-model="user.dateBirth" :ui="{ input: 'form-control '}" :max-date="new Date()" :time-config="{ enableTimePicker: false }" text-input></VueDatePicker>
+                            </div>
                         </div>
                         <br>
+
+                        <!-- Cidade -->
                         <div class="form-group">
-                            <label for="exampleInputPassword1">Repetir Password</label>
-                            <input type="password" v-model="passwordRepeatValue" class="form-control contact-form" id="exampleInputPassword1" placeholder="Password" required>
+                            <label for="exampleInputPassword1">Cidade</label>
+                            <input type="text" v-model="user.city" class="form-control contact-form" id="exampleInputEmail1" required="">
                         </div>
-        
+                        <br>
+
+                        <!-- Password Atual -->
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">Password Atual</label>
+                            <input type="password" v-model="actualPassword" class="form-control contact-form" id="exampleInputPassword1" placeholder="Password">
+                        </div>
+                        <br>
+
+                        <!-- Nova Password -->
+                        <div class="form-group">
+                            <label for="exampleInputPassword1">Nova Password</label>
+                            <input type="password" v-model="newPassword" class="form-control contact-form" id="exampleInputPassword1" placeholder="Password">
+                        </div>
+                        <br>                       
+                        
+                        <!-- Botão Submit -->
                         <div class="col-md-12">
                             <div class="form-group">
                                 <input type="submit" value="Atualizar" class="btn btn-form" style="width: 95% !important; height: 40px !important; margin-top: 4%; background-color: var(--aquapoint-logo-blue); color: white;" tabindex="0">
@@ -60,17 +85,31 @@
     </section>
 
     <section class="main-container container-spacer">
+        <!-- Favorite Aquapoints -->
         <div class="container">
             <div class="spacer"></div>
+            <h1 class="main-titles">BEBEDOUROS FAVORITOS</h1>
+            <div class="spacer"></div>
+            
+            <div class="row g-3 ">
+                <div class="col-md-4 pe-3 mb-3" v-for="aquapoint in userPointsFavorite" :key="aquapoint.id">
+                    <FavoriteAquapointCard :aquapoint="aquapoint" :favoriteChanged="LoadAllUserFavoritePoints"/>
+                </div>
+                
+            </div><!-- Content row end -->
+
+        </div><!-- Container end -->
+        <div class="container">
+            <div class="spacer"></div>
+            <div class="spacer"></div>
+
             <h1 class="main-titles">INTERAÇÕES RECENTES</h1>
-            <div class="spacer"></div>
-            <div class="spacer"></div>
             
             <div class="row">
                 <div class="col-lg-12" style="display: inline-block;">
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -82,7 +121,7 @@
                     </div>
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -94,7 +133,7 @@
                     </div>
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -106,7 +145,7 @@
                     </div>
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -118,7 +157,7 @@
                     </div>
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -130,7 +169,7 @@
                     </div>
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -142,7 +181,7 @@
                     </div>
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -154,7 +193,7 @@
                     </div>
                     <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
                         <div class="imageArea">
-                            <img src="../assets/images/microcubo-TOWER1-Bebedouro-76.9.1.1.jpg" alt="aquapoint-interaction">
+                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
                         </div>
                         
                         <h1>Bebedouro da praça</h1>
@@ -175,20 +214,74 @@
 <script setup>
     import { ref, onMounted, watch } from 'vue';
     import { useAuth } from '/src/utilities/useAuth';
+    import { useToast } from 'vue-toastification';
+    import { userService } from '../services/userService';
+    import { aquapointService } from '../services/aquapointService'
+    import { VueDatePicker } from '@vuepic/vue-datepicker';
+    import { useFormValidation } from '../utilities/useFormValidation';
+    import FavoriteAquapointCard from '../components/FavoriteAquapointCard.vue';
 
     const Auth = useAuth()
-    const nameValue = ref(Auth.user.name)
-    const emailValue = ref(Auth.user.email)
-    const passwordValue = ref('')
-    const passwordRepeatValue = ref('')
-    const profileImage = ref("/src/assets/images/user_image.png") 
+    const toast = useToast()
+    const { errors, validate, validateEmail, clearErrors } = useFormValidation()
+    const user = ref(null)
+    const actualPassword = ref('')
+    const newPassword = ref('')
+    const userPointsFavorite = ref(null)
 
-    function UpdateProfileData(){
-        console.log('Name: ' + nameValue.value + '\nEmail: ' + emailValue.value + '\nPassword: ' + passwordValue.value + '\nPassword Repeat: ' + passwordRepeatValue.value)
-        nameValue.value = Auth.user.name
-        emailValue.value = Auth.user.email
-        passwordValue.value = ''
-        passwordRepeatValue.value = ''
+
+   onMounted(async () => {
+        user.value = (await userService.getById(Auth.user.id)).data
+        await LoadAllUserFavoritePoints()
+    })
+
+    async function LoadAllUserFavoritePoints(){
+            userPointsFavorite.value = (await aquapointService.getUserFavoritePoints(Auth.user.id)).data
+    }
+
+    async function UpdateProfileData(){
+        clearErrors()
+
+        try{
+            const updatedUser = { ...user.value }
+
+            if(actualPassword.value){
+                const response = await userService.comparePasswords(actualPassword.value, user.value.passwordHash)
+                if(!response.data.isValid){
+                    toast.error('A password atual está errada.')
+                    return
+                }
+
+                if(!newPassword.value){ 
+                    toast.error('Insira uma nova password.')
+                    return
+                }
+
+                updatedUser.passwordHash = newPassword.value
+            }
+            
+            const emailError = validateEmail(updatedUser.email)
+            if(emailError) errors.value.email = emailError
+
+            const requiredFieldsFilled = validate({
+                name: updatedUser.name,
+                dateBirth: updatedUser.dateBirth,
+                city: updatedUser.city
+            })
+
+        
+            if(!requiredFieldsFilled || emailError) return
+            await userService.update(Auth.user.id, updatedUser)
+
+            console.log('Updated user')
+            actualPassword.value = ''
+            newPassword.value = ''
+            toast.success('Dados atualizados com sucesso.')
+        }
+
+        catch(err){
+            toast.error(`Erro ao atualizar dados do utilizador: ${err.message}`)
+        }
     }
 
     function onProfileImageChange(e) {
@@ -197,7 +290,7 @@
         
         const reader = new FileReader()
         reader.onload = (e) => {
-            profileImage.value = e.target.result
+            user.value.profilePicture = e.target.result
         }
         reader.readAsDataURL(file)
     }
