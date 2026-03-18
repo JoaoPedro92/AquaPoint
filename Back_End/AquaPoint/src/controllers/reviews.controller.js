@@ -87,7 +87,7 @@ async function findReviewById(id){
         reviews.createdAt
       FROM reviews
       INNER JOIN users ON reviews.user_id = users.id
-      WHERE reviews.id = ?
+      WHERE reviews.id = ? ORDER BY reviews.createdAt DESC
       `, [id]      
   );
 
@@ -105,7 +105,7 @@ async function findReviewsByAquapointId(id){
         reviews.createdAt
       FROM reviews
       INNER JOIN users ON reviews.user_id = users.id
-      WHERE reviews.point_id = ?
+      WHERE reviews.point_id = ? ORDER BY reviews.createdAt DESC
       `, [id]      
   );
 }

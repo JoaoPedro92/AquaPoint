@@ -30,7 +30,7 @@ export async function getFavoriteById(req, res){
 export async function getFavoriteByUserId(req, res){
     try{
         const id = Number(req.params.id)
-        const findFavorites = await findFavoritesByUserId(id);
+        const [findFavorites] = await findFavoritesByUserId(id);
         if(!findFavorites) return res.status(404).json({ error: `Favorite with User ID: ${id} not found`});
 
         res.json(findFavorites);
@@ -58,6 +58,22 @@ export async function createFavorite(req, res){
     }
 }
 
+// DELETE /favorites/{data}
+export async function deleteFavorite(req, res){
+
+  try{
+    const { user_id, point_id } = req.body
+
+    if(!user_id || !point_id) return res.status(400).json({ error: 'All fields are required' })
+
+    await pool.query('DELETE FROM favorites WHERE user_id = ? AND point_id = ?', [user_id, point_id])
+
+    res.json({ message: `Favorite deleted successfully` })
+  }
+  catch(err){
+    res.status(500).json({ error: err.message })
+  }
+}
 
 async function returnAllFavorites(){
     return await pool.query("SELECT * FROM favorites");
@@ -68,6 +84,5 @@ async function findFavoriteById(id){
 }
 
 export async function findFavoritesByUserId(userId){
-    const [rows] = await pool.query("SELECT * FROM favorites WHERE user_id = ?", [userId]);
-    return rows;
+    return await pool.query("SELECT point_id FROM favorites WHERE user_id = ?", [userId]);
 }
