@@ -403,4 +403,8 @@
     .text-orange {
         color: #fd7e14;
     }
+
+    .edit-zone-image{
+        max-height: 300px;
+    }
 </style>

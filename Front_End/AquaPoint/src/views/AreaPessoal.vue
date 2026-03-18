@@ -85,11 +85,25 @@
     </section>
 
     <section class="main-container container-spacer">
+        <!-- Favorite Aquapoints -->
         <div class="container">
             <div class="spacer"></div>
+            <h1 class="main-titles">BEBEDOUROS FAVORITOS</h1>
+            <div class="spacer"></div>
+            
+            <div class="row g-3 ">
+                <div class="col-md-4 pe-3 mb-3" v-for="aquapoint in userPointsFavorite" :key="aquapoint.id">
+                    <FavoriteAquapointCard :aquapoint="aquapoint"/>
+                </div>
+                
+            </div><!-- Content row end -->
+
+        </div><!-- Container end -->
+        <div class="container">
+            <div class="spacer"></div>
+            <div class="spacer"></div>
+
             <h1 class="main-titles">INTERAÇÕES RECENTES</h1>
-            <div class="spacer"></div>
-            <div class="spacer"></div>
             
             <div class="row">
                 <div class="col-lg-12" style="display: inline-block;">
@@ -202,8 +216,10 @@
     import { useAuth } from '/src/utilities/useAuth';
     import { useToast } from 'vue-toastification';
     import { userService } from '../services/userService';
+    import { aquapointService } from '../services/aquapointService'
     import { VueDatePicker } from '@vuepic/vue-datepicker';
     import { useFormValidation } from '../utilities/useFormValidation';
+    import FavoriteAquapointCard from '../components/FavoriteAquapointCard.vue';
 
     const Auth = useAuth()
     const toast = useToast()
@@ -211,10 +227,12 @@
     const user = ref(null)
     const actualPassword = ref('')
     const newPassword = ref('')
+    const userPointsFavorite = ref(null)
 
 
    onMounted(async () => {
         user.value = (await userService.getById(Auth.user.id)).data
+        userPointsFavorite.value = (await aquapointService.getUserFavoritePoints(Auth.user.id)).data
     })
 
     async function UpdateProfileData(){
