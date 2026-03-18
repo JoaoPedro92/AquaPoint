@@ -18,26 +18,26 @@
     <div v-if="showAquapointPopup" class="modal-overlay" @click="showAquapointPopup = false">
         <div class="modal-box" @click.stop>
             <button class="btn-close" @click="showAquapointPopup = false"></button>
-
+            <div class="text-center">
             <!-- Aquapoint image and infos -->
-            <img :src="selectedAquapoint.image" height="300px" alt="Imagem do bebedouro" style=" border-radius: 12px 12px 0 0; object-fit: fill;">
-            
+            <img :src="selectedAquapoint.image" height="300" width="370" alt="Imagem do bebedouro" class="point-image">
+            </div>
             <br><br>
 
             <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center gap-2">
                     <h4>{{ selectedAquapoint.point_name }}</h4>
-                    <i v-if="selectedAquapoint.state_name == 'Inativo'" class="bi bi-exclamation-octagon-fill text-danger ms-2" title="Estado Inativo"></i>
-                    <i v-if="selectedAquapoint.state_name == 'Necessita manutenção'" class="bi bi-exclamation-octagon-fill text-warning ms-2" title="Estado Necessita manutenção"></i>
+                    <i v-if="selectedAquapoint.state_name == 'Inativo'" class="bi bi-exclamation-octagon-fill text-danger mb-1" title="Estado Inativo"></i>
+                    <i v-if="selectedAquapoint.state_name == 'Necessita manutenção'" class="bi bi-exclamation-octagon-fill text-warning mb-1" title="Estado Necessita manutenção"></i>
                     <!-- Favorite Button -->
-                    <i :class="isHeartHover ? 'bi bi-heart-fill text-danger': 'bi bi-heart text-danger'"  class="mb-1 ms-2"
+                    <i :class="isHeartHover ? 'bi bi-heart-fill text-danger': 'bi bi-heart text-danger'"  class="mb-1"
                         v-on:mouseover="isHeartHover = true" v-on:mouseleave="isHeartHover = false" style="font-size: 20px; cursor: pointer"></i>
                     
                    
                 </div>
                 <!-- Google Maps Directions and Report Flag -->
                 <div class="d-flex align-items-center gap-2 mb-2">
-                     <a  :href="`https://www.google.com/maps/dir/?api=1&destination=${selectedAquapoint.latitude},${selectedAquapoint.longitude}&travelmode=driving`">
+                     <a  :href="`https://www.google.com/maps/dir/?api=1&destination=${selectedAquapoint.latitude},${selectedAquapoint.longitude}&travelmode=walking`" target="_blank">
                         <i class="bi bi-geo-alt-fill ms-2" style="font-size: 20px; cursor: pointer; color: var(--aquapoint-marker-blue);"></i>
                     </a>
                     <div class="hex-bg">                        
@@ -522,16 +522,15 @@
         if(vote === true){
             if(selectedAquapoint.value.point_trust < 4){
                 await aquapointService.changeTrustLevel(selectedAquapoint.value.id, { point_trust: selectedAquapoint.value.point_trust + 1 })
-                toast.info('Voto realizado com sucesso. Obrigado pelo contributo.')
             }
         }
         else{
             if(selectedAquapoint.value.point_trust > 1){
                 await aquapointService.changeTrustLevel(selectedAquapoint.value.id, { point_trust: selectedAquapoint.value.point_trust - 1 })
-                toast.info('Voto realizado com sucesso. Obrigado pelo contributo.')
             }
         }
 
+        toast.info('Voto realizado com sucesso. Obrigado pelo contributo.')
         showTrustLevelVote.value = false;
         selectedAquapoint.value = { ... (await aquapointService.getById(selectedAquapoint.value.id)).data }
     }
@@ -556,7 +555,7 @@
         background: white;
         padding: 2rem;
         border-radius: 8px;
-        width: 40%;
+        width: 600px;
         max-height: 95%;
         position: relative;
         overflow-y: auto;
@@ -597,5 +596,11 @@
 
     .modal-box > img {
         object-fit: cover;
+    }
+
+    .point-image{
+        border-radius: 12px 12px 0 0; /* Ou 16px */
+        object-fit: cover; /* Ou fill */
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     }
 </style>

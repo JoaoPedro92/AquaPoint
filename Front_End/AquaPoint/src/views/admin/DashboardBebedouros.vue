@@ -83,9 +83,9 @@
                 <tr>
                     <th scope="col" class="text-center">Imagem</th>
                     <th scope="col">Nome</th>
-                    <th scope="col">Tipo</th>
-                    <th scope="col">Pontuação Média</th>
-                    <th scope="col">Nº Reviews</th>
+                    <th scope="col" class="text-center">Tipo</th>
+                    <th scope="col" class="text-center" style="width:60px">Pontuação Média</th>
+                    <th scope="col" class="text-center">Nº Reviews</th>
                     <th scope="col">Estado</th>
                     <th scope="col">Credibilidade</th>
                     <th scope="col" class="text-center">
@@ -100,7 +100,7 @@
                             width="40" height="40">
                     </td>
                     <td>{{ aquapoint.point_name }}</td>
-                    <td>{{ aquapoint.point_type }}</td>
+                    <td class="text-center">{{ aquapoint.point_type }}</td>
                     <td class="text-center">{{ aquapoint.ratingAVG || 0.0 }}</td>
                     <td class="text-center">{{ aquapoint.ratingsAmount }}</td>
                     <td>
