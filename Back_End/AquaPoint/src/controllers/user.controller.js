@@ -79,11 +79,11 @@ export async function updateUser(req, res) {
 
     const { name, email, dateBirth, city, passwordHash, profilePicture } = req.body
     let profilePictureBlob = null
+
     let passwordHashed = findUser.passwordHash
 
     if(passwordHash){
       passwordHashed = await bcrypt.hash(passwordHash, 10)
-      console.log(passwordHash)
     }
 
     if(profilePicture){
