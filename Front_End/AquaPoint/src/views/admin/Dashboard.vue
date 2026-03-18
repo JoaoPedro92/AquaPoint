@@ -1,4 +1,9 @@
 <template>
+    <div v-if="loading" class="text-center mt-5">
+        <!--A carregar...-->
+        <div class="spinner-border text-primary"></div>
+    </div>
+
     <div class="container py-4">
 
         <h1 class="mb-5 text-black">Dashboard Geral</h1>
@@ -94,7 +99,9 @@
                     <img :src="bestFountain.image" class="img-fluid rounded mt-3 mb-3 rating-img">
                     <p class="fw-bold mb-1">{{ bestFountain.name }}</p>
                     <p class="mb-1">⭐ {{ bestFountain.rating }} / 5</p>
-                    <small class="text-muted">{{ bestFountain.reviews }} reviews</small>
+                    <small class="text-muted">
+                        {{ bestFountain.reviews ?? 0 }} {{ bestFountain.reviews === 1 ? 'review' : 'reviews' }}
+                    </small>
                     <div class="mt-2">
                         <span class="badge bg-success">
                             🏆 Melhor avaliado
@@ -110,7 +117,9 @@
                     <img :src="worstFountain.image" class="img-fluid rounded mt-3 mb-3 rating-img">
                     <p class="fw-bold mb-1">{{ worstFountain.name }}</p>
                     <p class="mb-1">⭐ {{ worstFountain.rating }} / 5</p>
-                    <small class="text-muted">{{ worstFountain.reviews }} reviews</small>
+                    <small class="text-muted">
+                        {{ worstFountain.reviews ?? 0 }} {{ worstFountain.reviews === 1 ? 'review' : 'reviews' }}
+                    </small>
                     <div class="mt-2">
                         <span class="badge bg-warning text-dark">
                             ⚠ Precisa de atenção
@@ -137,38 +146,70 @@
 
 <script setup>
 
+import { userService } from "../../services/userService.js"
+import { aquapointService } from "../../services/aquapointService.js"
+import { localsService } from "../../services/localsService.js"
+
 import { ref, onMounted } from 'vue'
 import Chart from 'chart.js/auto'
 
-const totalUsers = ref(20)
-const totalBebedouros = ref(30)
+const totalUsers = ref(0)
 
-const ativos = ref(25)
-const inativos = ref(5)
+const totalBebedouros = ref(0)
+const ativos = ref(0)
+const inativos = ref(0)
 
-const bestFountain = ref({
-    name: "Praça Central",
-    rating: 4.8,
-    reviews: 52,
-    image: "/src/assets/images/defaultPointImage.jpg"
+let points = []
+const loading = ref(true)
+
+let pieChart = null
+let cityChart = null
+
+const bestFountain = ref({})
+const worstFountain = ref({})
+const topFountains = ref([])
+
+onMounted(async () => {
+    await getAllUsers()
+    await getAllAquapoints()
+    loading.value = false
 })
 
-const worstFountain = ref({
-    name: "Zona Industrial",
-    rating: 1.8,
-    reviews: 12,
-    image: "/src/assets/images/defaultPointImage.jpg"
-})
+async function getAllUsers() {
+    try {
+        const response = await userService.getAll()
+        totalUsers.value = response.data.length
+    } catch (error) {
+        console.log("Erro ao buscar utilizadores", error)
+    }
 
-const topFountains = ref([
-    { id: 1, name: "Praça Central", rating: 4.8 },
-    { id: 2, name: "Jardim Norte", rating: 4.6 },
-    { id: 3, name: "Campus", rating: 4.5 },
-    { id: 4, name: "Centro", rating: 4.3 },
-    { id: 5, name: "Parque Sul", rating: 4.2 }
-])
+}
 
-onMounted(() => {
+async function getAllAquapoints() {
+    try {
+        const response = await aquapointService.getAll()
+        points = response.data
+
+        totalBebedouros.value = points.length
+
+        ativos.value = points.filter(p => p.state_id === 1 || p.state_id === 2).length
+        inativos.value = points.filter(p => p.state_id === 4).length
+
+        createPieChart()
+        await createCityChart()
+
+        ratingFountains()
+    }
+    catch (error) {
+        console.error("Erro aquapoints:", error)
+    }
+}
+
+function createPieChart() {
+
+    if (pieChart) {
+        pieChart.destroy()
+    }
     new Chart(
         document.getElementById('statusChart'),
         {
@@ -182,67 +223,85 @@ onMounted(() => {
             }
         })
 
-    new Chart(
-    document.getElementById('cityChart'),
-    {
-        type: 'bar',
-        data: {
-            labels: ['Lisboa', 'Porto', 'Coimbra'],
-            datasets: [{
-                label: 'Bebedouros',
-                data: [2, 6, 14],
-                backgroundColor: '#4DA6AC',
-                borderRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: false
-                }
-            },
-            scales: {
+}
 
-                y: {
-                    beginAtZero: true,
+async function createCityChart() {
 
-                    title: {
-                        display: true,
-                        text: 'Nº de Bebedouros',
-                        font: {
-                            size: 14,
-                            weight: 'bold'
-                        }
-                    },
+    const localsRes = await localsService.getAll()
+    const locals = localsRes.data
 
-                    ticks: {
-                        stepSize: 2
-                    }
-                },
+    const cities = {}
 
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Cidades',
-                        font: {
-                            size: 14,
-                            weight: 'bold'
-                        }
-                    }
-                }
+    points.forEach(point => {
 
-            }
+        const local = locals.find(l => l.id === point.local_id)
 
+        const cityName = local ? local.local_name : 'Desconhecido'
+
+        if (!cities[cityName]) {
+            cities[cityName] = 0
         }
+
+        cities[cityName]++
+    })
+
+    const labels = Object.keys(cities)
+    const data = Object.values(cities)
+
+    if (cityChart) {
+        cityChart.destroy()
     }
-)
 
-})
+    new Chart(
+        document.getElementById('cityChart'),
+        {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Bebedouros',
+                    data: data,
+                    backgroundColor: '#4DA6AC'
+                }]
+            }
+        }
+    )
+}
 
+function ratingFountains() {
+    const validPoints = points.filter(p => p.ratingAVG !== null)
+
+    if (validPoints.length === 0) return
+
+    const sorted = [...validPoints].sort((p1, p2) =>
+        (p2.ratingAVG - p1.ratingAVG) || (p2.ratingsAmount - p1.ratingsAmount)
+    )
+
+    //Best
+    const best = sorted[0]
+    bestFountain.value = {
+        name: best.point_name,
+        rating: Number(best.ratingAVG).toFixed(1),
+        reviews: best.ratingsAmount,
+        image: best.image || "/src/assets/images/defaultPointImage.jpg"
+    }
+
+    //worst
+    const worst = sorted[sorted.length - 1]
+    worstFountain.value = {
+        name: worst.point_name,
+        rating: Number(worst.ratingAVG).toFixed(1),
+        reviews: worst.ratingsAmount,
+        image: worst.image || "/src/assets/images/defaultPointImage.jpg"
+    }
+
+    //TOP FIVE
+    topFountains.value = sorted.slice(0, 5).map(p => ({
+        id: p.id,
+        name: p.point_name,
+        rating: Number(p.ratingAVG).toFixed(1)
+    }))
+}
 </script>
 
 <style scoped>
