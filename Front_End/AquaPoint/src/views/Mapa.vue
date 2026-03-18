@@ -2,6 +2,13 @@
     <h1>Mapa</h1>
 
     <div style="position: relative">
+        <div v-if="loadingMarkers" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.6); z-index: 999;
+               display: flex; align-items: center; justify-content: center;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">A carregar...</span>
+            </div>
+        </div>
+
         <div id="mapa" style="height: 80vh; width: 100%"></div>
 
         <!-- Botão Adicionar / Cancelar novo bebedouro -->
@@ -216,7 +223,7 @@
     const offcanvasClosedBySubmitButton = ref(false)
     const aquapointsList = ref([])
     const localValue = ref('')
-
+    const loadingMarkers = ref(false)
     const selectedMarker = ref(null)
     const userFavoritePoints = ref([])
 
@@ -361,6 +368,7 @@ console.log(favorites)
     }
 
     async function SetUpAquapointsOnMap() {
+        loadingMarkers.value = true
         aquapointsList.value = await GetAquapointsList()
         console.log(aquapointsList)
         
@@ -371,6 +379,8 @@ console.log(favorites)
                 }
             })
         }
+
+        loadingMarkers.value = false
     }
 
     function AddOrCancelMarkerClick(){
