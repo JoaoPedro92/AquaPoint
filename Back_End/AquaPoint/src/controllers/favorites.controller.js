@@ -86,6 +86,6 @@ async function findFavoriteById(id){
 }
 
 export async function findFavoritesByUserId(userId){
-    const [rows] = await pool.query("SELECT * FROM favorites WHERE user_id = ?", [userId]);
+    const [rows] = await pool.query("SELECT point_id FROM favorites WHERE user_id = ?", [userId]);
     return rows;
 }

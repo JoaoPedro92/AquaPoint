@@ -155,8 +155,17 @@ async function RegisterUser(){
     
   }
   catch(err){
+  console.error(err)
+
+  if (err.response) {
+    console.error(err.response.data)
+    toast.error(err.response.data.message || 'Erro no servidor')
+  } else if (err.message) {
+    toast.error(err.message)
+  } else {
     toast.error('Erro ao criar novo utilizador')
   }
+}
 
 }
 

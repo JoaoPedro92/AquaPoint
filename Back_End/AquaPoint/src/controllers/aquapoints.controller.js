@@ -55,7 +55,7 @@ export async function getUserFavoritePoints(req, res){
     const favoriteAquapoints = await Promise.all(
       favoriteUserPoints.map((point) => findAquapointById(point.point_id))
     )
-
+    
     res.json(favoriteAquapoints.map(formatPoints))
   }
   catch(err){

@@ -11,10 +11,8 @@
             </p>
 
             <!-- Rating -->
-             <p class="mt-4 mb-1" >
-                <div title="Classificação geral">
+             <p class="mt-4 mb-1" title="Classificação geral">
                 <StarsRating :rating="aquapoint.ratingAVG" :is-readonly="true" /><span class="ms-2">{{ aquapoint.ratingAVG }}</span>
-                </div>
             </p>
 
             <span class="badge rounded-2 text-nowrap mb-4" :style="GetPointStateStyles(aquapoint.state_name)" title="Estado do bebedouro">
