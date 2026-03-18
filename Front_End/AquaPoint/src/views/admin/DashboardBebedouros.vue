@@ -160,7 +160,7 @@
         </div>
         </div>
     </div>
-    <!-- Aquapoints table-->
+    <!-- Aquapoints table -->
     </div>
 
     <EditModal v-model:visible="showEditModal" :viewOnly="editAquapointViewOnly" :aquapoint="selectedAquaPoint"></EditModal>

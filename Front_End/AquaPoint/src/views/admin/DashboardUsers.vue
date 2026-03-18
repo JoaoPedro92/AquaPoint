@@ -87,6 +87,10 @@
         </div>
     </div>
     </div>
+
+    
+
+    <EditUserModal v-model:visible="showEditModal" :viewOnly="editUserViewOnly" :user="selectedUser" @user-updated="loadAllUsers"/>
 </template>
 
 <script setup>
@@ -94,22 +98,28 @@ import { ref, onMounted } from 'vue'
 import { useToast } from 'vue-toastification';
 import { userService } from '../../services/userService' 
 import { useAuth } from '../../utilities/useAuth'
+import EditUserModal from '../../components/EditUserModal.vue'
 
 const users = ref([])
 const toast = useToast()
 const loading = ref(true)
 const Auth = useAuth()
 const selectedUser = ref(null)
+const showEditModal = ref(false)
+const editUserViewOnly = ref(false)
 
 onMounted(async () => {
-    
-    users.value = (await userService.getAll()).data;
+    await loadAllUsers()
     loading.value = false
 })
 
+async function loadAllUsers(){
+    users.value = (await userService.getAll()).data;
+}
+
 function editUser(user){
-    console.log('editar', user)
-    // abrir popup para editar user
+    selectedUser.value = {...user}
+    showEditModal.value = true
 }
 
 async function deleteUser(userId){
@@ -141,3 +151,4 @@ async function markUserAsAdmin(userId, userIsAdmin){
 
 }
 </script>
+

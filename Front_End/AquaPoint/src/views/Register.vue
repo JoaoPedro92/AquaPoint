@@ -76,9 +76,9 @@
               </div>
             </div>
 
-            <!-- Nova Password -->
+            <!-- Repetir Password -->
             <div class="form-group mb-3">
-              <label class="form-label">Nova Password</label>
+              <label class="form-label">Repetir Password</label>
               <div class="password-wrapper">
                 <input v-model="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'"
                   class="form-control password-input" placeholder="Introduza uma password" required>
