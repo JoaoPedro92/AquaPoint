@@ -65,7 +65,7 @@ export async function deleteByUserAndPointId(req, res){
 
     try{
         const[result] = await pool.query(
-            'DELETE from favorites WHERE user_id = ? and point_id = ?', user_id, point_id
+            'DELETE from favorites WHERE user_id = ? and point_id = ?', [user_id, point_id]
         )
 
         res.status(200).json({ message: 'Favorite deleted successfully!', id: result.insertId})
