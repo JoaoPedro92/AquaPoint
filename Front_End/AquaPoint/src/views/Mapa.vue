@@ -2,11 +2,9 @@
     <h1>Mapa</h1>
 
     <div style="position: relative">
-        <div v-if="loadingMarkers" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.6); z-index: 999;
-               display: flex; align-items: center; justify-content: center;">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">A carregar...</span>
-            </div>
+        <!-- Loading Spinner while loading markers on map -->
+        <div v-if="loadingMarkers" class="loading-markers-spinner">
+            <img src="/src/assets/images/aqua_point_logo_white.png" class="loading-logo" />
         </div>
 
         <div id="mapa" style="height: 80vh; width: 100%"></div>
@@ -729,5 +727,29 @@ console.log(favorites)
         border-radius: 12px 12px 0 0; /* Ou 16px */
         object-fit: cover; /* Ou fill */
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    .loading-markers-spinner{
+        position: absolute; 
+        top: 0; left: 0; 
+        width: 100%; 
+        height: 100%; 
+        background: rgba(106, 106, 106, 0.655); 
+        z-index: 999;
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+    }
+
+    .loading-logo {
+        width: 20%;
+        animation: pulse 1.2s ease-in-out infinite;
+        filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25));
+    }
+
+    @keyframes pulse {
+        0%   { transform: scale(1);    opacity: 1; }
+        50%  { transform: scale(1.2);  opacity: 0.6; }
+        100% { transform: scale(1);    opacity: 1; }
     }
 </style>
