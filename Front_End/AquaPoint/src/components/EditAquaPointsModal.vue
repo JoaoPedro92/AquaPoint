@@ -6,7 +6,7 @@
             <section class="main-container container-spacer">
                 <div class="container">
                     <div class="spacer"></div>
-                    <h1 class="main-titles">EDITAR BEBEDOURO</h1>
+                    <h1 class="main-titles">{{props.title}}</h1>
                     <div class="spacer"></div>
 
                     <div class="row">
@@ -124,6 +124,10 @@
         viewOnly: {
             type: Boolean,
             default: false
+        },
+        title: {
+            type: String,
+            default: 'EDITAR BEBEDOURO'
         },
         aquapoint: {
             type: Object,

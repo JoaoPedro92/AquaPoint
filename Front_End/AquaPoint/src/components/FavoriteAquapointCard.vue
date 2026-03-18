@@ -1,5 +1,5 @@
 <template>
-    <div class="featured-product-card">
+    <div class="featured-product-card" @click="showPointDetailsModal = true">
         <div class="featured-product-image">
             <img :src="aquapoint.image" alt="Imagem do bebedouro favorito"/>
         </div>
@@ -11,25 +11,27 @@
             </p>
 
             <!-- Rating -->
-             <p class="mt-4 mb-1">
+             <p class="mt-4 mb-1" >
+                <div title="Classificação geral">
                 <StarsRating :rating="aquapoint.ratingAVG" :is-readonly="true" /><span class="ms-2">{{ aquapoint.ratingAVG }}</span>
+                </div>
             </p>
 
-            <span class="badge rounded-2 text-nowrap mb-4" :style="GetPointStateStyles(aquapoint.state_name)">
+            <span class="badge rounded-2 text-nowrap mb-4" :style="GetPointStateStyles(aquapoint.state_name)" title="Estado do bebedouro">
                 <i :class="GetPointStateIcon(aquapoint.state_name,)"></i>
                 {{ aquapoint.state_name }}
             </span>
             
             <div class="d-flex justify-content-between align-items-center">
-                <a href="#" class="btn btn-primary flex-grow-1 btn-sm me-4">Ver detalhes</a>
+                <a class="btn btn-primary flex-grow-1 btn-sm me-4" @click="showPointDetailsModal = true">Ver detalhes</a>
 
-                <i class="bi bi-heart-fill text-danger" style="cursor: pointer; font-size: 20px;" @click="RemoveFavoritePoint"></i>         
+                <i class="bi bi-heart-fill text-danger" style="cursor: pointer; font-size: 20px;" @click.stop data-bs-toggle="modal" data-bs-target="#deleteFavoriteModal" title="Remover favorito"></i>         
             </div>
         </div>
     </div>
 
     <!-- Delete Aquapoints Favorite Confirmation Modal -->
-        <div class="modal fade" id="deletFavoriteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteFavoriteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
             <div class="modal-header">
@@ -37,7 +39,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                Tem a certeza que pretende tirar como favorito o bebedouro <strong>"{{ selectedAquaPoint?.point_name }}"</strong>?
+                Tem a certeza que pretende tirar como favorito o bebedouro <strong>"{{ aquapoint?.point_name }}"</strong>?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" data-bs-dismiss="modal" @click="RemoveFavoritePoint">Sim</button>
@@ -45,7 +47,9 @@
             </div>
             </div>
         </div>
-        </div>
+    </div>
+
+    <AquapointDetailsModal v-model:visible="showPointDetailsModal" :title="'DETALHES DO BEBEDOURO'" :aquapoint="aquapoint" :view-only="true" />
 </template>
 
 <script setup>
@@ -53,6 +57,7 @@
     import { GetPointStateIcon, GetPointStateStyles } from '../utilities/tools';
     import { favoritesService } from '../services/favoritesService';
     import StarsRating from './StarsRating.vue';
+    import AquapointDetailsModal from '../components/EditAquaPointsModal.vue'
     import { useToast } from 'vue-toastification';
     import { useAuth } from '../utilities/useAuth';
 
@@ -63,16 +68,20 @@
         }
     })
 
+    const emit = defineEmits(['favoriteChanged'])
+
     const Auth = useAuth()
     const toast = useToast()
+    const showPointDetailsModal = ref(false)
 
-    async function RemoveFavoritePoint(point_id){
+    async function RemoveFavoritePoint(){
         try{
-            await favoritesService.deleteByUserAndPointId({user_id: Auth.user.id, point_id: aquapoint.id})
+            await favoritesService.deleteByUserAndPointId({user_id: Auth.user.id, point_id: props.aquapoint.id})
+            emit('favoriteChanged')
             toast.success('Favorito apagado com sucesso')
         }
         catch(err){
-            toast.error('Erro ao apagar bebedouro favorito')
+            toast.error(`Erro ao apagar bebedouro favorito ${err.message}`)
         }
     }
 </script>
