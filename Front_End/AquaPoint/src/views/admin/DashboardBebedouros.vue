@@ -163,7 +163,7 @@
     <!-- Aquapoints table -->
     </div>
 
-    <EditModal v-model:visible="showEditModal" :viewOnly="editAquapointViewOnly" :aquapoint="selectedAquaPoint"></EditModal>
+    <EditModal v-model:visible="showEditModal" :viewOnly="editAquapointViewOnly" :aquapoint="selectedAquaPoint" @pointUpdated="loadAquapoints()"></EditModal>
 </template>
 
 <script setup>
@@ -235,7 +235,6 @@ async function loadAquapoints() {
     loading.value = true
     allAquapoints.value = (await aquapointService.getAll()).data
     pendingPointsCount.value = allAquapoints.value.filter(a => a.state_id === 3).length
-    console.log(showPendingOnly.value)
     if(showPendingOnly.value){ aquapoints.value = allAquapoints.value.filter(a => a.state_id === 3) }
     else{ aquapoints.value = allAquapoints.value.filter(a => a.state_id !== 3) }
 

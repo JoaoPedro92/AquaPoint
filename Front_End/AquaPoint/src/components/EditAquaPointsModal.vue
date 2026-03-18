@@ -131,7 +131,7 @@
         }
     })
 
-    const emit = defineEmits(['update:visible'])
+    const emit = defineEmits(['update:visible', 'pointUpdated'])
 
     const nameValue = ref('')
     const stateValue = ref('')
@@ -300,17 +300,7 @@
             localId = zoneData.id
         }
 
-        if (localId) {
-            /*console.log("Dados a submeter:", {
-                id: props.aquapoint.id,
-                point_name: nameValue.value,
-                state_id: stateValue.value,
-                point_trust: trustValue.value,
-                latitude: latitudeValue.value,
-                longitude: longitudeValue.value,
-                local_id: localId,
-                image: newAquapointImage.value
-            })*/
+        if (localId) {           
             aquapointService.update(props.aquapoint.id, {
                 point_name: nameValue.value,
                 state_id: stateValue.value,
@@ -320,12 +310,10 @@
                 local_id: localId,
                 image: newAquapointImage.value
             }).then(() => {
-                toast.success('Dados atualizados com sucesso.')
+                emit('pointUpdated')
                 ChangeVisibility(false)
+                toast.success('Dados atualizados com sucesso.')
 
-                setTimeout(() => {
-                    window.location.reload()
-                }, 2000)
             }).catch(error => {
                 console.error("Erro ao atualizar bebedouro:", error)
             })
