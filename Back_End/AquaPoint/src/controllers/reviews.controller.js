@@ -78,6 +78,23 @@ export async function createReview(req, res){
   }
 }
 
+// DELETE /reviews
+export async function deleteReview(req, res){
+  const id = Number(req.params.id)
+
+  try{
+    const[result] = await pool.query(
+      'DELETE from reviews WHERE id = ?',
+      [id]
+    )
+
+    res.status(200).json({ message: 'Review deleted successfully' })
+  }
+  catch(err){
+    return res.status(500).json({ error: err.message })
+  }
+}
+
 async function returnAllReviews(){
   return await pool.query(`
       SELECT 
