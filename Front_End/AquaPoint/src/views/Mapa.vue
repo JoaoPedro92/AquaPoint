@@ -20,117 +20,7 @@
     </div>
 
     <!-- Modal detalhes do bebedouro selecionado -->
-    <div v-if="showAquapointPopup" class="modal-overlay" @click="showAquapointPopup = false">
-        <div class="modal-box" @click.stop>
-            <button class="btn-close" @click="CloseAquaPointPopUp()"></button>
-            
-            <!-- Aquapoint image and infos -->
-            <div class="text-center">
-                <img :src="selectedAquapoint.image" height="300" width="370" alt="Imagem do bebedouro" class="point-image">
-            </div>
-            <br><br>
-
-            <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-2">
-                    <h4>{{ selectedAquapoint.point_name }}</h4>
-                    <i v-if="selectedAquapoint.state_name == 'Inativo'" class="bi bi-exclamation-octagon-fill text-danger mb-1" title="Estado Inativo"></i>
-                    <i v-if="selectedAquapoint.state_name == 'Necessita manutenção'" class="bi bi-exclamation-octagon-fill text-warning mb-1" title="Estado Necessita manutenção"></i>
-                    <!-- Favorite Button -->
-                    <i :class="isFavorite ? 'bi bi-heart-fill text-danger': 'bi bi-heart text-danger'" v-on:click="ChangeFavoriteState()"  class="mb-1 ms-2" style="font-size: 20px; cursor: pointer"></i>
-                    
-                   
-                </div>
-                <!-- Google Maps Directions and Report Flag -->
-                <div class="d-flex align-items-center gap-2 mb-2">
-                     <a  :href="GetAquapointGoogleMapsDirections(selectedAquapoint.latitude, selectedAquapoint.longitude)" target="_blank">
-                        <i class="bi bi-geo-alt-fill ms-2" style="font-size: 20px; cursor: pointer; color: var(--aquapoint-marker-blue);"></i>
-                    </a>
-                    <div class="hex-bg">                        
-                        <i class="bi bi-flag-fill text-white" style="font-size: 0.7rem" title="Reportar" v-on:click="ReportProblem"></i>
-                    </div>
-                </div>
-                <!------------------->
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <i class="bi bi-star-fill text-warning"></i>
-                    <span class="ms-1">{{ selectedAquapoint.ratingAVG|| 0.0}}</span> <span class="ms-1" style="font-size:0.8rem"> - {{selectedAquapoint.ratingsAmount|| 0.0 }} opiniões</span>
-                </div>
-                <span>15min - 3,8km</span>
-            </div>
-            <!----------------------------------------->
-
-            <!-- Nivel de Credibilidade -->
-            <div class="mt-3">
-                <span style="font-size: 0.8rem">Nivel de Credibilidade: <strong>({{ selectedAquapoint.trust_name }})</strong></span>
-                <div class="d-flex">
-                    <div class="progress" style="height: 12px; width: 30%; cursor:pointer;" title="Clicar para votar na credibilidade" v-on:click="ShowVoteTrustLevel">
-                        <div 
-                            class="progress-bar" 
-                            :class="{ 
-                                'bg-orange': selectedAquapoint?.point_trust === 2,
-                                'bg-warning': selectedAquapoint?.point_trust === 3,
-                                'bg-success': selectedAquapoint?.point_trust === 4
-                            }"
-                            style="width: 100%;">
-                        </div>
-                    </div>
-
-                    <div v-if="showTrustLevelVote" class="vote-trustLevelBox">
-                        <div class="d-flex gap-2 ms-2">
-                            <button class="btn btn-sm btn-success btn-trustLevelVote" v-on:click="VoteTrustLevel(true)">
-                                <i class="bi bi-hand-thumbs-up-fill me-1"></i>Existe</button>
-                            <button class="btn btn-sm btn-danger btn-trustLevelVote" v-on:click="VoteTrustLevel(false)">
-                               <i class="bi bi-hand-thumbs-down-fill me-1" ></i>Não Existe</button>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!----------------------------->
-
-
-            <!-- Opinião dos Utilizadores -->
-             <h5 class="mt-4">Opinião dos Utilizadores</h5>
-            
-             <template v-if="reviews.length === 0">
-                <p class="text-muted">Ainda não há opiniões para este aquapoint.</p>
-             </template>
-             <template v-else>
-                <div style="max-height: 400px; overflow-y: auto;">
-                    <div v-for="review in reviews" :key="review.id">
-                        <div class="user-review-card">
-                            <div class="d-flex align-items-center">
-                                <img :src="review.profilePicture || '/src/assets/images/user_image.png'" width="20" height="20" alt="imagem utilizador" style="background-color: white; border-radius: 50%; object-fit: cover;">
-                                <span class="ms-2">{{ review.name }}</span>
-                                <span class="ms-auto" style="font-size:0.8rem">{{ review.created_at }}</span>
-                            </div>
-
-                            <!-- Stars Rating -->
-                            <span :title="review.rating + ' estrelas'">
-                                <StarsRating :rating="review.rating" :isReadonly="true"></StarsRating> 
-                            </span>
-
-                            <p class="mb-0">{{ review.comment }}</p>
-                        </div>
-                    </div>
-                </div>
-             </template>
-            <!------------------------------------->
-
-            <!-- Nova avaliação do bebedouro -->
-             <h5 class="mt-5 mb-0">AVALIA ESTE BEBEDOURO</h5>
-             <p class="mb-1" style="font-size: 0.9rem; color:gray;">Partilha a tua experiência</p>
-
-             <StarsRating v-model:rating="newReviewNumber" ></StarsRating>
-             
-             <br>
-
-             <textarea v-model="reviewText" class="form-control mt-3" placeholder="Escreve um comentário" id="exampleFormControlTextarea1" rows="4"></textarea>
-             <button class="btn btn-primary mt-3" style="width:100%; background-color: var(--aquapoint-logo-blue); border: none;" v-on:click="SubmitReview">SUBMETER</button>
-             <!---------------------------------->
-        </div>
-    </div>
+    
 
     <!-- Offcanvas Informações Adicionar Bebedouro-->
     <div class="offcanvas offcanvas-end" style="width:500px;" ref="offcanvasRef" tabindex="-1">
@@ -169,7 +59,7 @@
         </div>
     </div>
 
-    <ReportProblemModal v-model:visible="showReportProblemModal" :aquapoint="selectedAquapoint?.id"></ReportProblemModal>
+    <AquapointDetailsModal v-show="selectedAquapoint" v-model:visible="showAquapointDetailsModal" :aquapoint="selectedAquapoint" @favoriteChanged="ChangeFavoriteSelectedMarker" />
 </template>
 
 <script setup>
@@ -178,32 +68,25 @@
     import { Offcanvas } from 'bootstrap';
     import L, { icon } from 'leaflet'
     import 'leaflet/dist/leaflet.css'
-    import StarsRating from '../components/StarsRating.vue'
-    import { imageUrlToBase64, GetAquapointGoogleMapsDirections } from '../utilities/tools';
     import { useToast } from 'vue-toastification';
     import { useAuth } from '../utilities/useAuth';
     import { useModalStore } from '../utilities/modal';
-    import ReportProblemModal from '../components/ReportProblemModal.vue';
     import { userService } from '../services/userService';
     import { aquapointService } from '../services/aquapointService' 
-    import { reviewsService } from '../services/reviewsService' 
     import { localsService } from '../services/localsService';
     import { zonesService } from '../services/zonesService';
     import { point } from 'leaflet';
     import { favoriteService } from '../services/favoriteService';
+    import AquapointDetailsModal from '../components/AquapointDetailsModal.vue';
 
-    const loginModal = useModalStore()
+
+    const useModal = useModalStore()
     const Auth = useAuth()
     const toast = useToast()
-    const reviews = ref([])
     const mapaRef = ref(null)
-    const newReviewNumber = ref(0)
-    const reviewText = ref('')
+   
     const selectedAquapoint = ref(null)
     const showAquapointPopup = ref(false)
-    const isFavorite = ref(false)
-    const showReportProblemModal = ref(false)
-    const showTrustLevelVote = ref(false)
     const AddNewMode = ref(false)
     const offcanvasRef = ref(null)
     let offcanvasInstance = null
@@ -224,6 +107,7 @@
     const loadingMarkers = ref(false)
     const selectedMarker = ref(null)
     const userFavoritePoints = ref([])
+    const showAquapointDetailsModal = ref(false)
 
     onMounted(async() => {
         // Inicializa o offcanvas das informações no momento de adicionar um novo bebedouro
@@ -262,9 +146,7 @@
         })
 
         if (Auth.isLoggedIn) {
-            let favorites = await GetUserFavoritePoints()
-            
-            userFavoritePoints.value = favorites || []
+            await GetUserFavoritePoints()
         }
 
         SetUpAquapointsOnMap()
@@ -285,15 +167,19 @@
         )
         .addTo(mapaRef.value)
         .on('click', async () => {
-            reviews.value = await GetReviewsByPointId(point.id)
 
-            isFavorite.value = userFavoritePoints.value.find(p => p.point_id === point.id)
-  
             selectedMarker.value = marker
             selectedAquapoint.value = point
-            showAquapointPopup.value = true
-            showTrustLevelVote.value = false
+            //showAquapointPopup.value = true
+            showAquapointDetailsModal.value = true
         })
+    }
+
+    async function ChangeFavoriteSelectedMarker(){
+        selectedMarker.value.remove()
+        selectedAquapoint.value = (await aquapointService.getById(selectedAquapoint.value.id)).data
+        await GetUserFavoritePoints()
+        AddMarkerToMap(selectedAquapoint.value)
     }
 
     function GetAquapointMarker(point) {
@@ -336,13 +222,14 @@
     }
 
     async function GetUserFavoritePoints(){
-        var favorites = await favoriteService.getByUserId(Auth.user.id)
-console.log(favorites)
+        userFavoritePoints.value = (await favoriteService.getByUserId(Auth.user.id)).data || null
+
+        /*var favorites = await favoriteService.getByUserId(Auth.user.id)
         if (favorites) {
             return favorites.data
         }
 
-        return null
+        return null*/
     }
 
     async function GetAquapointsList(){
@@ -383,50 +270,12 @@ console.log(favorites)
 
     function AddOrCancelMarkerClick(){
         if(!Auth.isLoggedIn){
-            loginModal.openLoginModal()
+            useModal.openLoginModal()
             return
         }
 
         AddNewMode.value = !AddNewMode.value
-    }
-
-    async function SubmitReview(){
-        if (!Auth.isLoggedIn) {
-            loginModal.openLoginModal()
-            return
-        }
-
-        if (reviewText.value.trim() === '') {
-            toast.error('Por favor, escreva um comentário antes de submeter a sua opinião.')
-            return
-        }
-
-        try {
-            await reviewsService.create({
-                user_id: Auth.user.id,
-                point_id: selectedAquapoint.value.id,
-                rating: newReviewNumber.value,
-                comment: reviewText.value
-            })
-
-            toast.success('Obrigado pela sua opinião!')
-
-            // Refresh das reviews para mostrar a nova review submetida
-            reviews.value = await GetReviewsByPointId(selectedAquapoint.value.id)
-
-        } catch (error) {
-            toast.error('Ocorreu um erro ao submeter a sua opinião. Por favor, tente novamente.')
-        }
-        
-        newReviewNumber.value = 0
-        reviewText.value = ''
-    }
-
-    function ReportProblem(){
-        console.log('Report Problem clicked')
-
-        showReportProblemModal.value = true
-    }
+    }  
 
     async function CloseAquaPointPopUp(){
         showAquapointPopup.value = false
@@ -435,11 +284,6 @@ console.log(favorites)
         /// funciona mas dá um pequeno delay e um efeito estranho de os marcadores desaparecerem e voltarem a aparecer, por isso optei por não limpar os marcadores ao fechar o popup
         /*ClearMapMarkers()
         SetUpAquapointsOnMap()*/
-    }
-
-    function ShowVoteTrustLevel(){
-        console.log('VoteTrustLevel clicked')
-        showTrustLevelVote.value = !showTrustLevelVote.value
     }
 
     function openOffcanvas(){
@@ -473,32 +317,7 @@ console.log(favorites)
         
     }
 
-    async function ChangeFavoriteState(){
-        if (!Auth.isLoggedIn) {
-            loginModal.openLoginModal()
-            return
-        }
-
-        if (isFavorite.value) {
-            await favoriteService.delete({ user_id: Auth.user.id, point_id: selectedAquapoint.value.id })
-            toast.info('Bebedouro removido dos favoritos.')
-        } else {
-            await favoriteService.create({ user_id: Auth.user.id, point_id: selectedAquapoint.value.id })
-            toast.success('Bebedouro adicionado aos favoritos.') 
-        }
-
-        isFavorite.value = !isFavorite.value
-
-        if (Auth.isLoggedIn) {
-            let favorites = await GetUserFavoritePoints()
-            
-            userFavoritePoints.value = favorites || []
-        }
-
-        if (selectedMarker.value) {
-            selectedMarker.value.setIcon(GetAquapointMarker(selectedAquapoint.value))
-        }
-    }
+    
 
     async function SubmitNewAquapoint(){
         if (!newAquapointName.value || newAquapointName.value.trim() === ''){
@@ -646,88 +465,10 @@ console.log(favorites)
             popupAnchor: [0, -40]
         })
     }
-
-    async function VoteTrustLevel(vote){
-        if(vote === true){
-            if(selectedAquapoint.value.point_trust < 4){
-                await aquapointService.changeTrustLevel(selectedAquapoint.value.id, { point_trust: selectedAquapoint.value.point_trust + 1 })
-            }
-        }
-        else{
-            if(selectedAquapoint.value.point_trust > 1){
-                await aquapointService.changeTrustLevel(selectedAquapoint.value.id, { point_trust: selectedAquapoint.value.point_trust - 1 })
-            }
-        }
-
-        toast.info('Voto realizado com sucesso. Obrigado pelo contributo.')
-        showTrustLevelVote.value = false;
-        selectedAquapoint.value = { ... (await aquapointService.getById(selectedAquapoint.value.id)).data }
-    }
 </script>
 
 <style scoped>
-    .modal-overlay {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0,0,0,0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-    }
-    .modal-box {
-        background: white;
-        padding: 2rem;
-        border-radius: 8px;
-        width: 600px;
-        max-height: 95%;
-        position: relative;
-        overflow-y: auto;
-    }
-
-    .btn-close {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-    }
-
-    .user-review-card {
-        background-color: rgb(216, 216, 216);
-        padding: 10px;
-        margin: 10px 0px 10px 0px;
-        border-radius: 12px;
-        border: 1px solid #e9ecef;
-        transition: box-shadow 0.2s;
-    }
-
-    .user-review-card:hover{
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-
-    .btn-trustLevelVote{
-        padding: 2px 5px;
-        font-size: 0.7rem;
-    }
-
-    .aquapoint-image-preview {
-        position: relative;
-        margin-bottom: 10px;
-        width: 50%;
-        left: 25%;
-        border-radius: 8px;
-        object-fit: contain;
-    }
-
-    .modal-box > img {
-        object-fit: cover;
-    }
-
-    .point-image{
-        border-radius: 12px 12px 0 0; /* Ou 16px */
-        object-fit: cover; /* Ou fill */
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-    }
+    
 
     .loading-markers-spinner{
         position: absolute; 
