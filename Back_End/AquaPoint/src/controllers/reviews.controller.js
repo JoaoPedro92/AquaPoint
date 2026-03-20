@@ -41,6 +41,22 @@ export async function getReviewByPointId(req, res) {
   }
 }
 
+// GET /reviews/user/{id}
+export async function getReviewsByUserId(req, res){
+  const userId = Number(req.params.id)
+
+  try{
+    const [reviews] = await findReviewsByUserId(userId)
+    if(!reviews) return res.status(404).json({ error: `No Reviews found for user with ID: ${userId} not found`});
+
+    res.json(reviews.map(formatReview));
+  }
+  catch(err){
+    console.log(err.message)
+    res.status(500).json(err.message);
+  }
+}
+
 // POST /reviews
 export async function createReview(req, res){
   const { user_id, rating, comment, point_id } = req.body;
@@ -107,6 +123,25 @@ async function findReviewsByAquapointId(id){
       INNER JOIN users ON reviews.user_id = users.id
       WHERE reviews.point_id = ? ORDER BY reviews.createdAt DESC
       `, [id]      
+  );
+}
+
+async function findReviewsByUserId(userId){
+  return await pool.query(`
+      SELECT 
+        users.id,
+        users.name,
+        users.profilePicture,
+        reviews.id,
+        reviews.rating,
+        reviews.comment,
+        reviews.point_id,
+        reviews.createdAt
+      FROM reviews
+      INNER JOIN users ON reviews.user_id = users.id
+      WHERE reviews.user_id = ? 
+      ORDER BY reviews.createdAt DESC
+      `, [userId]      
   );
 }
 
