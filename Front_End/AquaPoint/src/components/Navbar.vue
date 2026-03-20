@@ -61,11 +61,9 @@
             </div>
         </div>
     </div>
-
-
   </nav>
 
-<FavoriteAquapointModal v-model:visible="showUserFavoriteAquapoints" :favoritePointsList="userFavoritePoints"/>
+    <FavoriteAquapointModal v-model:visible="showUserFavoriteAquapoints" :favoritePointsList="userFavoritePoints"/>
   
   </template>
 
