@@ -82,6 +82,13 @@
                                             <input type="submit" value="Submeter" class="btn btn-form bg-primary" style="width: 100% !important; height: 40px !important; margin-top: 4%; color: white;" tabindex="0">
                                         </div>
                                     </div>
+                                    <div v-else>
+                                        <div class="form-group">
+                                            <button type="button" class="btn btn-outline-primary w-100" style="height: 40px; margin-top: 4%;" @click="OpenGoogleMapsInOtherTabWithDirections(aquapoint.latitude, aquapoint.longitude)">
+                                                <i class="bi bi-geo-alt me-2"></i>Obter direções
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </form>
                         </div><!-- Col end -->
@@ -107,7 +114,7 @@
     import { trustLevelService } from '../services/trustLevelsService'
     import { statesService } from '../services/statesService'
     import { useToast } from 'vue-toastification';
-    import { GetPointStateIcon, GetTrustLevelIcon } from '../utilities/tools'
+    import { GetPointStateIcon, GetTrustLevelIcon, OpenGoogleMapsInOtherTabWithDirections } from '../utilities/tools'
     import vSelect from 'vue3-select'
     import 'vue3-select/dist/vue3-select.css'
 

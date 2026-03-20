@@ -236,7 +236,7 @@
     })
 
     async function LoadAllUserFavoritePoints(){
-            userPointsFavorite.value = (await aquapointService.getUserFavoritePoints(Auth.user.id)).data
+        userPointsFavorite.value = (await aquapointService.getUserFavoritePoints(Auth.user.id)).data
     }
 
     async function UpdateProfileData(){

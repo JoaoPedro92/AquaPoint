@@ -42,7 +42,7 @@
                 </div>
                 <!-- Google Maps Directions and Report Flag -->
                 <div class="d-flex align-items-center gap-2 mb-2">
-                     <a  :href="`https://www.google.com/maps/dir/?api=1&destination=${selectedAquapoint.latitude},${selectedAquapoint.longitude}&travelmode=walking`" target="_blank">
+                     <a  :href="GetAquapointGoogleMapsDirections(selectedAquapoint.latitude, selectedAquapoint.longitude)" target="_blank">
                         <i class="bi bi-geo-alt-fill ms-2" style="font-size: 20px; cursor: pointer; color: var(--aquapoint-marker-blue);"></i>
                     </a>
                     <div class="hex-bg">                        
@@ -179,7 +179,7 @@
     import L, { icon } from 'leaflet'
     import 'leaflet/dist/leaflet.css'
     import StarsRating from '../components/StarsRating.vue'
-    import { imageUrlToBase64 } from '../utilities/tools';
+    import { imageUrlToBase64, GetAquapointGoogleMapsDirections } from '../utilities/tools';
     import { useToast } from 'vue-toastification';
     import { useAuth } from '../utilities/useAuth';
     import { useModalStore } from '../utilities/modal';

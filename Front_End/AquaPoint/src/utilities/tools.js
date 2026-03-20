@@ -50,3 +50,11 @@ export function GetTrustLevelIcon(trust){
     return trustLevel[trust] || ''
 }
 
+export function GetAquapointGoogleMapsDirections(latitude, longitude){
+    return `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&travelmode=walking`
+}
+
+export function OpenGoogleMapsInOtherTabWithDirections(latitude, longitude){
+    window.open(GetAquapointGoogleMapsDirections(latitude, longitude), '_blank')
+}
+
