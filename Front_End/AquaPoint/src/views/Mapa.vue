@@ -59,7 +59,7 @@
         </div>
     </div>
 
-    <AquapointDetailsModal v-show="selectedAquapoint" v-model:visible="showAquapointDetailsModal" :aquapoint="selectedAquapoint" @favoriteChanged="ChangeFavoriteSelectedMarker" />
+    <AquapointDetailsModal v-model:visible="showAquapointDetailsModal" v-model:aquapoint="selectedAquapoint" :aquapoint="selectedAquapoint" @favoriteChanged="ChangeFavoriteSelectedMarker" />
 </template>
 
 <script setup>
@@ -169,7 +169,7 @@
         .on('click', async () => {
 
             selectedMarker.value = marker
-            selectedAquapoint.value = point
+            selectedAquapoint.value = (await aquapointService.getById(point.id)).data
             //showAquapointPopup.value = true
             showAquapointDetailsModal.value = true
         })

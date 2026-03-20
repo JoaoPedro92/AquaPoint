@@ -6,7 +6,7 @@
 
         <div class="p-3">
             <!-- Aquapoint name -->
-            <p class="fw-medium mb-2">{{ aquapoint.point_name }}</p>
+            <p class="fw-medium mb-2">{{ aquapoint?.point_name }}</p>
 
             <!-- Badges Type Interaction and Aquapoint's state -->
             <div class="d-flex gap-2 flex-wrap mb-3">

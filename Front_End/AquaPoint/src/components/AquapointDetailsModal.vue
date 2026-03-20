@@ -121,7 +121,7 @@
                 style="width:100%; background-color: var(--aquapoint-logo-blue); border: none;"
                 v-on:click="SubmitReview">SUBMETER</button>
             <!---------------------------------->
-
+            
             <ReportProblemModal v-model:visible="showReportProblemModal" :aquapoint="aquapoint?.id" />
 
         </div>
@@ -153,7 +153,7 @@ const props = defineProps({
     }
 })
 
-const emit = defineEmits(['update:visible', 'favoriteChanged'])
+const emit = defineEmits(['update:visible', 'update:aquapoint', 'favoriteChanged'])
 
 
 const Auth = useAuth()
@@ -170,9 +170,9 @@ const showReportProblemModal = ref(false)
 
 watch(() => props.visible, async (newValue) => {
     if (newValue) {
+        await GetReviewsByPointId(props.aquapoint.id)
         userFavoritePoints.value = await GetUserFavoritePoints() || []
         isFavorite.value = userFavoritePoints.value.some(p => p.point_id === props.aquapoint.id)
-        console.log(`Favorite: ${isFavorite.value}`)
     }
 })
 
@@ -196,10 +196,6 @@ async function ChangeFavoriteState() {
 
     emit('favoriteChanged')
     isFavorite.value = !isFavorite.value
-
-    /*if (selectedMarker.value) {
-        selectedMarker.value.setIcon(GetAquapointMarker(props.aquapoint))
-    }*/
 }
 
 async function GetReviewsByPointId(pointId) {
@@ -278,7 +274,8 @@ async function VoteTrustLevel(vote) {
 
     toast.info('Voto realizado com sucesso. Obrigado pelo contributo.')
     showTrustLevelVote.value = false;
-    props.aquapoint = { ... (await aquapointService.getById(props.aquapoint.id)).data }
+    const updatedData = (await aquapointService.getById(props.aquapoint.id)).data
+    emit('update:aquapoint', updatedData)
 }
 </script>
 
