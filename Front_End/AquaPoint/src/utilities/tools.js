@@ -19,6 +19,16 @@ export function GetPointStateStyles(state) {
     return styles[state] || {}
 }
 
+export function GetPointStateColor(state){
+    const styles = {
+        'Funcional': '#166534',
+        'Pendente': '#fef9c3',
+        'Necessita manutenção': '#f97316',
+        'Inativo': '#b91c1c'
+    }
+    return styles[state] || {}
+}
+
 export function GetPointStateIcon(state, changeBgColor = false){
     const icons = {
         'Inativo': 'bi-slash-circle-fill',
@@ -50,3 +60,18 @@ export function GetTrustLevelIcon(trust){
     return trustLevel[trust] || ''
 }
 
+export function GetAquapointGoogleMapsDirections(latitude, longitude){
+    return `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&travelmode=walking`
+}
+
+export function OpenGoogleMapsInOtherTabWithDirections(latitude, longitude){
+    window.open(GetAquapointGoogleMapsDirections(latitude, longitude), '_blank')
+}
+
+export function formatDate(date) {
+  return new Date(date).toLocaleDateString('pt-PT', { 
+    day: '2-digit', 
+    month: 'long', 
+    year: 'numeric' 
+  })
+}

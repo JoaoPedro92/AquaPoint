@@ -54,39 +54,50 @@
                     <li>
                         <router-link to="/user/personal-area" class="dropdown-item">Perfil</router-link>
                     </li>
-                    <li><router-link to="/user/personal-area" class="dropdown-item">Ver Favoritos</router-link></li>
+                    <li @click="OpenFavoriteAquapointsModal"><router-link class="dropdown-item">Ver Favoritos</router-link></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item text-danger" style="cursor:pointer;" @click="LogoutUser">Logout</a></li>
                 </ul>
             </div>
         </div>
     </div>
-
   </nav>
 
+    <FavoriteAquapointModal v-model:visible="showUserFavoriteAquapoints" :favoritePointsList="userFavoritePoints"/>
   
   </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import LoginModal from './LoginModal.vue';
-import { useAuth } from '../utilities/useAuth';
-import { useModalStore } from '../utilities/modal';
+    import { ref } from 'vue';
+    import { useRouter } from 'vue-router';
+    import LoginModal from './LoginModal.vue';
+    import FavoriteAquapointModal from './FavoriteAquapointModal.vue';
+    import { useAuth } from '../utilities/useAuth';
+    import { useModalStore } from '../utilities/modal';
+    import { aquapointService } from '../services/aquapointService';
 
-const loginModal = useModalStore()
-const router = useRouter()
-const Auth = useAuth()
-const loginModalVisible = ref(false)
-const showUserMenu = ref(false)
+    const loginModal = useModalStore()
+    const router = useRouter()
+    const Auth = useAuth()
+    const loginModalVisible = ref(false)
+    const showUserMenu = ref(false)
+    const userFavoritePoints = ref(null)
+    const showUserFavoriteAquapoints = ref(false)
 
-function LogoutUser(){
-    try{
-        Auth.logout()
-        router.push('/')
+    async function OpenFavoriteAquapointsModal(){
+        if(Auth.isLoggedIn){
+            userFavoritePoints.value = (await aquapointService.getUserFavoritePoints(Auth.user.id)).data
+            showUserFavoriteAquapoints.value = true
+        }
     }
-    catch (e){
-        alert(e)
+
+    function LogoutUser(){
+        try{
+            Auth.logout()
+            router.push('/')
+        }
+        catch (e){
+            alert(e)
+        }
     }
-}
 </script>

@@ -90,7 +90,7 @@
             <div class="spacer"></div>
             <h1 class="main-titles">BEBEDOUROS FAVORITOS</h1>
             <div class="spacer"></div>
-            
+
             <div class="row g-3 ">
                 <div class="col-md-4 pe-3 mb-3" v-for="aquapoint in userPointsFavorite" :key="aquapoint.id">
                     <FavoriteAquapointCard :aquapoint="aquapoint" :favoriteChanged="LoadAllUserFavoritePoints"/>
@@ -102,110 +102,16 @@
         <div class="container">
             <div class="spacer"></div>
             <div class="spacer"></div>
-
-            <h1 class="main-titles">INTERAÇÕES RECENTES</h1>
             
-            <div class="row">
-                <div class="col-lg-12" style="display: inline-block;">
-                    <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
-                        <div class="imageArea">
-                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
-                        </div>
-                        
-                        <h1>Bebedouro da praça</h1>
-                        <span><b>Tipo de interação</b>: Comentário</span>
-                        <br>
-                        <span><b>Interação</b>: "O bebedouro está em boas condições, gostei bastante!"</span>
-                    
-                        <input type="submit" value="Verificar" class="btn btn-form" style="width: 90% !important; position: absolute !important; left: 5% !important; bottom: 5%; height: 35px !important; background-color: var(--aquapoint-logo-blue); color: white;" tabindex="0">
-                    </div>
-                    <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
-                        <div class="imageArea">
-                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
-                        </div>
-                        
-                        <h1>Bebedouro da praça</h1>
-                        <span><b>Tipo de interação</b>: Comentário</span>
-                        <br>
-                        <span><b>Interação</b>: "O bebedouro está em boas condições, gostei bastante!"</span>
-                    
-                        <input type="submit" value="Verificar" class="btn btn-form" style="width: 90% !important; position: absolute !important; left: 5% !important; bottom: 5%; height: 35px !important; background-color: var(--aquapoint-logo-blue); color: white;" tabindex="0">
-                    </div>
-                    <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
-                        <div class="imageArea">
-                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
-                        </div>
-                        
-                        <h1>Bebedouro da praça</h1>
-                        <span><b>Tipo de interação</b>: Comentário</span>
-                        <br>
-                        <span><b>Interação</b>: "O bebedouro está em boas condições, gostei bastante!"</span>
-                    
-                        <input type="submit" value="Verificar" class="btn btn-form" style="width: 90% !important; position: absolute !important; left: 5% !important; bottom: 5%; height: 35px !important; background-color: var(--aquapoint-logo-blue); color: white;" tabindex="0">
-                    </div>
-                    <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
-                        <div class="imageArea">
-                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
-                        </div>
-                        
-                        <h1>Bebedouro da praça</h1>
-                        <span><b>Tipo de interação</b>: Comentário</span>
-                        <br>
-                        <span><b>Interação</b>: "O bebedouro está em boas condições, gostei bastante!"</span>
-                    
-                        <input type="submit" value="Verificar" class="btn btn-form" style="width: 90% !important; position: absolute !important; left: 5% !important; bottom: 5%; height: 35px !important; background-color: var(--aquapoint-logo-blue); color: white;" tabindex="0">
-                    </div>
-                    <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
-                        <div class="imageArea">
-                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
-                        </div>
-                        
-                        <h1>Bebedouro da praça</h1>
-                        <span><b>Tipo de interação</b>: Comentário</span>
-                        <br>
-                        <span><b>Interação</b>: "O bebedouro está em boas condições, gostei bastante!"</span>
-                    
-                        <input type="submit" value="Verificar" class="btn btn-form" style="width: 90% !important; position: absolute !important; left: 5% !important; bottom: 5%; height: 35px !important; background-color: var(--aquapoint-logo-blue); color: white;" tabindex="0">
-                    </div>
-                    <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
-                        <div class="imageArea">
-                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
-                        </div>
-                        
-                        <h1>Bebedouro da praça</h1>
-                        <span><b>Tipo de interação</b>: Comentário</span>
-                        <br>
-                        <span><b>Interação</b>: "O bebedouro está em boas condições, gostei bastante!"</span>
-                    
-                        <input type="submit" value="Verificar" class="btn btn-form" style="width: 90% !important; position: absolute !important; left: 5% !important; bottom: 5%; height: 35px !important; background-color: var(--aquapoint-logo-blue); color: white;" tabindex="0">
-                    </div>
-                    <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
-                        <div class="imageArea">
-                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
-                        </div>
-                        
-                        <h1>Bebedouro da praça</h1>
-                        <span><b>Tipo de interação</b>: Comentário</span>
-                        <br>
-                        <span><b>Interação</b>: "O bebedouro está em boas condições, gostei bastante!"</span>
-                    
-                        <input type="submit" value="Verificar" class="btn btn-form" style="width: 90% !important; position: absolute !important; left: 5% !important; bottom: 5%; height: 35px !important; background-color: var(--aquapoint-logo-blue); color: white;" tabindex="0">
-                    </div>
-                    <div class="aquapoint-interaction col-lg-3 aquapoint-interaction-col-lg-custom">
-                        <div class="imageArea">
-                            <img src="../assets/images/defaultPointImage.jpg" alt="aquapoint-interaction">
-                        </div>
-                        
-                        <h1>Bebedouro da praça</h1>
-                        <span><b>Tipo de interação</b>: Comentário</span>
-                        <br>
-                        <span><b>Interação</b>: "O bebedouro está em boas condições, gostei bastante!"</span>
-                    
-                        <input type="submit" value="Verificar" class="btn btn-form" style="width: 90% !important; position: absolute !important; left: 5% !important; bottom: 5%; height: 35px !important; background-color: var(--aquapoint-logo-blue); color: white;" tabindex="0">
-                    </div>
-                </div>
+            <h1 class="main-titles">INTERAÇÕES RECENTES</h1>
+                <div class="spacer"></div>
+            
+                <div class="row g-3">
+                    <div class="col-md-4 pe-3 mb-3" v-for="interaction in userInteractions" :key="interaction.id">
+                        <InteractionDetailsCard :interaction="interaction" />
+                    </div>                
+                </div><!-- Content row end -->
                 
-            </div><!-- Content row end -->
 
         </div><!-- Container end -->
     </section>
@@ -217,9 +123,11 @@
     import { useToast } from 'vue-toastification';
     import { userService } from '../services/userService';
     import { aquapointService } from '../services/aquapointService'
+    import { reviewsService } from '../services/reviewsService'
     import { VueDatePicker } from '@vuepic/vue-datepicker';
     import { useFormValidation } from '../utilities/useFormValidation';
     import FavoriteAquapointCard from '../components/FavoriteAquapointCard.vue';
+    import InteractionDetailsCard from '../components/InteractionDetailsCard.vue';
 
     const Auth = useAuth()
     const toast = useToast()
@@ -228,15 +136,21 @@
     const actualPassword = ref('')
     const newPassword = ref('')
     const userPointsFavorite = ref(null)
+    const userInteractions = ref(null)
 
 
    onMounted(async () => {
         user.value = (await userService.getById(Auth.user.id)).data
         await LoadAllUserFavoritePoints()
+        await LoadAllUserInteractions()
     })
 
     async function LoadAllUserFavoritePoints(){
-            userPointsFavorite.value = (await aquapointService.getUserFavoritePoints(Auth.user.id)).data
+        userPointsFavorite.value = (await aquapointService.getUserFavoritePoints(Auth.user.id)).data
+    }
+
+    async function LoadAllUserInteractions() {
+        userInteractions.value = (await reviewsService.getByUserId(Auth.user.id)).data
     }
 
     async function UpdateProfileData(){
