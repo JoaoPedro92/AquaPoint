@@ -40,7 +40,7 @@
                         </div>
                         <div class="col-5 text-center">
                             <h4>Bebedouros</h4>
-                            <h2 class="fw-bold">{{ totalBebedouros }}</h2>
+                            <h2 class="fw-bold">{{ totalFountains }}</h2>
 
                             <router-link to="/admin/dashboard-bebedouros"
                                 class="btn btn-outline-dark dashboard-btn mt-2">
@@ -49,20 +49,19 @@
                         </div>
 
                         <div class="col-4">
-                            <div class="d-flex align-items-center mb-3">
+                            <div class="d-flex align-items-center mb-2">
                                 <span class="status-dot active me-2"></span>
-                                <div>
-                                    <p class="mb-0">Ativos</p>
-                                    <strong>{{ ativos }}</strong>
-                                </div>
+                                <span>Ativos: <strong>{{ active }}</strong></span>
+                            </div>
+
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="status-dot inactive me-2"></span>
+                                <span>Inativos: <strong>{{ inactive }}</strong></span>
                             </div>
 
                             <div class="d-flex align-items-center">
-                                <span class="status-dot inactive me-2"></span>
-                                <div>
-                                    <p class="mb-0">Inativos</p>
-                                    <strong>{{ inativos }}</strong>
-                                </div>
+                                <span class="status-dot pending me-2"></span>
+                                <span>Pendentes: <strong>{{ pending }}</strong></span>
                             </div>
                         </div>
                     </div>
@@ -80,7 +79,6 @@
 
 
         <!-- GRÁFICO CIDADES -->
-
         <div class="row mt-4">
             <div class="col-md-12">
                 <div class="card p-4 bg-aquapoint-gray">
@@ -150,14 +148,16 @@ import { userService } from "../../services/userService.js"
 import { aquapointService } from "../../services/aquapointService.js"
 import { localsService } from "../../services/localsService.js"
 
+
 import { ref, onMounted } from 'vue'
 import Chart from 'chart.js/auto'
 
 const totalUsers = ref(0)
 
-const totalBebedouros = ref(0)
-const ativos = ref(0)
-const inativos = ref(0)
+const totalFountains = ref(0)
+const active = ref(0)
+const inactive = ref(0)
+const pending = ref(0)
 
 let points = []
 const loading = ref(true)
@@ -190,10 +190,11 @@ async function getAllAquapoints() {
         const response = await aquapointService.getAll()
         points = response.data
 
-        totalBebedouros.value = points.length
+        active.value = points.filter(p => p.state_id === 1 || p.state_id === 2).length
+        inactive.value = points.filter(p => p.state_id === 4).length
+        pending.value = points.filter(p => p.state_id === 3).length
 
-        ativos.value = points.filter(p => p.state_id === 1 || p.state_id === 2).length
-        inativos.value = points.filter(p => p.state_id === 4).length
+        totalFountains.value = active.value + inactive.value
 
         createPieChart()
         await createCityChart()
@@ -210,23 +211,33 @@ function createPieChart() {
     if (pieChart) {
         pieChart.destroy()
     }
-    new Chart(
+    pieChart = new Chart(
         document.getElementById('statusChart'),
         {
-            type: 'pie',
+            type: "pie",
             data: {
-                labels: ['Ativos', 'Inativos'],
+                labels: ["Ativos", "Inativos", "Pendentes"],
                 datasets: [{
-                    data: [ativos.value, inativos.value],
-                    backgroundColor: ['#00cc00', '#f4a261']
+                    data: [active.value, inactive.value, pending.value],
+                    backgroundColor: ["#00cc00", "#e63946", "#f4a261"]
                 }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        position: "top",
+                        labels: {
+                            boxWidth: 12,
+                            padding: 14
+                        }
+                    }
+                }
             }
         })
 
 }
 
 async function createCityChart() {
-
     const localsRes = await localsService.getAll()
     const locals = localsRes.data
 
@@ -234,14 +245,15 @@ async function createCityChart() {
 
     points.forEach(point => {
 
-        const local = locals.find(l => l.id === point.local_id)
+        const local = locals.find(l => Number(l.id) === Number(point.local_id))
 
-        const cityName = local ? local.local_name : 'Desconhecido'
+        if (!local) return
+
+        const cityName = local.zone_name
 
         if (!cities[cityName]) {
             cities[cityName] = 0
         }
-
         cities[cityName]++
     })
 
@@ -252,17 +264,40 @@ async function createCityChart() {
         cityChart.destroy()
     }
 
-    new Chart(
+    cityChart = new Chart(
         document.getElementById('cityChart'),
         {
             type: 'bar',
             data: {
-                labels: labels,
+                labels,
                 datasets: [{
                     label: 'Bebedouros',
-                    data: data,
+                    data,
                     backgroundColor: '#4DA6AC'
                 }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Nº de Bebedouros'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Cidades'
+                        }
+                    }
+                }
             }
         }
     )
@@ -332,6 +367,10 @@ function ratingFountains() {
 }
 
 .status-dot.inactive {
+    background: #e63946;
+}
+
+.status-dot.pending {
     background: #f4a261;
 }
 
