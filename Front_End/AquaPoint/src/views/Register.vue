@@ -104,20 +104,21 @@
 
 <script setup>
 
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { imageUrlToBase64 } from '../utilities/tools';
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification';
 import { useAuth } from '../utilities/useAuth';
 import { userService } from '../services/userService';
 import { authService } from '../services/authService';
-
+import userImageDefault from '../assets/images/user_image.png'
 
 const newUser = ref({
     name: '',
     email: '',
     password: '',
     city: '',
-    profilePicture: '../src/assets/images/user_image.png',
+    profilePicture: userImageDefault,
     dateBirth: null,
     isAdmin: 0
 })
@@ -128,6 +129,10 @@ const toast = useToast()
 const router = useRouter()
 const Auth = useAuth()
 const fileInput = ref(null)
+
+onMounted(async () => {
+  newUser.value.profilePicture = await imageUrlToBase64(userImageDefault)
+})
 
 async function RegisterUser(){
 
