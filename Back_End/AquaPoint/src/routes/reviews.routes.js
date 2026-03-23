@@ -8,6 +8,6 @@ router.get("/:id", getReviewById);
 router.get("/aquapoint/:id", getReviewByPointId);
 router.get("/user/:id", getReviewsByUserId);
 router.post("/", createReview);
-router.delete("/:id", deleteReview);
+router.delete("/", deleteReview);
 
 export default router;

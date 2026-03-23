@@ -80,7 +80,7 @@ export async function createReview(req, res){
 
 // DELETE /reviews
 export async function deleteReview(req, res){
-  const id = Number(req.params.id)
+  const { id } = req.body
 
   try{
     const[result] = await pool.query(
@@ -129,10 +129,11 @@ async function findReviewById(id){
 
 async function findReviewsByAquapointId(id){
   return await pool.query(`
-      SELECT 
+      SELECT         
         users.name,
         users.profilePicture,
         reviews.id,
+        reviews.user_id,
         reviews.rating,
         reviews.comment,
         reviews.createdAt

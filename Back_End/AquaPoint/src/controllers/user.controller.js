@@ -41,7 +41,7 @@ export async function createUser(req, res) {
   if(!name || !email || !dateBirth || !city || !password) {
     return res.status(400).json({ error: 'All fields are required' })
   }
-
+  console.log('profilePicture:', profilePicture?.substring(0, 50))
   try{
     const passwordBcrypt = await bcrypt.hash(password, 10)
     let profilePictureBlob = null
