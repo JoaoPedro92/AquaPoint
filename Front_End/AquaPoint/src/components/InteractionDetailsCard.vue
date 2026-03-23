@@ -18,6 +18,11 @@
                 </span>
             </div>
 
+            <!-- Rating -->
+             <p class="mt-4 mb-1" title="Classificação geral">
+                <StarsRating :rating="props.interaction.rating" :is-readonly="true" /><span class="ms-2">{{ Number(props.interaction.rating).toFixed(1) }}</span>
+            </p>
+
             <!-- Comment -->
             <div class="p-2 mb-3 rounded-end" :style="`background: var(--bs-secondary-bg); border-left: 3px solid ${GetPointStateColor(aquapoint?.state_name)};`">
                 <p class="mb-0 fst-italic text-muted" style="font-size: 13px;">"{{ props.interaction.comment }}"</p>
@@ -26,19 +31,19 @@
             <!-- Footer -->
             <div class="d-flex align-items-center justify-content-between">
                 <span class="text-muted" style="font-size: 12px;">{{ formatDate(props.interaction.createdAt) }}</span>
-                <button class="btn btn-sm btn-outline-primary" >Verificar</button>
+                <button class="btn btn-sm btn-outline-primary" @click="showAquapointDetails = true">Verificar</button>
             </div>
         </div>
 
     </div>
 
-    <AquapointDetailsModal v-model:visible="showPointDetailsModal" :title="'DETALHES DO BEBEDOURO'" :aquapoint="aquapoint" :view-only="true" />
+    <AquapointDetailsModal v-model:visible="showAquapointDetails" :title="'DETALHES DO BEBEDOURO'" :aquapoint="aquapoint" :view-only="true" />
 </template>
 
 <script setup>
     import {ref, onMounted} from 'vue'
     import StarsRating from './StarsRating.vue';
-    import AquapointDetailsModal from '../components/EditAquaPointsModal.vue'
+    import AquapointDetailsModal from '../components/AquapointDetailsModal.vue'
     import { GetPointStateStyles, GetPointStateColor, formatDate } from '../utilities/tools';
     import { useToast } from 'vue-toastification';
     import { useAuth } from '../utilities/useAuth';
@@ -51,30 +56,15 @@
         }
     })
 
-    const aquapoint = ref(null)
-
     onMounted(async () => {
         console.log(props.interaction)
         console.log(props.interaction.point_id)
         aquapoint.value = (await aquapointService.getById(props.interaction.point_id)).data
     })
 
-    const emit = defineEmits(['favoriteChanged'])
+    const aquapoint = ref(null)
+    const showAquapointDetails = ref(false)
 
-    const Auth = useAuth()
-    const toast = useToast()
-    const showPointDetailsModal = ref(false)
-
-    async function RemoveFavoritePoint(){
-        try{
-            await favoritesService.deleteByUserAndPointId({user_id: Auth.user.id, point_id: props.aquapoint.id})
-            emit('favoriteChanged')
-            toast.success('Favorito apagado com sucesso')
-        }
-        catch(err){
-            toast.error(`Erro ao apagar bebedouro favorito ${err.message}`)
-        }
-    }
 </script>
 
 <style scoped>
