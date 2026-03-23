@@ -86,7 +86,7 @@
             <template v-else>
                 <div style="max-height: 400px; overflow-y: auto;">
                     <div v-for="review in reviews" :key="review.id">
-                        <div class="user-review-card position-relative" @mouseover="reviewHover = review.id" @mouseleave="reviewHover = null; openReviewDropdown = null">
+                        <div class="user-review-card position-relative" @mouseover="reviewHover = review.id" @mouseleave="editMode = null">
                              <!-- Header -->
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <div class="d-flex align-items-center gap-2">
@@ -97,15 +97,30 @@
                                 </div>
                                 <div class="d-flex align-items-center gap-3">
                                     <span style="font-size: 12px; color: gray;">{{ formatDate(review.createdAt) }}</span>
-                                    <!-- 3 pontos -->
-                                    <div v-if="(Auth.isAdmin || review.user_id == Auth.user?.id) && reviewHover === review.id" style="position: relative;">
-                                        <i class="bi bi-three-dots-vertical" style="cursor: pointer;" @click.stop="toggleReviewDropdown(review.id)"></i>
-                                        <div v-if="openReviewDropdown === review.id" class="review-dropdown">
-                                            <div @click.prevent="editReview(review)" style="cursor: pointer; padding: 8px 12px; font-size: 14px;">
-                                                <i class="bi bi-pencil me-2"></i>Editar
-                                            </div>
-                                            <div class="text-danger" @click.prevent="DeleteReview(review.id)" style="cursor: pointer; padding: 8px 12px; font-size: 14px;">
-                                                <i class="bi bi-trash me-2"></i>Apagar
+
+                                    <!-- Confirm/Cancel buttons -->
+                                    <div v-if="editMode && edittingReviewId === review.id" class="d-flex gap-1">
+                                        <button class="btn btn-sm btn-success d-flex align-items-center justify-content-center" @click="ApplyCommentChanges(review)"
+                                            style="width: 28px; height: 28px; padding: 0; border-radius: 50%;">
+                                            <i class="bi bi-check-lg" style="font-size: 14px;"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger d-flex align-items-center justify-content-center" @click="CancelEdit"
+                                            style="width: 28px; height: 28px; padding: 0; border-radius: 50%;">
+                                            <i class="bi bi-x" style="font-size: 14px;"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- 3 points vertical, options -->
+                                    <div v-if="(Auth.isAdmin || review.user_id == Auth.user?.id) && reviewHover === review.id && edittingReviewId !== review.id" style="position: relative;">                                        
+                                        <div>
+                                            <i class="bi bi-three-dots-vertical" style="cursor: pointer;" @click.stop="toggleReviewDropdown(review.id)"></i>
+                                            <div v-if="openReviewDropdown === review.id" class="review-dropdown">
+                                                <div @click.prevent="EditReview(review)" style="cursor: pointer; padding: 8px 12px; font-size: 14px;">
+                                                    <i class="bi bi-pencil me-2"></i>Editar
+                                                </div>
+                                                <div class="text-danger" @click.prevent="DeleteReview(review.id)" style="cursor: pointer; padding: 8px 12px; font-size: 14px;">
+                                                    <i class="bi bi-trash me-2"></i>Apagar
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -114,10 +129,15 @@
 
                             <!-- Stars Rating -->
                             <span :title="review.rating + ' estrelas'">
-                                <StarsRating :rating="review.rating" :isReadonly="true"></StarsRating>
+                                <StarsRating v-model:rating="review.rating" :isReadonly="editMode && review.id === edittingReviewId ? false : true"></StarsRating>
                             </span>
-
-                            <p class="mb-0">{{ review.comment }}</p>
+                            
+                            <div v-if="editMode && review.id === edittingReviewId">
+                                <input v-model="edittingComment" class="form-control form-control-sm" style="border-radius: 8px; font-size: 14px;" >
+                            </div>
+                            <div v-else>
+                                <p class="mb-0">{{ review.comment }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -132,10 +152,8 @@
 
             <br>
 
-            <textarea v-model="reviewText" class="form-control mt-3" placeholder="Escreve um comentário"
-                id="exampleFormControlTextarea1" rows="4"></textarea>
-            <button class="btn btn-primary mt-3"
-                style="width:100%; background-color: var(--aquapoint-logo-blue); border: none;"
+            <textarea v-model="reviewText" class="form-control mt-3" placeholder="Escreve um comentário" id="exampleFormControlTextarea1" rows="4"></textarea>
+            <button class="btn btn-primary mt-3" style="width:100%; background-color: var(--aquapoint-logo-blue); border: none;"
                 v-on:click="SubmitReview">SUBMETER</button>
             <!---------------------------------->
             
@@ -186,6 +204,9 @@ const showTrustLevelVote = ref(false)
 const showReportProblemModal = ref(false)
 const reviewHover = ref(null)
 const openReviewDropdown = ref(null)
+const editMode = ref(false)
+const edittingReviewId = ref(null)
+const edittingComment = ref('')
 
 
 watch(() => props.visible, async (newValue) => {
@@ -314,6 +335,33 @@ async function DeleteReview(id){
         toast.error(err.message)
     }
 }
+
+function EditReview(review){
+    editMode.value = true
+    edittingReviewId.value = review.id
+    edittingComment.value = review.comment
+    openReviewDropdown.value = null
+}
+
+function CancelEdit(){
+    editMode.value = false
+    edittingReviewId.value = null
+}
+
+async function ApplyCommentChanges(review){
+    review.comment = edittingComment.value
+
+    try{
+        await reviewsService.update(review.id, review)
+        editMode.value = false
+        edittingReviewId.value = null
+        toast.success('Comentario alterado com sucesso')
+    }
+    catch(err){
+        toast.error(`Erro ao gravar alteração do comentário.\nErro: ${err.message}`)
+    }
+}
+
 </script>
 
 <style scoped>
