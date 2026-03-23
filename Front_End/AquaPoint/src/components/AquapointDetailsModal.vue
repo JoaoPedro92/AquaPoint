@@ -86,13 +86,30 @@
             <template v-else>
                 <div style="max-height: 400px; overflow-y: auto;">
                     <div v-for="review in reviews" :key="review.id">
-                        <div class="user-review-card">
-                            <div class="d-flex align-items-center">
-                                <img :src="review.profilePicture || '/src/assets/images/user_image.png'" width="20"
-                                    height="20" alt="imagem utilizador"
-                                    style="background-color: white; border-radius: 50%; object-fit: cover;">
-                                <span class="ms-2">{{ review.name }}</span>
-                                <span class="ms-auto" style="font-size:0.8rem">{{ review.created_at }}</span>
+                        <div class="user-review-card position-relative" @mouseover="reviewHover = review.id" @mouseleave="reviewHover = null; openReviewDropdown = null">
+                             <!-- Header -->
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img :src="review.profilePicture || '/src/assets/images/user_image.png'" 
+                                        width="28" height="28"
+                                        style="border-radius: 50%; object-fit: cover;">
+                                    <span style="font-size: 14px; font-weight: 00;">{{ review.name }}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span style="font-size: 12px; color: gray;">{{ formatDate(review.createdAt) }}</span>
+                                    <!-- 3 pontos -->
+                                    <div v-if="(Auth.isAdmin || review.user_id == Auth.user?.id) && reviewHover === review.id" style="position: relative;">
+                                        <i class="bi bi-three-dots-vertical" style="cursor: pointer;" @click.stop="toggleReviewDropdown(review.id)"></i>
+                                        <div v-if="openReviewDropdown === review.id" class="review-dropdown">
+                                            <div @click.prevent="editReview(review)" style="cursor: pointer; padding: 8px 12px; font-size: 14px;">
+                                                <i class="bi bi-pencil me-2"></i>Editar
+                                            </div>
+                                            <div class="text-danger" @click.prevent="DeleteReview(review.id)" style="cursor: pointer; padding: 8px 12px; font-size: 14px;">
+                                                <i class="bi bi-trash me-2"></i>Apagar
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Stars Rating -->
@@ -140,7 +157,8 @@ import { useAuth } from '../utilities/useAuth';
 import { useToast } from 'vue-toastification';
 import StarsRating from '../components/StarsRating.vue'
 import ReportProblemModal from '../components/ReportProblemModal.vue'
-import { imageUrlToBase64, GetAquapointGoogleMapsDirections } from '../utilities/tools';
+import { imageUrlToBase64, GetAquapointGoogleMapsDirections, formatDate } from '../utilities/tools';
+import { Interaction } from 'chart.js';
 
 const props = defineProps({
     visible: {
@@ -153,7 +171,7 @@ const props = defineProps({
     }
 })
 
-const emit = defineEmits(['update:visible', 'update:aquapoint', 'favoriteChanged'])
+const emit = defineEmits(['update:visible', 'update:aquapoint', 'favoriteChanged', 'reviewChanged'])
 
 
 const Auth = useAuth()
@@ -166,6 +184,8 @@ const newReviewNumber = ref(0)
 const reviewText = ref('')
 const showTrustLevelVote = ref(false)
 const showReportProblemModal = ref(false)
+const reviewHover = ref(null)
+const openReviewDropdown = ref(null)
 
 
 watch(() => props.visible, async (newValue) => {
@@ -175,6 +195,10 @@ watch(() => props.visible, async (newValue) => {
         isFavorite.value = userFavoritePoints.value.some(p => p.point_id === props.aquapoint.id)
     }
 })
+
+function toggleReviewDropdown(id){
+    openReviewDropdown.value = openReviewDropdown.value === id ? null : id
+}
 
 function ChangeVisibility() {
     emit('update:visible', !props.visible)
@@ -240,6 +264,7 @@ async function SubmitReview() {
 
         // Refresh das reviews para mostrar a nova review submetida
         reviews.value = await GetReviewsByPointId(props.aquapoint.id)
+        emit('reviewChanged')
 
     } catch (error) {
         toast.error('Ocorreu um erro ao submeter a sua opinião. Por favor, tente novamente.')
@@ -276,6 +301,18 @@ async function VoteTrustLevel(vote) {
     showTrustLevelVote.value = false;
     const updatedData = (await aquapointService.getById(props.aquapoint.id)).data
     emit('update:aquapoint', updatedData)
+}
+
+async function DeleteReview(id){
+    try{
+        await reviewsService.delete(id)
+        reviews.value = await GetReviewsByPointId(props.aquapoint.id)
+        emit('reviewChanged')
+        toast.success('Comentário removido com sucesso')
+    }
+    catch(err){
+        toast.error(err.message)
+    }
 }
 </script>
 
@@ -346,5 +383,17 @@ async function VoteTrustLevel(vote) {
     object-fit: cover;
     /* Ou fill */
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.review-dropdown {
+    position: absolute; 
+    right: 0; 
+    top: 20px; 
+    background: white; 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    min-width: 130px; 
+    z-index: 999; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 </style>

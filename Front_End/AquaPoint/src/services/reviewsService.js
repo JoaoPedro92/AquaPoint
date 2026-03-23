@@ -6,4 +6,5 @@ export const reviewsService = {
   getByPointId: (id) => api.get(`/reviews/aquapoint/${id}`),
   getByUserId: (userId) => api.get(`/reviews/user/${userId}`),
   create: (data) => api.post('/reviews', data),
+  delete: (id) => api.delete('reviews/', { data: { id } })
 }

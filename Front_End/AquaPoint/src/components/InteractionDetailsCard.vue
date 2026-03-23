@@ -30,7 +30,7 @@
 
             <!-- Footer -->
             <div class="d-flex align-items-center justify-content-between">
-                <span class="text-muted" style="font-size: 12px;">{{ formatDate(props.interaction.createdAt) }}</span>
+                <span class="text-muted" style="font-size: 12px;">{{ formatDateExtense(props.interaction.createdAt) }}</span>
                 <button class="btn btn-sm btn-outline-primary" @click="showAquapointDetails = true">Verificar</button>
             </div>
         </div>
@@ -44,7 +44,7 @@
     import {ref, onMounted} from 'vue'
     import StarsRating from './StarsRating.vue';
     import AquapointDetailsModal from '../components/AquapointDetailsModal.vue'
-    import { GetPointStateStyles, GetPointStateColor, formatDate } from '../utilities/tools';
+    import { GetPointStateStyles, GetPointStateColor, formatDateExtense } from '../utilities/tools';
     import { useToast } from 'vue-toastification';
     import { useAuth } from '../utilities/useAuth';
     import { aquapointService } from '../services/aquapointService';

@@ -68,10 +68,18 @@ export function OpenGoogleMapsInOtherTabWithDirections(latitude, longitude){
     window.open(GetAquapointGoogleMapsDirections(latitude, longitude), '_blank')
 }
 
-export function formatDate(date) {
+export function formatDateExtense(date) {
   return new Date(date).toLocaleDateString('pt-PT', { 
     day: '2-digit', 
     month: 'long', 
+    year: 'numeric' 
+  })
+}
+
+export function formatDate(date) {
+  return new Date(date).toLocaleDateString('pt-PT', { 
+    day: '2-digit', 
+    month: '2-digit', 
     year: 'numeric' 
   })
 }

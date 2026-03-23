@@ -20,6 +20,8 @@
     </div>
 
     <!-- Modal detalhes do bebedouro selecionado -->
+    <AquapointDetailsModal v-model:visible="showAquapointDetailsModal" v-model:aquapoint="selectedAquapoint" :aquapoint="selectedAquapoint" 
+        @favoriteChanged="ChangeFavoriteSelectedMarker" @reviewChanged="RefreshSelectedMarker" />
     
 
     <!-- Offcanvas Informações Adicionar Bebedouro-->
@@ -59,7 +61,6 @@
         </div>
     </div>
 
-    <AquapointDetailsModal v-model:visible="showAquapointDetailsModal" v-model:aquapoint="selectedAquapoint" :aquapoint="selectedAquapoint" @favoriteChanged="ChangeFavoriteSelectedMarker" />
 </template>
 
 <script setup>
@@ -173,6 +174,10 @@
             //showAquapointPopup.value = true
             showAquapointDetailsModal.value = true
         })
+    }
+
+    async function RefreshSelectedMarker(){
+        selectedAquapoint.value = (await aquapointService.getById(selectedAquapoint.value.id)).data
     }
 
     async function ChangeFavoriteSelectedMarker(){
