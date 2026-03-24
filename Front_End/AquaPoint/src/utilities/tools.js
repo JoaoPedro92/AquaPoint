@@ -17,9 +17,9 @@ export function GetPointStateStyles(aquapoint) {
         'Pendente': { backgroundColor: '#fef9c3', color: '#854d0e' }
     }
 
-    if (aquapoint?.isPending === 1) {
+    /*if (aquapoint?.isPending === 1) {
         return styles["Pendente"] || {}
-    } 
+    } */
 
     return styles[aquapoint.state_name] || {}
 }
@@ -32,9 +32,9 @@ export function GetPointStateColor(aquapoint){
         'Inativo': '#b91c1c'
     }
 
-    if (aquapoint?.isPending === 1) {
+    /*if (aquapoint?.isPending === 1) {
         return styles["Pendente"] || {}
-    }
+    }*/
 
     return styles[aquapoint.state_name] || {}
 }
@@ -53,14 +53,14 @@ export function GetPointStateIcon(aquapoint, changeBgColor = false){
         'Pendente': 'text-warning'
     }
 
-    if (aquapoint?.isPending === 1) {
+    /*if (aquapoint?.isPending === 1) {
         return `bi ${icons["Pendente"] || 'bi-question-circle'} ${changeBgColor ? (colors["Pendente"] || '') : ''}`.trim()
-    } else {
-        const baseIcon = icons[aquapoint.state_name] || 'bi-question-circle'
-        const colorClass = changeBgColor ? (colors[aquapoint.state_name] || '') : ''
+    }*/
 
-        return `bi ${baseIcon} ${colorClass}`.trim()
-    }
+    const baseIcon = icons[aquapoint.state_name] || 'bi-question-circle'
+    const colorClass = changeBgColor ? (colors[aquapoint.state_name] || '') : ''
+
+    return `bi ${baseIcon} ${colorClass}`.trim()
 }
 
 export function GetTrustLevelIcon(trust){
