@@ -15,8 +15,8 @@
                 <StarsRating :rating="aquapoint.ratingAVG" :is-readonly="true" /><span class="ms-2">{{ aquapoint.ratingAVG }}</span>
             </p>
 
-            <span class="badge rounded-2 text-nowrap mb-4" :style="GetPointStateStyles(aquapoint.state_name)" title="Estado do bebedouro">
-                <i :class="GetPointStateIcon(aquapoint.state_name,)"></i>
+            <span class="badge rounded-2 text-nowrap mb-4" :style="GetPointStateStyles(aquapoint)" title="Estado do bebedouro">
+                <i :class="GetPointStateIcon(aquapoint)"></i>
                 {{ aquapoint.state_name }}
             </span>
             

@@ -23,10 +23,10 @@ insert into type (id, type_name) values (3, 'Ambos');
 -- -------------------------------------------------------
 -- STATES
 -- -------------------------------------------------------
-insert into states (id, state_name) values (1, 'Necessita manutenção');
-insert into states (id, state_name) values (2, 'Bom estado');
-insert into states (id, state_name) values (3, 'Pendente');
-insert into states (id, state_name) values (4, 'Inativo');
+insert into states (id, state_name, backgroundColor, color) values (1, 'Necessita manutenção', '#f97316', '#ffff');
+insert into states (id, state_name, backgroundColor, color) values (2, 'Bom estado', '#166534', '#c1ebbc');
+insert into states (id, state_name, backgroundColor, color) values (3, 'Pendente', '#fef9c3', '#854d0e');
+insert into states (id, state_name, backgroundColor, color) values (4, 'Inativo', '#b91c1c', '#fee2e2');
 
 -- -------------------------------------------------------
 -- TRUST LEVELS

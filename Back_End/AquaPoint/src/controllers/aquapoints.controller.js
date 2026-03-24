@@ -92,9 +92,9 @@ export async function getCountPendingAquapoints(req, res){
 
 // POST /aquapoints
 export async function createAquapoint(req, res){
-  const { point_name, image, point_type, point_trust, local_id, state_id, latitude, longitude } = req.body;
+  const { point_name, image, point_type, point_trust, local_id, state_id, latitude, longitude, createdBy, isPending } = req.body;
 
-  if(!point_name || !image || !point_type || !point_trust || !local_id || !state_id || !latitude || !longitude){
+  if(!point_name || !image || !point_type || !point_trust || !local_id || !state_id || !latitude || !longitude || !createdBy || !isPending){
     return res.status(400).json({ error: 'All fields are required' })
   }
 
@@ -106,8 +106,8 @@ export async function createAquapoint(req, res){
 
   try{
     const[result] = await pool.query(
-      'INSERT INTO aqua_points (point_name, image, point_type, point_trust, local_id, state_id, latitude, longitude) VALUES(?, ?, ?, ?, ?, ?, ?, ?)',
-      [point_name, aquaPointPictureBlob, point_type, point_trust, local_id, state_id, latitude, longitude]
+      'INSERT INTO aqua_points (point_name, image, point_type, point_trust, local_id, state_id, latitude, longitude, createdBy, isPending) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [point_name, aquaPointPictureBlob, point_type, point_trust, local_id, state_id, latitude, longitude, createdBy, isPending]
     )
 
     res.status(201).json({ message: 'Aquapoint created successfully' })

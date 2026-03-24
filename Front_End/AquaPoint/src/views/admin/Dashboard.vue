@@ -191,8 +191,8 @@ async function getAllAquapoints() {
         points = response.data
 
         active.value = points.filter(p => p.state_id === 1 || p.state_id === 2).length
-        inactive.value = points.filter(p => p.state_id === 4).length
-        pending.value = points.filter(p => p.state_id === 3).length
+        inactive.value = points.filter(p => p.state_id === 3).length
+        pending.value = points.filter(p => p.isPending === 1).length
 
         totalFountains.value = active.value + inactive.value
 

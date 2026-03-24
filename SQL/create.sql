@@ -53,6 +53,8 @@ create table users (
 create table states (
     id int not null auto_increment,
     state_name text not null,
+    backgroundColor text not null,
+    color text not null,
     primary key (id)
 );
 
@@ -87,7 +89,9 @@ create table aqua_points (
     point_type int not null,  
     point_trust int not null,       
     local_id int not null,      
-    state_id int not null,     
+    state_id int not null,   
+    createdBy int not null,
+    isPending TINYINT not null,  
     image LONGBLOB default NULL,    
     latitude double not null,
     longitude double not null,
@@ -156,6 +160,12 @@ on delete cascade on update cascade;
 alter table aqua_points
 add constraint fk_aqua_points_state
 foreign key (state_id) references states(id)
+on delete cascade on update cascade;
+
+-- AQUA_POINTS -> AQUA_POINTS e USERS
+alter table aqua_points
+add constraint fk_aqua_points_created_by
+foreign key (createdBy) references users(id)
 on delete cascade on update cascade;
 
 -- POINTS_TRUST -> AQUA_POINTS e TRUSTLEVELS

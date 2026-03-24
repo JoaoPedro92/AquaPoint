@@ -22,8 +22,8 @@
                             <p class="fw-medium mb-0 small">{{ aquapoint.point_name }}</p>
                             <p class="text-muted mb-0" style="font-size: 12px;">{{ aquapoint.type_name }}</p>
                         </div>
-                        <span class="badge rounded-2 text-nowrap" :style="GetPointStateStyles(aquapoint.state_name)">
-                            <i :class="GetPointStateIcon(aquapoint.state_name)"></i>
+                        <span class="badge rounded-2 text-nowrap" :style="GetPointStateStyles(aquapoint)">
+                            <i :class="GetPointStateIcon(aquapoint)"></i>
                             {{ aquapoint.state_name }}
                         </span>
                     </div>
@@ -59,10 +59,10 @@
                                 Eliminar
                             </button>
                             <button @click="changePointState(aquapoint)" class="btn btn-sm flex-fill text-white me-2" :class="{
-                                'bg-success': aquapoint.state_id === 4,
-                                'bg-secondary': aquapoint.state_id !== 4
+                                'bg-success': aquapoint.state_id === 3,
+                                'bg-secondary': aquapoint.state_id !== 3
                             }">
-                                {{ aquapoint.state_id !== 4 ? 'Marcar como Inativo' : 'Marcar como Ativo' }}
+                                {{ aquapoint.state_id !== 3 ? 'Marcar como Inativo' : 'Marcar como Ativo' }}
                             </button>
                         </div>
                         <div v-else >
@@ -104,8 +104,8 @@
                     <td class="text-center">{{ aquapoint.ratingAVG || 0.0 }}</td>
                     <td class="text-center">{{ aquapoint.ratingsAmount }}</td>
                     <td>
-                        <span class="badge rounded-2 text-nowrap" :style="GetPointStateStyles(aquapoint.state_name)">
-                            <i :class="GetPointStateIcon(aquapoint.state_name,)"></i>
+                        <span class="badge rounded-2 text-nowrap" :style="GetPointStateStyles(aquapoint)">
+                            <i :class="GetPointStateIcon(aquapoint)"></i>
                             {{ aquapoint.state_name }}
                         </span>
                     </td>
@@ -130,7 +130,7 @@
                             <button class="btn btn-sm btn-danger mt-1 me-2"
                                 @click="selectedAquaPoint = aquapoint"  data-bs-toggle="modal" data-bs-target="#deleteAquapointModal">Eliminar</button>
 
-                            <button v-if="aquapoint.state_id == 3 || aquapoint.state_id == 4"
+                            <button v-if="aquapoint.isPending == 1 || aquapoint.state_id == 3"
                                 class="btn btn-sm btn-success mt-1" @click="changePointState(aquapoint)">Marcar como
                                 ativo</button>
                             <button v-else class="btn btn-sm btn-warning mt-1"
@@ -189,7 +189,7 @@ onMounted(async () => {
 })
 
 function GetInactiveAquaPoints() {
-    return aquapoints.value.filter(a => a.state_id === 4)
+    return aquapoints.value.filter(a => a.state_id === 3)
 }
 
 async function GetPendingAquaPointsCount() {
@@ -215,8 +215,8 @@ async function deleteAquaPoint(pointId) {
 
 async function changePointState(aquapoint) {
     if (aquapoint) {
-        if (aquapoint.state_id !== 4) {
-            aquapoint.state_id = 4
+        if (aquapoint.state_id !== 3) {
+            aquapoint.state_id = 3
         } else {
             aquapoint.state_id = 2
         }
@@ -234,21 +234,21 @@ async function changePointState(aquapoint) {
 async function loadAquapoints() {
     loading.value = true
     allAquapoints.value = (await aquapointService.getAll()).data
-    pendingPointsCount.value = allAquapoints.value.filter(a => a.state_id === 3).length
-    if(showPendingOnly.value){ aquapoints.value = allAquapoints.value.filter(a => a.state_id === 3) }
-    else{ aquapoints.value = allAquapoints.value.filter(a => a.state_id !== 3) }
+    pendingPointsCount.value = allAquapoints.value.filter(a => a.isPending === 1).length
+    if(showPendingOnly.value){ aquapoints.value = allAquapoints.value.filter(a => a.isPending === 1) }
+    else{ aquapoints.value = allAquapoints.value.filter(a => a.isPending !== 1) }
 
     loading.value = false
 }
 
 async function showPendingAquapoints() {
     showPendingOnly.value = true
-    aquapoints.value = allAquapoints.value.filter(a => a.state_id === 3)
+    aquapoints.value = allAquapoints.value.filter(a => a.isPending === 1)
 }
 
 async function showNotPendingAquapoints() {
     showPendingOnly.value = false
-    aquapoints.value = allAquapoints.value.filter(a => a.state_id !== 3)
+    aquapoints.value = allAquapoints.value.filter(a => a.isPending !== 1)
 }
 
 async function acceptPendingPoint(aquapoint){
