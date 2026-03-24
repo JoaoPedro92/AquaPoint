@@ -353,6 +353,7 @@ async function ApplyCommentChanges(review){
 
     try{
         await reviewsService.update(review.id, review)
+        emit('reviewChanged')
         editMode.value = false
         edittingReviewId.value = null
         toast.success('Comentario alterado com sucesso')
