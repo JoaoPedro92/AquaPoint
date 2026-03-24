@@ -253,7 +253,7 @@ async function showNotPendingAquapoints() {
 
 async function acceptPendingPoint(aquapoint){
     try{
-        aquapoint.state_id = 2
+        aquapoint.isPending = 0
         await aquapointService.update(aquapoint.id, aquapoint)
         toast.info('Bebedouro foi aprovado com sucesso')
         await loadAquapoints()
