@@ -232,6 +232,11 @@ async function ChangeFavoriteState() {
         return
     }
 
+    if (props.aquapoint.isPending == 1) {
+        toast.error('O bebedouro ainda está pendente de aprovação.')
+        return
+    }
+
     if (isFavorite.value) {
         await favoriteService.delete({ user_id: Auth.user.id, point_id: props.aquapoint.id })
         toast.info('Bebedouro removido dos favoritos.')
@@ -269,6 +274,11 @@ async function SubmitReview() {
         return
     }
 
+    if (props.aquapoint.isPending == 1) {
+        toast.error('O bebedouro ainda está pendente de aprovação.')
+        return
+    }
+
     if (reviewText.value.trim() === '') {
         toast.error('Por favor, escreva um comentário antes de submeter a sua opinião.')
         return
@@ -299,6 +309,11 @@ async function SubmitReview() {
 function ReportProblem() {
     console.log('Report Problem clicked')
 
+    if (props.aquapoint.isPending == 1) {
+        toast.error('O bebedouro ainda está pendente de aprovação.')
+        return
+    }
+    
     showReportProblemModal.value = true
 }
 

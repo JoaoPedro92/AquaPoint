@@ -60,6 +60,11 @@
                             </div>
 
                             <div class="d-flex align-items-center">
+                                <span class="status-dot maintenance me-2"></span>
+                                <span>Estragados: <strong>{{ maintenance }}</strong></span>
+                            </div>
+
+                            <div class="d-flex align-items-center">
                                 <span class="status-dot pending me-2"></span>
                                 <span>Pendentes: <strong>{{ pending }}</strong></span>
                             </div>
@@ -157,6 +162,7 @@ const totalUsers = ref(0)
 const totalFountains = ref(0)
 const active = ref(0)
 const inactive = ref(0)
+const maintenance = ref(0)
 const pending = ref(0)
 
 let points = []
@@ -190,11 +196,12 @@ async function getAllAquapoints() {
         const response = await aquapointService.getAll()
         points = response.data
 
-        active.value = points.filter(p => p.state_id === 1 || p.state_id === 2).length
-        inactive.value = points.filter(p => p.state_id === 3).length
+        active.value = points.filter(p => p.state_id === 2 && p.isPending !== 1).length
+        inactive.value = points.filter(p => p.state_id === 3 && p.isPending !== 1).length
+        maintenance.value = points.filter(p => p.state_id === 1 && p.isPending !== 1).length
         pending.value = points.filter(p => p.isPending === 1).length
 
-        totalFountains.value = active.value + inactive.value
+        totalFountains.value = active.value + inactive.value + maintenance.value + pending.value
 
         createPieChart()
         await createCityChart()
@@ -216,10 +223,10 @@ function createPieChart() {
         {
             type: "pie",
             data: {
-                labels: ["Ativos", "Inativos", "Pendentes"],
+                labels: ["Ativos", "Inativos", "Estragados", "Pendentes"],
                 datasets: [{
-                    data: [active.value, inactive.value, pending.value],
-                    backgroundColor: ["#00cc00", "#e63946", "#f4a261"]
+                    data: [active.value, inactive.value, maintenance.value, pending.value],
+                    backgroundColor: ["#00cc00", "#e63946", "#ffd700", "#f4a261"]
                 }]
             },
             options: {
@@ -368,6 +375,10 @@ function ratingFountains() {
 
 .status-dot.inactive {
     background: #e63946;
+}
+
+.status-dot.maintenance {
+    background: #ffd700;
 }
 
 .status-dot.pending {
