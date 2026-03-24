@@ -58,16 +58,22 @@ export async function getReportByPointId(req, res) {
 
 // POST /reports
 export async function createReport(req, res){
-  const { user_id, comment, point_id } = req.body;
+  const { user_id, comment, point_id, image } = req.body;
 
-  if(!user_id || !comment || !point_id){
+  if(!user_id || !comment || !point_id || !image){
     return res.status(400).json({ error: 'All fields are required' })
+  }
+
+  let reportPictureBlob = null
+
+  if (typeof image === 'string' && image.startsWith('data:image/')) {
+    reportPictureBlob = Buffer.from(image.split(',')[1], 'base64')
   }
 
   try{
     const[result] = await pool.query(
-      'INSERT INTO reports (user_id, comment, point_id, createdAt) VALUES(?, ?, ?, now())',
-      [user_id, comment, point_id]
+      'INSERT INTO reports (user_id, comment, point_id, image, createdAt) VALUES(?, ?, ?, ?, now())',
+      [user_id, comment, point_id, reportPictureBlob]
     )
 
     res.status(201).json({ message: 'Report created successfully' })

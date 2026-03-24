@@ -124,7 +124,8 @@ create table reviews (
 create table reports (
     id int not null auto_increment,
     user_id int not null,   
-    comment TEXT not null,         
+    comment TEXT not null,   
+    image LONGBLOB not null,         
     point_id int not null,           
     createdAt date not null,
     primary key (id)
