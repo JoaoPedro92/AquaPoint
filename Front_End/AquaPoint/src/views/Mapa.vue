@@ -216,6 +216,10 @@
         } else if (point.state_name == 'Necessita manutenção') {
             markerColor = 'orange'
         }
+        
+        if (point.isPending == 1) {
+            markerColor = 'gray'
+        }
 
         let markerIcon = getMarkerIcon(markerColor)
 
@@ -286,6 +290,8 @@
         if (aquapointsList) {
             aquapointsList.value.forEach(point => {
                 if (point.isPending != 1) {
+                    AddMarkerToMap(point)
+                } else if (Auth.isLoggedIn && Auth.user.id === point.createdBy) {
                     AddMarkerToMap(point)
                 }
             })
