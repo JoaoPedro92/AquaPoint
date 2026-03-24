@@ -112,7 +112,7 @@ export async function isVoteEnableByUserAndAquapointId(req, res){
         if(!rows[0].valid){
             return res.status(200).json({ 
                 valid: false,
-                error: `Só podes votar novamente em ${new Date(rows[0].next_vote_date).toLocaleDateString('pt-PT')}.`
+                error: `Só pode votar novamente apartir de ${new Date(rows[0].next_vote_date).toLocaleDateString('pt-PT')}.`
             });
         }
 
