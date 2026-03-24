@@ -23,10 +23,9 @@ insert into type (id, type_name) values (3, 'Ambos');
 -- -------------------------------------------------------
 -- STATES
 -- -------------------------------------------------------
-insert into states (id, state_name) values (1, 'Necessita manutenção');
-insert into states (id, state_name) values (2, 'Bom estado');
-insert into states (id, state_name) values (3, 'Pendente');
-insert into states (id, state_name) values (4, 'Inativo');
+insert into states (id, state_name, backgroundColor, color) values (1, 'Necessita manutenção', '#f97316', '#ffff');
+insert into states (id, state_name, backgroundColor, color) values (2, 'Bom estado', '#166534', '#c1ebbc');
+insert into states (id, state_name, backgroundColor, color) values (3, 'Inativo', '#b91c1c', '#fee2e2');
 
 -- -------------------------------------------------------
 -- TRUST LEVELS
@@ -51,17 +50,17 @@ values (3, 'Maria Santos', 'maria@email.com', 'hash_maria', '2025-01-03', 0);
 -- -------------------------------------------------------
 -- AQUA POINTS
 -- -------------------------------------------------------
-insert into aqua_points (id, point_name, point_type, point_trust, local_id, state_id, latitude, longitude)
-values (1, 'Fonte do Jardim', 1, 4, 1, 1, 38.6979, -9.4215);
+insert into aqua_points (id, point_name, point_type, point_trust, local_id, state_id, latitude, longitude, createdBy, isPending)
+values (1, 'Fonte do Jardim', 1, 4, 1, 1, 38.6979, -9.4215, 1, 0);
 
-insert into aqua_points (id, point_name, point_type, point_trust, local_id, state_id, latitude, longitude)
-values (2, 'Bebedouro do Parque', 3, 3, 2, 3, 38.8029, -9.3817);
+insert into aqua_points (id, point_name, point_type, point_trust, local_id, state_id, latitude, longitude, createdBy, isPending)
+values (2, 'Bebedouro do Parque', 3, 3, 2, 3, 38.8029, -9.3817, 1, 0);
 
-insert into aqua_points (id, point_name, point_type, point_trust, local_id, state_id, latitude, longitude)
-values (3, 'Fonte da Praia', 3, 2, 3, 1, 41.1820, -8.6890);
+insert into aqua_points (id, point_name, point_type, point_trust, local_id, state_id, latitude, longitude, createdBy, isPending)
+values (3, 'Fonte da Praia', 3, 2, 3, 1, 41.1820, -8.6890, 1, 0);
 
-insert into aqua_points (id, point_name, point_type, point_trust, local_id, state_id, latitude, longitude)
-values (4, 'Bebedouro Central', 1, 4, 4, 2, 37.0891, -8.2479);
+insert into aqua_points (id, point_name, point_type, point_trust, local_id, state_id, latitude, longitude, createdBy, isPending)
+values (4, 'Bebedouro Central', 1, 4, 4, 2, 37.0891, -8.2479, 1, 1);
 
 -- -------------------------------------------------------
 -- FAVORITES

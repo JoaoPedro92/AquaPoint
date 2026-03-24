@@ -35,7 +35,10 @@
                 
                 <!-- Upload imagem bebedouro -->
                 <div class="mb-3">
-                    <img :src="newAquapointImagePreview" class="aquapoint-image-preview" style="cursor:pointer;" v-on:click="fileInput.click()">
+                    <div class="image">
+                        <img :src="newAquapointImagePreview" class="aquapoint-image-preview" style="cursor:pointer;" v-on:click="fileInput.click()">
+                    </div>
+                    <br>
                     <input type="file" ref="fileInput" style="display:none" @change="onFileChange" accept="image/*">
                     <button class="btn btn-outline-secondary btn-file-input w-100" @click="fileInput.click()">
                         <i class="bi bi-upload me-2"></i>Escolher ficheiro
@@ -53,6 +56,10 @@
                 :class="newAquapointType === type.id ? 'btn bg-aquapoint-blue text-white shadow-sm' : 'btn bg-aquapoint-gray'"
                  v-on:click="newAquapointType = type.id"> {{ type.nome }}</button>
                  <!----------------------->
+                <h6>Estado do Bebedouro:</h6>
+                <button v-for="state in aquapointStates" :key="state.id" 
+                :class="newAquapointState === state.id ? 'btn bg-aquapoint-blue text-white shadow-sm' : 'btn bg-aquapoint-gray'"
+                 v-on:click="newAquapointState = state.id"> {{ state.nome }}</button>
             </div>
 
             <div class="d-flex justify-content-center mt-5">
@@ -61,7 +68,15 @@
         </div>
     </div>
 
-</template>
+</template> 
+
+<style scoped>
+    .aquapoint-image-preview {
+        width: 100%;
+        height: 14rem; 
+        object-fit: contain;
+    }
+</style>
 
 <script setup>
     import { ref, onMounted, watch } from 'vue';
@@ -98,6 +113,12 @@
         { id: 3, nome: 'Ambos' }
     ]
     const newAquapointType = ref(1)
+    const newAquapointState = ref(1)
+    const aquapointStates = [
+        { id: 1, nome: 'Necessita manutenção' },
+        { id: 2, nome: 'Funcional' },
+        { id: 3, nome: 'Inativo' },
+    ]
     const fileInput = ref(null)
     const fileName = ref('')
     const newAquapointImagePreview = ref(null)
@@ -195,6 +216,10 @@
         } else if (point.state_name == 'Necessita manutenção') {
             markerColor = 'orange'
         }
+        
+        if (point.isPending == 1) {
+            markerColor = 'gray'
+        }
 
         let markerIcon = getMarkerIcon(markerColor)
 
@@ -264,7 +289,9 @@
         
         if (aquapointsList) {
             aquapointsList.value.forEach(point => {
-                if (point.state_name != "Pendente") {
+                if (point.isPending != 1) {
+                    AddMarkerToMap(point)
+                } else if (Auth.isLoggedIn && Auth.user.id === point.createdBy) {
                     AddMarkerToMap(point)
                 }
             })
@@ -304,6 +331,7 @@
 
         AddNewMode.value = false
         newAquapointType.value = 1
+        newAquapointState.value = 1
         newAquapointName.value = null
         newAquapointImagePreview.value = null
         localValue.value = ''
@@ -360,9 +388,11 @@
             point_type: newAquapointType.value,
             point_trust: 2,
             local_id: localId,
-            state_id: 3, // Pendente
+            state_id: newAquapointState.value, // Pendente
             latitude: coords.lat, 
-            longitude: coords.lng
+            longitude: coords.lng,
+            createdBy: Auth.user.id,
+            isPending: 1,
         }
 
         AddNewAquaPoint(newPoint)

@@ -92,9 +92,9 @@ export async function getCountPendingAquapoints(req, res){
 
 // POST /aquapoints
 export async function createAquapoint(req, res){
-  const { point_name, image, point_type, point_trust, local_id, state_id, latitude, longitude } = req.body;
+  const { point_name, image, point_type, point_trust, local_id, state_id, latitude, longitude, createdBy, isPending } = req.body;
 
-  if(!point_name || !image || !point_type || !point_trust || !local_id || !state_id || !latitude || !longitude){
+  if(!point_name || !image || !point_type || !point_trust || !local_id || !state_id || !latitude || !longitude || !createdBy || !isPending){
     return res.status(400).json({ error: 'All fields are required' })
   }
 
@@ -106,8 +106,8 @@ export async function createAquapoint(req, res){
 
   try{
     const[result] = await pool.query(
-      'INSERT INTO aqua_points (point_name, image, point_type, point_trust, local_id, state_id, latitude, longitude) VALUES(?, ?, ?, ?, ?, ?, ?, ?)',
-      [point_name, aquaPointPictureBlob, point_type, point_trust, local_id, state_id, latitude, longitude]
+      'INSERT INTO aqua_points (point_name, image, point_type, point_trust, local_id, state_id, latitude, longitude, createdBy, isPending) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [point_name, aquaPointPictureBlob, point_type, point_trust, local_id, state_id, latitude, longitude, createdBy, isPending]
     )
 
     res.status(201).json({ message: 'Aquapoint created successfully' })
@@ -135,8 +135,10 @@ export async function updateAquapoint(req, res) {
     const image = req.body.image ?? findAquapoint.image;
     const latitude = req.body.latitude ?? findAquapoint.latitude;
     const longitude = req.body.longitude ?? findAquapoint.longitude;
+    const createdBy = req.body.createdBy ?? findAquapoint.createdBy;
+    const isPending = req.body.isPending ?? findAquapoint.isPending;
 
-    if(!point_name || !point_type || !point_trust || !local_id || !state_id || !latitude || !longitude || !image){
+    if(!point_name || !point_type || !point_trust || !local_id || !state_id || !latitude || !longitude || !image || !createdBy || !isPending == undefined){
       return res.status(400).json({ error: 'All fields are required' })
     }
 
@@ -148,8 +150,8 @@ export async function updateAquapoint(req, res) {
     else{ aquaPointPictureBlob = findAquapoint.image }
 
     const[result] = await pool.query(
-      'UPDATE aqua_points set point_name = ?, point_type = ?, point_trust = ?, local_id = ?, state_id = ?, image = ?, latitude = ?, longitude = ? WHERE id = ?',
-      [point_name, point_type, point_trust, local_id, state_id, aquaPointPictureBlob, latitude, longitude, findAquapoint.id]
+      'UPDATE aqua_points set point_name = ?, point_type = ?, point_trust = ?, local_id = ?, state_id = ?, image = ?, latitude = ?, longitude = ?, createdBy = ?, isPending = ? WHERE id = ?',
+      [point_name, point_type, point_trust, local_id, state_id, aquaPointPictureBlob, latitude, longitude, createdBy, isPending, findAquapoint.id]
     )
 
     if(result.affectedRows === 0) return res.status(500).json({ error: `There was a problem updating the aquapoint with ID: ${findAquapoint.id}`})

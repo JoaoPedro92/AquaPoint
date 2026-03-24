@@ -53,9 +53,23 @@ create table users (
 create table states (
     id int not null auto_increment,
     state_name text not null,
+    backgroundColor text not null,
+    color text not null,
     primary key (id)
 );
 
+
+-- -------------------------------------------------------
+-- TABELA TRUST LOGS
+-- -------------------------------------------------------
+create table trust_logs (
+    id int not null auto_increment,
+    user_id int not null,
+    point_id int not null,
+    trust_vote int not null,
+    vote_date date not null,
+    primary key (id)
+);
 
 -- -------------------------------------------------------
 -- TABELA TRUST LEVELS
@@ -75,7 +89,9 @@ create table aqua_points (
     point_type int not null,  
     point_trust int not null,       
     local_id int not null,      
-    state_id int not null,     
+    state_id int not null,   
+    createdBy int not null,
+    isPending TINYINT not null,  
     image LONGBLOB default NULL,    
     latitude double not null,
     longitude double not null,
@@ -112,7 +128,8 @@ create table reviews (
 create table reports (
     id int not null auto_increment,
     user_id int not null,   
-    comment TEXT not null,         
+    comment TEXT not null,   
+    image LONGBLOB not null,         
     point_id int not null,           
     createdAt date not null,
     primary key (id)
@@ -143,6 +160,12 @@ on delete cascade on update cascade;
 alter table aqua_points
 add constraint fk_aqua_points_state
 foreign key (state_id) references states(id)
+on delete cascade on update cascade;
+
+-- AQUA_POINTS -> AQUA_POINTS e USERS
+alter table aqua_points
+add constraint fk_aqua_points_created_by
+foreign key (createdBy) references users(id)
 on delete cascade on update cascade;
 
 -- POINTS_TRUST -> AQUA_POINTS e TRUSTLEVELS
@@ -181,4 +204,20 @@ on delete cascade on update cascade;
 alter table reports
 add constraint fk_reports_point
 foreign key (point_id) references aqua_points(id)
+on delete cascade on update cascade;
+
+-- trust logs -> USERS, POINT, VOTE
+alter table trust_logs
+add constraint fk_trust_logs_user
+foreign key (user_id) references users(id)
+on delete cascade on update cascade;
+
+alter table trust_logs
+add constraint fk_trust_logs_point
+foreign key (point_id) references aqua_points(id)
+on delete cascade on update cascade;
+
+alter table trust_logs
+add constraint fk_trust_logs_trust_level
+foreign key (trust_vote) references trustLevels(id)
 on delete cascade on update cascade;

@@ -30,10 +30,10 @@
                                             <label class="label" for="state">Estado do bebedouro</label>
                                             <v-select v-model="stateValue" :options="allStates" :disabled="viewOnly"  label="state_name" :reduce="state => state.id" placeholder="Seleciona um estado">
                                                 <template #option="option">
-                                                    <i class="me-2" :class="GetPointStateIcon(option.state_name, true)"></i>{{ option.state_name }}
+                                                    <i class="me-2" :class="GetPointStateIcon(option, true)"></i>{{ option.state_name }}
                                                 </template>
                                                 <template #selected-option="option">
-                                                    <i :class="GetPointStateIcon(option.state_name, true)" class="me-2"></i>
+                                                    <i :class="GetPointStateIcon(option, true)" class="me-2"></i>
                                                     {{ option.state_name }}
                                                 </template>
                                             </v-select>                                            
