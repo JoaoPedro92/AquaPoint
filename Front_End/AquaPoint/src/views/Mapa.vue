@@ -35,7 +35,10 @@
                 
                 <!-- Upload imagem bebedouro -->
                 <div class="mb-3">
-                    <img :src="newAquapointImagePreview" class="aquapoint-image-preview" style="cursor:pointer;" v-on:click="fileInput.click()">
+                    <div class="image">
+                        <img :src="newAquapointImagePreview" class="aquapoint-image-preview" style="cursor:pointer;" v-on:click="fileInput.click()">
+                    </div>
+                    <br>
                     <input type="file" ref="fileInput" style="display:none" @change="onFileChange" accept="image/*">
                     <button class="btn btn-outline-secondary btn-file-input w-100" @click="fileInput.click()">
                         <i class="bi bi-upload me-2"></i>Escolher ficheiro
@@ -61,7 +64,15 @@
         </div>
     </div>
 
-</template>
+</template> 
+
+<style scoped>
+    .aquapoint-image-preview {
+        width: 100%;
+        height: 14rem; 
+        object-fit: contain;
+    }
+</style>
 
 <script setup>
     import { ref, onMounted, watch } from 'vue';
