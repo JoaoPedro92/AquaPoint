@@ -91,14 +91,17 @@ export async function getMostRecentTrustLogByUserAndAquapointId(req, res) {
     }
 }
 
-// GET /trustlogs/user/{userId}/is-vote-enable
+// GET /trustlogs/user/{userId}/aquapoint/{aquapointId}/is-vote-enable
 export async function isVoteEnableByUserAndAquapointId(req, res){
     const userId = Number(req.params.userId)
     const pointId = Number(req.params.pointId)
 
     try{
+        // Vote interval of 5 days
         const [rows] = await pool.query(
-            `SELECT NOW() >= DATE_ADD(vote_date, INTERVAL 5 DAY) as valid FROM trust_logs 
+            `SELECT NOW() >= DATE_ADD(vote_date, INTERVAL 5 DAY) as valid,
+                DATE_ADD(vote_date, INTERVAL 5 DAY) AS next_vote_date
+             FROM trust_logs 
                 WHERE trust_logs.user_id = ? and trust_logs.point_id = ? 
                 ORDER BY trust_logs.vote_date DESC LIMIT 1`,
             [userId, pointId]
@@ -106,7 +109,15 @@ export async function isVoteEnableByUserAndAquapointId(req, res){
 
         if (rows.length === 0) return res.status(404).json({ error: 'Registo não encontrado' });
         
-        return res.json({ valid: rows[0].valid === 1 })
+        if(!rows[0].valid){
+            return res.status(200).json({ 
+                valid: false,
+                error: `Só podes votar novamente em ${new Date(rows[0].next_vote_date).toLocaleDateString('pt-PT')}.`
+            });
+        }
+
+        return res.json({ valid: true })
+        
     }
     catch(err){
         console.log(err.message)

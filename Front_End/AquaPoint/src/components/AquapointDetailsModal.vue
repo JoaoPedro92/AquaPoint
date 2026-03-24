@@ -171,6 +171,7 @@ import { aquapointService } from '../services/aquapointService';
 import { useModalStore } from '../utilities/modal';
 import { favoriteService } from '../services/favoriteService';
 import { reviewsService } from '../services/reviewsService';
+import { trustLogsService } from '../services/trustLogsService';
 import { useAuth } from '../utilities/useAuth';
 import { useToast } from 'vue-toastification';
 import StarsRating from '../components/StarsRating.vue'
@@ -301,9 +302,19 @@ function ReportProblem() {
     showReportProblemModal.value = true
 }
 
-function ShowVoteTrustLevel() {
-    console.log('VoteTrustLevel clicked')
-    showTrustLevelVote.value = !showTrustLevelVote.value
+async function ShowVoteTrustLevel() {
+    try{
+        const isUserValidToVote = (await trustLogsService.isVoteEnableByUserAndAquapointId(Auth.user.id, props.aquapoint.id)).data
+        if(!isUserValidToVote.valid){
+            toast.warning(isUserValidToVote.error)
+            return;
+        }
+
+        showTrustLevelVote.value = !showTrustLevelVote.value
+    }
+    catch(err){
+        toast.error('Erro ao verificar validade da votação.')
+    }
 }
 
 async function VoteTrustLevel(vote) {
