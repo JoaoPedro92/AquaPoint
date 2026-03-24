@@ -6,6 +6,7 @@ TRUNCATE TABLE reports;
 TRUNCATE TABLE reviews;
 TRUNCATE TABLE favorites;
 TRUNCATE TABLE points_state;
+TRUNCATE TABLE trust_logs;
 TRUNCATE TABLE aqua_points;
 TRUNCATE TABLE users;
 TRUNCATE TABLE trustLevels;

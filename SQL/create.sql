@@ -58,6 +58,18 @@ create table states (
 
 
 -- -------------------------------------------------------
+-- TABELA TRUST LOGS
+-- -------------------------------------------------------
+create table trust_logs (
+    id int not null auto_increment,
+    user_id int not null,
+    point_id int not null,
+    trust_vote int not null,
+    vote_date date not null,
+    primary key (id)
+);
+
+-- -------------------------------------------------------
 -- TABELA TRUST LEVELS
 -- -------------------------------------------------------
 create table trustLevels (
@@ -181,4 +193,20 @@ on delete cascade on update cascade;
 alter table reports
 add constraint fk_reports_point
 foreign key (point_id) references aqua_points(id)
+on delete cascade on update cascade;
+
+-- trust logs -> USERS, POINT, VOTE
+alter table trust_logs
+add constraint fk_trust_logs_user
+foreign key (user_id) references users(id)
+on delete cascade on update cascade;
+
+alter table trust_logs
+add constraint fk_trust_logs_point
+foreign key (point_id) references aqua_points(id)
+on delete cascade on update cascade;
+
+alter table trust_logs
+add constraint fk_trust_logs_trust_level
+foreign key (trust_vote) references trustLevels(id)
 on delete cascade on update cascade;
