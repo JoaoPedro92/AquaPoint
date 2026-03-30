@@ -13,7 +13,7 @@
                 <span class="badge rounded-pill" style="background: var(--bs-secondary-bg); color: var(--bs-secondary-color);">
                     Comentário
                 </span>
-                <span class="badge rounded-pill" :style="GetPointStateStyles(aquapoint?.state_name)">
+                <span class="badge rounded-pill" :style="GetPointStateStyles(aquapoint)">
                     {{ aquapoint?.state_name }}
                 </span>
             </div>
@@ -24,7 +24,7 @@
             </p>
 
             <!-- Comment -->
-            <div class="p-2 mb-3 rounded-end" :style="`background: var(--bs-secondary-bg); border-left: 3px solid ${GetPointStateColor(aquapoint?.state_name)};`">
+            <div class="p-2 mb-3 rounded-end" :style="`background: var(--bs-secondary-bg); border-left: 3px solid ${GetPointStateColor(aquapoint)};`">
                 <p class="mb-0 fst-italic text-muted" style="font-size: 13px;">"{{ props.interaction.comment }}"</p>
             </div>
 

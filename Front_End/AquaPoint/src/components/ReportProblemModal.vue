@@ -21,6 +21,12 @@
                 <label for="floatingPassword">Dê-nos mais informações</label>
                 <div class="invalid-feedback">{{  errors.description }}</div>
             </div>
+            <br>
+
+            <div class="form-floating">
+                <input type="file" class="form-control" id="floatingFile" placeholder="Anexar imagem" @change="onFileChange" accept="image/*">
+                <label for="floatingFile">Anexar imagem</label>
+            </div>
 
             <div class="d-flex justify-content-center mt-4">
                 <button class="btn btn-success shadow-sm" style="width: 60%;" v-on:click="ReportProblem">SUBMETER</button>
@@ -42,6 +48,7 @@
     const Auth = useAuth()
     const toast = useToast()
     const pointId = ref(null)
+    const reportImage = ref(null)
 
     const props = defineProps({
         visible: {
@@ -68,6 +75,18 @@
         emit('update:visible', value)
     }
 
+    function onFileChange(e) {
+        const file = e.target.files[0]
+        if(!file) return
+        
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            reportImage.value = e.target.result
+        }
+        reader.readAsDataURL(file)
+        
+    }
+
     async function ReportProblem(){
         clearErrors()
         //const emailError = validateEmail(userEmail.value)
@@ -89,12 +108,18 @@
             toast.error('Ponto de água não identificado. Por favor, tente novamente.')
             return
         }
+       
+        if (!reportImage.value) {
+            toast.error('Por favor, anexe uma imagem ao seu report.')
+            return
+        }
 
         try {
             await reportsService.create({
                 user_id: Auth.user.id,
                 point_id: pointId.value,
-                comment: reportDescription.value
+                comment: reportDescription.value,
+                image: reportImage.value, 
             })
 
             toast.success('Report enviado com sucesso!')
