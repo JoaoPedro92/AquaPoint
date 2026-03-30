@@ -1,5 +1,83 @@
 <template>
-    <h1>Mapa</h1>
+    <!--<h1>Mapa</h1>-->
+    <div class="p-1" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+    
+        <!-- Botão Filtros -->
+        <div style="position: relative;">
+            <button @click="showFilters = !showFilters" 
+                style="background: white; border: 0.5px solid #ccc; border-radius: 8px; padding: 8px 16px; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-sliders"></i>
+                Filtros
+                <i :class="showFilters ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
+            </button>
+
+            <!-- Dropdown -->
+            <div v-if="showFilters" 
+                style="position: absolute; top: 44px; left: 0; background: white; border: 0.5px solid #ddd; border-radius: 12px; padding: 16px; min-width: 260px; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
+                
+                <!-- State Filter -->
+                <p style="font-size: 12px; font-weight: 500; color: gray; margin: 0 0 10px; text-transform: uppercase;">Estado</p>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                    <label v-for="state in allPointStates" :key="state.id" style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px;">
+                        <input type="checkbox" :value="state.state_name" v-model="filters.states">
+                        <i :class="GetPointStateIcon(state.state_name, true)"></i>{{ state.state_name }}
+                    </label>
+                </div>
+
+                <hr style="margin: 0 0 14px;">
+
+                <!-- Type Filter -->
+                <p style="font-size: 12px; font-weight: 500; color: gray; margin: 0 0 10px; text-transform: uppercase;">Tipo</p>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                    <label v-for="type in allTypes" :key="type.id" style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px;">
+                        <input type="checkbox" :value="type.type_name" v-model="filters.types">
+                        {{ type.type_name }}
+                    </label>
+                </div>
+
+                <hr style="margin: 0 0 14px;">
+
+
+                <!-- City Filter -->
+                <p style="font-size: 12px; font-weight: 500; color: gray; margin: 0 0 10px; text-transform: uppercase;">Cidade</p>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                    <input v-model="filters.city" class="form-control form-control-sm" placeholder="Filtrar por cidade" @keyup.enter="activeCityFilter = filters.city;">
+                </div>
+
+
+                <!-- Filter dropdown button , clear and apply -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 0.5px solid #eee; padding-top: 12px;">
+                    <button @click="ClearFilters" style="background: none; border: none; font-size: 13px; color: gray; cursor: pointer; text-decoration: underline;">Limpar</button>
+                    <button @click="showFilters = false; AtualizarMarkers()" 
+                        style="background: #378ADD; color: white; border: none; border-radius: 8px; padding: 6px 16px; font-size: 13px; cursor: pointer;">
+                        Aplicar
+                    </button>
+                </div>
+
+                
+            </div>
+        </div>
+
+        <!-- Badges filtros ativos -->
+        <span v-for="state in filters.states" :key="state"
+            :style="[{ borderRadius: '20px', padding: '4px 10px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }, GetPointStateStyleFromList(allPointStates, state)]">
+            <i :class=GetPointStateIcon(state)></i>{{ state }}
+            <span @click="removeStateFilter(state)" style="font-size: 14px; line-height: 1;">x</span>
+        </span>
+
+        <span v-for="type in filters.types" :key="type"
+            style="background: #0c447c; color: #b5d4f4; border-radius: 20px; padding: 4px 10px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+            {{ type }}
+            <span @click="removeTypeFilter(type)" style="font-size: 14px; line-height: 1;">x</span>
+        </span>
+
+        <span v-if="activeCityFilter"
+            :style="{ borderRadius: '20px', padding: '4px 10px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', background: '#378ADD', color: 'white' }">
+            <i class="bi bi-geo-alt me-1"></i>{{ activeCityFilter }}
+            <span @click="activeCityFilter = ''; filters.city = ''; AtualizarMarkers()" style="font-size: 14px; line-height: 1;">×</span>
+        </span>
+
+    </div>
 
     <div style="position: relative">
         <!-- Loading Spinner while loading markers on map -->
@@ -69,6 +147,7 @@
     import { Offcanvas } from 'bootstrap';
     import L, { icon } from 'leaflet'
     import 'leaflet/dist/leaflet.css'
+    import { GetPointStateStyleFromList, GetPointStateIcon } from '../utilities/tools';
     import { useToast } from 'vue-toastification';
     import { useAuth } from '../utilities/useAuth';
     import { useModalStore } from '../utilities/modal';
@@ -76,6 +155,8 @@
     import { aquapointService } from '../services/aquapointService' 
     import { localsService } from '../services/localsService';
     import { zonesService } from '../services/zonesService';
+    import { statesService } from '../services/statesService';
+    import { typesService } from '../services/typesService';
     import { point } from 'leaflet';
     import { favoriteService } from '../services/favoriteService';
     import AquapointDetailsModal from '../components/AquapointDetailsModal.vue';
@@ -109,8 +190,22 @@
     const selectedMarker = ref(null)
     const userFavoritePoints = ref([])
     const showAquapointDetailsModal = ref(false)
+    const showFilters = ref(false)
+    const activeCityFilter = ref('')
+    const allPointStates = ref([])
+    const allTypes = ref([])
+    const filters = ref({
+        states: [],
+        types: [],
+        city: ''
+    })
 
     onMounted(async() => {
+        allPointStates.value = (await statesService.getAll()).data
+        allTypes.value = (await typesService.getAll()).data
+        filters.value.states = allPointStates.value.map(e => e.state_name)
+        filters.value.types = allTypes.value.map(e => e.type_name)
+
         // Inicializa o offcanvas das informações no momento de adicionar um novo bebedouro
         offcanvasInstance = new Offcanvas(offcanvasRef.value)
         offcanvasRef.value.addEventListener('hide.bs.offcanvas', () => {
@@ -118,11 +213,12 @@
             closeOffcanvas()
         })
 
-        mapaRef.value = L.map('mapa').setView([38.781558, -9.102584], 13)
+        mapaRef.value = L.map('mapa', { zoomControl: false }).setView([38.781558, -9.102584], 13)
         L.tileLayer('https://tile.jawg.io/jawg-lagoon/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
             attribution: '© Jawg Maps',
             accessToken: 'BumVzniBYxFsvv2lUwvsZ8fQMn6WdPC2sS5bAqyeSyDrROwuULnZrt0lE1uKPHrT'
         }).addTo(mapaRef.value)
+        L.control.zoom({position: 'topright'}).addTo(mapaRef.value)
 
         mapaRef.value.on('click', async (e) => {
             if(!AddNewMode.value) return 

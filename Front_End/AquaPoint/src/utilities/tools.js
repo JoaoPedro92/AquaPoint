@@ -9,6 +9,13 @@ export async function imageUrlToBase64(url){
     })
 }
 
+export function GetPointStateStyleFromList(statesList, stateName){
+    if (!statesList || statesList.length === 0) return { background: '#ccc', color: 'white' }
+
+    const state = statesList.find(e => e.state_name === stateName)
+    return { backgroundColor: state.backgroundColor || '#ccc', color: state.color }
+}
+
 export function GetPointStateStyles(state) {
     const styles = {
         'Funcional': { backgroundColor: '#166534', color: '#c1ebbc' },
