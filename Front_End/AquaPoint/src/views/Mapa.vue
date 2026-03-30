@@ -60,7 +60,7 @@
 
         <!-- Badges filtros ativos -->
         <span v-for="state in filters.states" :key="state"
-            :style="[{ borderRadius: '20px', padding: '4px 10px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }, GetPointStateStyleFromList(allPointStates, state)]">
+            :style="[{ borderRadius: '20px', padding: '4px 10px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }, GetStateStylesFromStateName(allPointStates, state)]">
             <i :class=GetPointStateIcon(state)></i>{{ state }}
             <span @click="removeStateFilter(state)" style="font-size: 14px; line-height: 1;">x</span>
         </span>
@@ -130,12 +130,12 @@
                 </div>
                 <!-- Tipo de bebedouro -->
                 <h6>Tipo de Bebedouro:</h6>
-                <button v-for="type in aquapointTypes" :key="type.id" 
+                <button v-for="type in allTypes" :key="type.id" 
                 :class="newAquapointType === type.id ? 'btn bg-aquapoint-blue text-white shadow-sm' : 'btn bg-aquapoint-gray'"
                  v-on:click="newAquapointType = type.id"> {{ type.nome }}</button>
                  <!----------------------->
                 <h6>Estado do Bebedouro:</h6>
-                <button v-for="state in aquapointStates" :key="state.id" 
+                <button v-for="state in allPointStates" :key="state.id" 
                 :class="newAquapointState === state.id ? 'btn bg-aquapoint-blue text-white shadow-sm' : 'btn bg-aquapoint-gray'"
                  v-on:click="newAquapointState = state.id"> {{ state.nome }}</button>
             </div>
@@ -162,7 +162,7 @@
     import { Offcanvas } from 'bootstrap';
     import L, { icon } from 'leaflet'
     import 'leaflet/dist/leaflet.css'
-    import { GetPointStateStyleFromList, GetPointStateIcon } from '../utilities/tools';
+    import { GetPointStateStylesFromList, GetStateStylesFromStateName, GetPointStateIcon } from '../utilities/tools';
     import { useToast } from 'vue-toastification';
     import { useAuth } from '../utilities/useAuth';
     import { useModalStore } from '../utilities/modal';
@@ -188,18 +188,8 @@
     const offcanvasRef = ref(null)
     let offcanvasInstance = null
     const newMarkerAquapoint = ref(null)
-    const aquapointTypes = [
-        { id: 1, nome: 'Pessoas' },
-        { id: 2, nome: 'Animais' },
-        { id: 3, nome: 'Ambos' }
-    ]
     const newAquapointType = ref(1)
     const newAquapointState = ref(1)
-    const aquapointStates = [
-        { id: 1, nome: 'Necessita manutenção' },
-        { id: 2, nome: 'Funcional' },
-        { id: 3, nome: 'Inativo' },
-    ]
     const fileInput = ref(null)
     const fileName = ref('')
     const newAquapointImagePreview = ref(null)
