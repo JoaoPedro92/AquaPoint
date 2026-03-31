@@ -41,14 +41,14 @@
                 <!-- City Filter -->
                 <p style="font-size: 12px; font-weight: 500; color: gray; margin: 0 0 10px; text-transform: uppercase;">Cidade</p>
                 <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
-                    <input v-model="filters.city" class="form-control form-control-sm" placeholder="Filtrar por cidade" @keyup.enter="activeCityFilter = filters.city;">
+                    <input v-model="filters.city" class="form-control form-control-sm" placeholder="Filtrar por cidade" @keyup.enter="AddCityFilterToList(); ApplyFilters()">
                 </div>
 
 
                 <!-- Filter dropdown button , clear and apply -->
                 <div style="display: flex; justify-content: space-between; align-items: center; border-top: 0.5px solid #eee; padding-top: 12px;">
                     <button @click="ClearFilters" style="background: none; border: none; font-size: 13px; color: gray; cursor: pointer; text-decoration: underline;">Limpar</button>
-                    <button @click="showFilters = false; AtualizarMarkers()" 
+                    <button @click="ApplyFilters()" 
                         style="background: #378ADD; color: white; border: none; border-radius: 8px; padding: 6px 16px; font-size: 13px; cursor: pointer;">
                         Aplicar
                     </button>
@@ -59,22 +59,22 @@
         </div>
 
         <!-- Badges filtros ativos -->
-        <span v-for="state in filters.states" :key="state"
+        <span v-for="state in activeFilters.states" :key="state"
             :style="[{ borderRadius: '20px', padding: '4px 10px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }, GetStateStylesFromStateName(allPointStates, state)]">
             <i :class=GetPointStateIcon(state)></i>{{ state }}
-            <span @click="removeStateFilter(state)" style="font-size: 14px; line-height: 1;">x</span>
+            <span @click="RemoveStateFilter(state)" style="font-size: 14px; line-height: 1;">x</span>
         </span>
 
-        <span v-for="type in filters.types" :key="type"
+        <span v-for="type in activeFilters.types" :key="type"
             style="background: #0c447c; color: #b5d4f4; border-radius: 20px; padding: 4px 10px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
             {{ type }}
-            <span @click="removeTypeFilter(type)" style="font-size: 14px; line-height: 1;">x</span>
+            <span @click="RemoveTypeFilter(type)" style="font-size: 14px; line-height: 1;">x</span>
         </span>
 
-        <span v-if="activeCityFilter"
+        <span v-for="cityFilter in activeCityFilter" :key="cityFilter"
             :style="{ borderRadius: '20px', padding: '4px 10px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', background: '#378ADD', color: 'white' }">
-            <i class="bi bi-geo-alt me-1"></i>{{ activeCityFilter }}
-            <span @click="activeCityFilter = ''; filters.city = ''; AtualizarMarkers()" style="font-size: 14px; line-height: 1;">×</span>
+            <i class="bi bi-geo-alt me-1"></i>{{ cityFilter }}
+            <span @click="RemoveCityFilter(cityFilter)" style="font-size: 14px; line-height: 1;">×</span>
         </span>
 
     </div>
@@ -202,10 +202,15 @@
     const userFavoritePoints = ref([])
     const showAquapointDetailsModal = ref(false)
     const showFilters = ref(false)
-    const activeCityFilter = ref('')
+    const activeCityFilter = ref([])
     const allPointStates = ref([])
     const allTypes = ref([])
     const filters = ref({
+        states: [],
+        types: [],
+        city: ''
+    })
+    const activeFilters = ref({
         states: [],
         types: [],
         city: ''
@@ -214,8 +219,8 @@
     onMounted(async() => {
         allPointStates.value = (await statesService.getAll()).data
         allTypes.value = (await typesService.getAll()).data
-        filters.value.states = allPointStates.value.map(e => e.state_name)
-        filters.value.types = allTypes.value.map(e => e.type_name)
+        //filters.value.states = allPointStates.value.map(e => e.state_name)
+        //filters.value.types = allTypes.value.map(e => e.type_name)
 
         // Inicializa o offcanvas das informações no momento de adicionar um novo bebedouro
         offcanvasInstance = new Offcanvas(offcanvasRef.value)
@@ -371,7 +376,7 @@
     async function SetUpAquapointsOnMap() {
         loadingMarkers.value = true
         aquapointsList.value = await GetAquapointsList()
-        console.log(aquapointsList)
+        //console.log(aquapointsList)
         
         if (aquapointsList) {
             aquapointsList.value.forEach(point => {
@@ -384,6 +389,66 @@
         }
 
         loadingMarkers.value = false
+    }
+
+    function AddCityFilterToList(){        
+        if(filters.value.city && !activeCityFilter.value.includes(filters.value.city)){
+            activeCityFilter.value = [...activeCityFilter.value, filters.value.city]
+            filters.value.city = ''
+        }
+    }
+
+    async function RefreshMarkers(){
+        ClearMapMarkers()
+
+        aquapointsList.value
+            .filter(point => activeFilters.value.states.length === 0 || activeFilters.value.states.includes(point.state_name))
+            .filter(point => activeFilters.value.types.length === 0 || activeFilters.value.types.includes(point.type_name))
+            .filter(point => activeCityFilter.value.length === 0 || activeCityFilter.value.some(city => point.local_name.toLowerCase().includes(city.toLowerCase())))
+            .forEach(point => AddMarkerToMap(point))
+    }
+
+    function ApplyFilters(){
+        loadingMarkers.value = true
+
+        AddCityFilterToList()
+
+        activeFilters.value.states = [...filters.value.states]
+        activeFilters.value.types = [...filters.value.types]
+        activeFilters.value.city = filters.value.city
+
+        showFilters.value = false
+
+        RefreshMarkers()
+        loadingMarkers.value = false
+    }
+
+    function RemoveTypeFilter(type){
+        filters.value.types = filters.value.types.filter(t => t !== type)
+        activeFilters.value.types = activeFilters.value.types.filter(t => t !== type)
+        RefreshMarkers()
+    }
+
+    function RemoveStateFilter(state){
+        filters.value.states = filters.value.states.filter(s => s !== state)
+        activeFilters.value.states = activeFilters.value.states.filter(s => s !== state)
+        RefreshMarkers()
+    }
+
+    function RemoveCityFilter(city){
+        activeCityFilter.value = activeCityFilter.value.filter(c => c !== city)
+        filters.city = '';
+        RefreshMarkers()
+    }
+
+    function ClearFilters(){
+        filters.value.city = ''
+        
+        activeFilters.value.states = []
+        activeFilters.value.types = []
+        activeCityFilter.value = []
+        
+        RefreshMarkers()
     }
 
     function AddOrCancelMarkerClick(){
@@ -434,9 +499,7 @@
         }
         reader.readAsDataURL(file)
         
-    }
-
-    
+    }   
 
     async function SubmitNewAquapoint(){
         if (!newAquapointName.value || newAquapointName.value.trim() === ''){
@@ -586,6 +649,8 @@
             popupAnchor: [0, -40]
         })
     }
+
+    
 </script>
 
 <style scoped>
