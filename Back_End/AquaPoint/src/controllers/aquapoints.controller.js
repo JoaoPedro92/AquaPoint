@@ -110,7 +110,7 @@ export async function createAquapoint(req, res){
       [point_name, aquaPointPictureBlob, point_type, point_trust, local_id, state_id, latitude, longitude, createdBy, isPending]
     )
 
-    res.status(201).json({ message: 'Aquapoint created successfully' })
+    res.status(201).json({ message: 'Aquapoint created successfully', id: result.insertId })
   }
   catch(err){
     return res.status(500).json({ error: err.message })
