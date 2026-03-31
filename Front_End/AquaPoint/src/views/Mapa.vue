@@ -132,12 +132,12 @@
                 <h6>Tipo de Bebedouro:</h6>
                 <button v-for="type in allTypes" :key="type.id" 
                 :class="newAquapointType === type.id ? 'btn bg-aquapoint-blue text-white shadow-sm' : 'btn bg-aquapoint-gray'"
-                 v-on:click="newAquapointType = type.id"> {{ type.nome }}</button>
+                 v-on:click="newAquapointType = type.id"> {{ type.type_name }}</button>
                  <!----------------------->
                 <h6>Estado do Bebedouro:</h6>
                 <button v-for="state in allPointStates" :key="state.id" 
                 :class="newAquapointState === state.id ? 'btn bg-aquapoint-blue text-white shadow-sm' : 'btn bg-aquapoint-gray'"
-                 v-on:click="newAquapointState = state.id"> {{ state.nome }}</button>
+                 v-on:click="newAquapointState = state.id"> {{ state.state_name }}</button>
             </div>
 
             <div class="d-flex justify-content-center mt-5">
@@ -217,15 +217,17 @@
     })
 
     onMounted(async() => {
+        console.log(Auth.user.id)
         allPointStates.value = (await statesService.getAll()).data
         allTypes.value = (await typesService.getAll()).data
         //filters.value.states = allPointStates.value.map(e => e.state_name)
         //filters.value.types = allTypes.value.map(e => e.type_name)
 
+        console.log(allPointStates)
         // Inicializa o offcanvas das informações no momento de adicionar um novo bebedouro
         offcanvasInstance = new Offcanvas(offcanvasRef.value)
         offcanvasRef.value.addEventListener('hide.bs.offcanvas', () => {
-            console.log('offcanvas fechado')
+            //console.log('offcanvas fechado')
             closeOffcanvas()
         })
 
@@ -280,7 +282,6 @@
         )
         .addTo(mapaRef.value)
         .on('click', async () => {
-
             selectedMarker.value = marker
             selectedAquapoint.value = (await aquapointService.getById(point.id)).data
             //showAquapointPopup.value = true
@@ -375,18 +376,22 @@
 
     async function SetUpAquapointsOnMap() {
         loadingMarkers.value = true
+        ClearMapMarkers()
+
         aquapointsList.value = await GetAquapointsList()
         //console.log(aquapointsList)
         
-        if (aquapointsList) {
-            aquapointsList.value.forEach(point => {
+        aquapointsList.value
+            .filter(point => activeFilters.value.states.length === 0 || activeFilters.value.states.includes(point.state_name))
+            .filter(point => activeFilters.value.types.length === 0 || activeFilters.value.types.includes(point.type_name))
+            .filter(point => activeCityFilter.value.length === 0 || activeCityFilter.value.some(city => point.local_name.toLowerCase().includes(city.toLowerCase())))
+            .forEach(point => {
                 if (point.isPending != 1) {
                     AddMarkerToMap(point)
                 } else if (Auth.isLoggedIn && Auth.user.id === point.createdBy) {
                     AddMarkerToMap(point)
                 }
-            })
-        }
+            })        
 
         loadingMarkers.value = false
     }
@@ -396,16 +401,6 @@
             activeCityFilter.value = [...activeCityFilter.value, filters.value.city]
             filters.value.city = ''
         }
-    }
-
-    async function RefreshMarkers(){
-        ClearMapMarkers()
-
-        aquapointsList.value
-            .filter(point => activeFilters.value.states.length === 0 || activeFilters.value.states.includes(point.state_name))
-            .filter(point => activeFilters.value.types.length === 0 || activeFilters.value.types.includes(point.type_name))
-            .filter(point => activeCityFilter.value.length === 0 || activeCityFilter.value.some(city => point.local_name.toLowerCase().includes(city.toLowerCase())))
-            .forEach(point => AddMarkerToMap(point))
     }
 
     function ApplyFilters(){
@@ -419,26 +414,26 @@
 
         showFilters.value = false
 
-        RefreshMarkers()
+        SetUpAquapointsOnMap()
         loadingMarkers.value = false
     }
 
     function RemoveTypeFilter(type){
         filters.value.types = filters.value.types.filter(t => t !== type)
         activeFilters.value.types = activeFilters.value.types.filter(t => t !== type)
-        RefreshMarkers()
+        SetUpAquapointsOnMap()
     }
 
     function RemoveStateFilter(state){
         filters.value.states = filters.value.states.filter(s => s !== state)
         activeFilters.value.states = activeFilters.value.states.filter(s => s !== state)
-        RefreshMarkers()
+        SetUpAquapointsOnMap()
     }
 
     function RemoveCityFilter(city){
         activeCityFilter.value = activeCityFilter.value.filter(c => c !== city)
         filters.city = '';
-        RefreshMarkers()
+        SetUpAquapointsOnMap()
     }
 
     function ClearFilters(){
@@ -448,7 +443,7 @@
         activeFilters.value.types = []
         activeCityFilter.value = []
         
-        RefreshMarkers()
+        SetUpAquapointsOnMap()
     }
 
     function AddOrCancelMarkerClick(){
@@ -508,7 +503,7 @@
             return;
         }
 
-        console.log(`${newAquapointName.value} \n${newAquapointType.value}`)
+        //console.log(`${newAquapointName.value} \n${newAquapointType.value}`)
         //offcanvasClosedBySubmitButton.value = true
 
         const coords = newMarkerAquapoint.value.getLatLng()
@@ -544,7 +539,11 @@
             isPending: 1,
         }
 
-        AddNewAquaPoint(newPoint)
+        loadingMarkers.value = true
+        newPoint.id = await AddNewAquaPoint(newPoint)
+        AddMarkerToMap(newPoint)
+        loadingMarkers.value = false
+
     }
 
     async function GetPlaceDataByCoords(lat, lng) {
@@ -620,6 +619,7 @@
                 offcanvasInstance.hide()
 
                 aquapointsList.value = await GetAquapointsList()
+                return createdPoint.data.id
             }
         } catch (err) {
             console.log("Status:", err.response?.status)
