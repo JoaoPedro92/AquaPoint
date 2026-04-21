@@ -130,6 +130,10 @@
     const selectedMarker = ref(null)
     const userFavoritePoints = ref([])
     const showAquapointDetailsModal = ref(false)
+    let userCoords = {
+        lat: 38.781558,
+        lng: -9.102584,
+    }
 
     onMounted(async() => {
         // Inicializa o offcanvas das informações no momento de adicionar um novo bebedouro
@@ -139,7 +143,7 @@
             closeOffcanvas()
         })
 
-        mapaRef.value = L.map('mapa').setView([38.781558, -9.102584], 13)
+        mapaRef.value = L.map('mapa').setView([userCoords.lat, userCoords.lng], 13)
         L.tileLayer('https://tile.jawg.io/jawg-lagoon/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
             attribution: '© Jawg Maps',
             accessToken: 'BumVzniBYxFsvv2lUwvsZ8fQMn6WdPC2sS5bAqyeSyDrROwuULnZrt0lE1uKPHrT'
@@ -171,6 +175,30 @@
             await GetUserFavoritePoints()
         }
 
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude
+                    const lng = position.coords.longitude
+
+                    userCoords.lat = lat
+                    userCoords.lng = lng
+
+                    mapaRef.value.setView([lat, lng], 13)
+
+                    L.marker([lat, lng])
+                        .addTo(mapaRef.value)
+                        .bindPopup('📍')
+                        .openPopup()
+                },
+                (error) => {
+                    mapaRef.value.setView([userCoords.lat, userCoords.lng], 13)
+                }
+            )
+        } else {
+            mapaRef.value.setView([userCoords.lat, userCoords.lng], 13)
+        }
+
         SetUpAquapointsOnMap()
     })
 
@@ -192,6 +220,12 @@
 
             selectedMarker.value = marker
             selectedAquapoint.value = (await aquapointService.getById(point.id)).data
+
+            selectedAquapoint.value.distanceMeters = mapaRef.value.distance(
+                [userCoords.lat, userCoords.lng],
+                [selectedAquapoint.value.latitude, selectedAquapoint.value.longitude]
+            )
+            
             //showAquapointPopup.value = true
             showAquapointDetailsModal.value = true
         })
