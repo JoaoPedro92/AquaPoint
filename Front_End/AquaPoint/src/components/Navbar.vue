@@ -63,7 +63,7 @@
     </div>
   </nav>
 
-    <FavoriteAquapointModal v-model:visible="showUserFavoriteAquapoints" :favoritePointsList="userFavoritePoints"/>
+    <FavoriteAquapointModal v-model:visible="showUserFavoriteAquapoints" :favoritePointsList="userFavoritePoints" @pointUpdated="LoadAllUserFavoritePoints"/>
   
   </template>
 
@@ -89,6 +89,10 @@
             userFavoritePoints.value = (await aquapointService.getUserFavoritePoints(Auth.user.id)).data
             showUserFavoriteAquapoints.value = true
         }
+    }
+
+    async function LoadAllUserFavoritePoints(){
+        userFavoritePoints.value = (await aquapointService.getUserFavoritePoints(Auth.user.id)).data
     }
 
     function LogoutUser(){

@@ -26,7 +26,7 @@
                 </div>
                 <!-- Google Maps Directions and Report Flag -->
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <a :href="GetAquapointGoogleMapsDirections(aquapoint.latitude, aquapoint.longitude)"
+                    <a v-if="aquapoint?.latitude && aquapoint?.longitude" :href="GetAquapointGoogleMapsDirections(aquapoint.latitude, aquapoint.longitude)"
                         target="_blank">
                         <i class="bi bi-geo-alt-fill ms-2"
                             style="font-size: 20px; cursor: pointer; color: var(--aquapoint-marker-blue);"></i>

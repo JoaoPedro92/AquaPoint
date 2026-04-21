@@ -1,4 +1,5 @@
 <template>
+    <div>
     <div class="featured-product-card" @click="showPointDetailsModal = true">
         <div class="featured-product-image">
             <img :src="aquapoint.image" alt="Imagem do bebedouro favorito"/>
@@ -12,24 +13,24 @@
 
             <!-- Rating -->
              <p class="mt-4 mb-1" title="Classificação geral">
-                <StarsRating :rating="aquapoint.ratingAVG" :is-readonly="true" /><span class="ms-2">{{ aquapoint.ratingAVG }}</span>
+                <StarsRating :rating="Number(aquapoint.ratingAVG)" :is-readonly="true" /><span class="ms-2">{{ aquapoint.ratingAVG }}</span>
             </p>
 
             <span class="badge rounded-2 text-nowrap mb-4" :style="GetPointStateStyles(aquapoint)" title="Estado do bebedouro">
-                <i :class="GetPointStateIcon(aquapoint)"></i>
+                <i :class="GetPointStateIcon(aquapoint.state_name)"></i>
                 {{ aquapoint.state_name }}
             </span>
             
             <div class="d-flex justify-content-between align-items-center">
                 <a class="btn btn-primary flex-grow-1 btn-sm me-4" @click="showPointDetailsModal = true">Ver detalhes</a>
 
-                <i class="bi bi-heart-fill text-danger" style="cursor: pointer; font-size: 20px;" @click.stop data-bs-toggle="modal" data-bs-target="#deleteFavoriteModal" title="Remover favorito"></i>         
+                <i class="bi bi-heart-fill text-danger" style="cursor: pointer; font-size: 20px;" @click.stop data-bs-toggle="modal" :data-bs-target="`#deleteFavoriteModal-${aquapoint.id}`" title="Remover favorito"></i>         
             </div>
         </div>
     </div>
 
     <!-- Delete Aquapoints Favorite Confirmation Modal -->
-    <div class="modal fade" id="deleteFavoriteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal fade" :id="`deleteFavoriteModal-${aquapoint.id}`" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
             <div class="modal-header">
@@ -48,6 +49,7 @@
     </div>
 
     <AquapointDetailsModal v-model:visible="showPointDetailsModal" :title="'DETALHES DO BEBEDOURO'" :aquapoint="aquapoint" :view-only="true" />
+</div>
 </template>
 
 <script setup>

@@ -7,7 +7,7 @@
                     <div class="spacer"></div>
 
                     <div class="12 pe-3 mb-3" v-for="aquapoint in favoritePointsList" :key="aquapoint.id">
-                        <FavoriteAquapointCard :aquapoint="aquapoint" :favoriteChanged="LoadAllUserFavoritePoints"/>
+                        <FavoriteAquapointCard :aquapoint="aquapoint" @favoriteChanged="LoadAllUserFavoritePoints"/>
                     </div>
             </section>    
         </div>
@@ -16,7 +16,9 @@
 
 <script setup>
     import FavoriteAquapointCard from './FavoriteAquapointCard.vue';
-
+    import { useAuth } from '../utilities/useAuth';
+    import { useModalStore } from '../utilities/modal';
+    import { aquapointService } from '../services/aquapointService';
 
     const props = defineProps({
         visible: {
@@ -33,14 +35,18 @@
         }
     })
 
+    const Auth = useAuth()
+    const useModal = useModalStore()
     const emit = defineEmits(['update:visible', 'pointUpdated'])
 
     function ChangeVisibility(value) {
-        emit('update:visible', value)
+        emit('update:visible', value)        
     }
 
     async function LoadAllUserFavoritePoints(){
-
+        emit('pointUpdated')
+        useModal.triggerRemovedFavorite()
+        
     }
 </script>
 

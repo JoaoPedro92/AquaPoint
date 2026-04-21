@@ -28,7 +28,7 @@ export function GetStateStylesFromStateName(statesList, stateName){
     return { backgroundColor: state.backgroundColor || '#ccc', color: state.color }
 }
 
-export function GetPointStateStyles(state) {
+export function GetPointStateStyles(aquapoint) {
     const styles = {
         'Funcional': { backgroundColor: '#166534', color: '#c1ebbc' },
         'Necessita manutenção': { backgroundColor: '#f97316', color: '#ffff' },
@@ -40,7 +40,7 @@ export function GetPointStateStyles(state) {
         return styles["Pendente"] || {}
     } */
 
-    return styles[aquapoint.state_name] || {}
+    return styles[aquapoint?.state_name] || {}
 }
 
 export function GetPointStateColor(aquapoint){
@@ -55,7 +55,7 @@ export function GetPointStateColor(aquapoint){
         return styles["Pendente"] || {}
     }*/
 
-    return styles[aquapoint.state_name] || {}
+    return styles[aquapoint?.state_name] || {}
 }
 
 export function GetPointStateIcon(stateName, changeBgColor = false){

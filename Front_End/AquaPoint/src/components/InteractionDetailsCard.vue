@@ -57,8 +57,6 @@
     })
 
     onMounted(async () => {
-        console.log(props.interaction)
-        console.log(props.interaction.point_id)
         aquapoint.value = (await aquapointService.getById(props.interaction.point_id)).data
     })
 

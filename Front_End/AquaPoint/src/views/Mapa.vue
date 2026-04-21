@@ -157,7 +157,7 @@
 </style>
 
 <script setup>
-    import { ref, onMounted, watch } from 'vue';
+    import { ref, onMounted, nextTick, watch } from 'vue';
     import addNewMarkerImg from '../assets/images/map-markers/add_new_aqua_point_marker.png'
     import { Offcanvas } from 'bootstrap';
     import L, { icon } from 'leaflet'
@@ -223,7 +223,8 @@
     }
 
     onMounted(async() => {
-        console.log(Auth.user.id)
+        
+
         allPointStates.value = (await statesService.getAll()).data
         allTypes.value = (await typesService.getAll()).data
         //filters.value.states = allPointStates.value.map(e => e.state_name)
@@ -266,6 +267,8 @@
             }
         })
 
+        
+
         if (Auth.isLoggedIn) {
             await GetUserFavoritePoints()
         }
@@ -281,10 +284,31 @@
 
                     mapaRef.value.setView([lat, lng], 13)
 
-                    L.marker([lat, lng])
-                        .addTo(mapaRef.value)
-                        .bindPopup('📍')
-                        .openPopup()
+                    const initials = Auth.user?.name?.charAt(0).toUpperCase() || '?'
+
+                    const userMarker = L.marker([lat, lng], {
+                        icon: L.divIcon({
+                            className: '',
+                            html: `<div style="
+                                width: 36px; 
+                                height: 36px; 
+                                border-radius: 50%; 
+                                background: #378ADD; 
+                                color: white; 
+                                display: flex; 
+                                align-items: center; 
+                                justify-content: center; 
+                                font-size: 16px; 
+                                font-weight: 500;
+                                border: 3px solid white;
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                            ">${initials}</div>`,
+                            iconSize: [36, 36],
+                            iconAnchor: [18, 18],
+                            popupAnchor: [0, -20]
+                        })
+                    })
+                    .addTo(mapaRef.value)
                 },
                 (error) => {
                     mapaRef.value.setView([userCoords.lat, userCoords.lng], 13)
@@ -295,6 +319,11 @@
         }
 
         SetUpAquapointsOnMap()
+
+        useModal.setRemovedFavoriteCallback(async () => {
+            await GetUserFavoritePoints()
+            await SetUpAquapointsOnMap()
+        })
     })
 
     // Fica a aguardar que a variavel modoAdicionar altere e reaja à mudança mudando o tipo de cursor
@@ -302,6 +331,22 @@
         if (!mapaRef.value) return
         mapaRef.value.getContainer().style.cursor = val ? 'crosshair' : ''
     })
+
+    // When aquapointDetailsModal closes, leaflet recalculate map's size
+    watch(showAquapointDetailsModal, (val) => {
+    if (!val) {
+        setTimeout(() => {
+            if (mapaRef.value && mapaRef.value._loaded) {
+                mapaRef.value.options.zoomAnimation = true
+                mapaRef.value.invalidateSize({ animate: false })
+            }
+        }, 400)
+    } else {
+        if (mapaRef.value) {
+            mapaRef.value.options.zoomAnimation = false
+        }
+    }
+})
 
     function AddMarkerToMap(point){
         const marker = L.marker(
@@ -315,10 +360,15 @@
             selectedMarker.value = marker
             selectedAquapoint.value = (await aquapointService.getById(point.id)).data
 
-            selectedAquapoint.value.distanceMeters = mapaRef.value.distance(
+            // Using roads paths to aquapoint
+            const response = await fetch(`https://routing.openstreetmap.de/routed-foot/route/v1/foot/${userCoords.lng},${userCoords.lat};${selectedAquapoint.value.longitude},${selectedAquapoint.value.latitude}?overview=false`)
+            const data = await response.json()
+            selectedAquapoint.value.distanceMeters = data.routes[0].distance
+            
+            /*selectedAquapoint.value.distanceMeters = mapaRef.value.distance(
                 [userCoords.lat, userCoords.lng],
                 [selectedAquapoint.value.latitude, selectedAquapoint.value.longitude]
-            )
+            )*/
             
             //showAquapointPopup.value = true
             showAquapointDetailsModal.value = true
@@ -365,6 +415,7 @@
             markerIcon = L.icon({
                 iconUrl: image,
                 iconSize: [50, 50],
+                iconAnchor: [15, 40]
             });
         }
 
