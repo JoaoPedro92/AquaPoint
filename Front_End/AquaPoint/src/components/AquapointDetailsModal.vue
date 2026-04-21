@@ -336,17 +336,28 @@ async function VoteTrustLevel(vote) {
     if (vote === true) {
         if (props.aquapoint.point_trust < 4) {
             await aquapointService.changeTrustLevel(props.aquapoint.id, { point_trust: props.aquapoint.point_trust + 1 })
+            await trustLogsService.create({
+                user_id: Auth.user.id,
+                point_id: props.aquapoint.id,
+                trust_vote: props.aquapoint.point_trust + 1
+            })
         }
     }
     else {
         if (props.aquapoint.point_trust > 1) {
             await aquapointService.changeTrustLevel(props.aquapoint.id, { point_trust: props.aquapoint.point_trust - 1 })
+            await trustLogsService.create({
+                user_id: Auth.user.id,
+                point_id: props.aquapoint.id,
+                trust_vote: props.aquapoint.point_trust - 1
+            })
         }
     }
 
     toast.info('Voto realizado com sucesso. Obrigado pelo contributo.')
     showTrustLevelVote.value = false;
     const updatedData = (await aquapointService.getById(props.aquapoint.id)).data
+    updatedData.distanceMeters = props.aquapoint.distanceMeters
     emit('update:aquapoint', updatedData)
 }
 

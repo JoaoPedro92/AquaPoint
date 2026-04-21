@@ -221,6 +221,7 @@
         lat: 38.781558,
         lng: -9.102584,
     }
+    const userMarkerRef = ref(null)
 
     onMounted(async() => {
         
@@ -286,7 +287,7 @@
 
                     const initials = Auth.user?.name?.charAt(0).toUpperCase() || '?'
 
-                    const userMarker = L.marker([lat, lng], {
+                    userMarkerRef.value = L.marker([lat, lng], {
                         icon: L.divIcon({
                             className: '',
                             html: `<div style="
@@ -323,8 +324,12 @@
         useModal.setRemovedFavoriteCallback(async () => {
             await GetUserFavoritePoints()
             await SetUpAquapointsOnMap()
+            if (userMarkerRef.value) {
+                userMarkerRef.value.addTo(mapaRef.value)
+            }
         })
     })
+
 
     // Fica a aguardar que a variavel modoAdicionar altere e reaja à mudança mudando o tipo de cursor
     watch(AddNewMode, (val) => {
@@ -334,19 +339,19 @@
 
     // When aquapointDetailsModal closes, leaflet recalculate map's size
     watch(showAquapointDetailsModal, (val) => {
-    if (!val) {
-        setTimeout(() => {
-            if (mapaRef.value && mapaRef.value._loaded) {
-                mapaRef.value.options.zoomAnimation = true
-                mapaRef.value.invalidateSize({ animate: false })
+        if (!val) {
+            setTimeout(() => {
+                if (mapaRef.value && mapaRef.value._loaded) {
+                    mapaRef.value.options.zoomAnimation = true
+                    mapaRef.value.invalidateSize({ animate: false })
+                }
+            }, 400)
+        } else {
+            if (mapaRef.value) {
+                mapaRef.value.options.zoomAnimation = false
             }
-        }, 400)
-    } else {
-        if (mapaRef.value) {
-            mapaRef.value.options.zoomAnimation = false
         }
-    }
-})
+    })
 
     function AddMarkerToMap(point){
         const marker = L.marker(
@@ -428,7 +433,7 @@
 
     function ClearMapMarkers() {
         mapaRef.value.eachLayer((layer) => {
-            if (layer instanceof L.Marker) {
+            if (layer instanceof L.Marker && layer !== userMarkerRef.value) {
                 mapaRef.value.removeLayer(layer)
             }
         })
