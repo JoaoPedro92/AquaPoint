@@ -9,7 +9,26 @@ export async function imageUrlToBase64(url){
     })
 }
 
-export function GetPointStateStyles(aquapoint) {
+export function GetPointStateStylesFromList(statesList, aquapoint){
+    if (!statesList || statesList.length === 0) return { background: '#ccc', color: 'white' }
+
+    // Returning pending point style (background and color)
+    /*if (aquapoint?.isPending === 1) {
+        return { backgroundColor: '#fef9c3', color: '#854d0e' }
+    }*/
+
+    const state = statesList.find(e => e.state_name === aquapoint.state_name)
+    return { backgroundColor: state.backgroundColor || '#ccc', color: state.color }
+}
+
+export function GetStateStylesFromStateName(statesList, stateName){
+    if (!statesList || statesList.length === 0) return { background: '#ccc', color: 'white' }
+
+    const state = statesList.find(e => e.state_name === stateName)
+    return { backgroundColor: state.backgroundColor || '#ccc', color: state.color }
+}
+
+export function GetPointStateStyles(state) {
     const styles = {
         'Funcional': { backgroundColor: '#166534', color: '#c1ebbc' },
         'Necessita manutenção': { backgroundColor: '#f97316', color: '#ffff' },
@@ -39,7 +58,7 @@ export function GetPointStateColor(aquapoint){
     return styles[aquapoint.state_name] || {}
 }
 
-export function GetPointStateIcon(aquapoint, changeBgColor = false){
+export function GetPointStateIcon(stateName, changeBgColor = false){
     const icons = {
         'Inativo': 'bi-slash-circle-fill',
         'Necessita manutenção': 'bi-exclamation-triangle-fill text-warning',
@@ -57,8 +76,8 @@ export function GetPointStateIcon(aquapoint, changeBgColor = false){
         return `bi ${icons["Pendente"] || 'bi-question-circle'} ${changeBgColor ? (colors["Pendente"] || '') : ''}`.trim()
     }*/
 
-    const baseIcon = icons[aquapoint.state_name] || 'bi-question-circle'
-    const colorClass = changeBgColor ? (colors[aquapoint.state_name] || '') : ''
+    const baseIcon = icons[stateName] || 'bi-question-circle'
+    const colorClass = changeBgColor ? (colors[stateName] || '') : ''
 
     return `bi ${baseIcon} ${colorClass}`.trim()
 }

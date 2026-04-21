@@ -22,8 +22,8 @@
                             <p class="fw-medium mb-0 small">{{ aquapoint.point_name }}</p>
                             <p class="text-muted mb-0" style="font-size: 12px;">{{ aquapoint.type_name }}</p>
                         </div>
-                        <span class="badge rounded-2 text-nowrap" :style="GetPointStateStyles(aquapoint)">
-                            <i :class="GetPointStateIcon(aquapoint)"></i>
+                        <span class="badge rounded-2 text-nowrap" :style="GetPointStateStylesFromList(allStates, aquapoint)">
+                            <i :class="GetPointStateIcon(aquapoint.state_name)"></i>
                             {{ aquapoint.state_name }}
                         </span>
                     </div>
@@ -104,8 +104,8 @@
                     <td class="text-center">{{ aquapoint.ratingAVG || 0.0 }}</td>
                     <td class="text-center">{{ aquapoint.ratingsAmount }}</td>
                     <td>
-                        <span class="badge rounded-2 text-nowrap" :style="GetPointStateStyles(aquapoint)">
-                            <i :class="GetPointStateIcon(aquapoint)"></i>
+                        <span class="badge rounded-2 text-nowrap" :style="GetPointStateStylesFromList(allStates, aquapoint)">
+                            <i :class="GetPointStateIcon(aquapoint.state_name)"></i>
                             {{ aquapoint.state_name }}
                         </span>
                     </td>
@@ -171,7 +171,8 @@
 import { ref, onMounted } from 'vue'
 import { useToast } from 'vue-toastification';
 import { aquapointService } from '../../services/aquapointService'
-import { GetPointStateIcon, GetPointStateStyles, GetTrustLevelIcon } from '../../utilities/tools';
+import { statesService } from '../../services/statesService';
+import { GetPointStateIcon, GetPointStateStylesFromList, GetTrustLevelIcon } from '../../utilities/tools';
 import EditModal from '/src/components/EditAquaPointsModal.vue'
 
 const allAquapoints = ref([])
@@ -183,9 +184,11 @@ const selectedAquaPoint = ref(null)
 const pendingPointsCount = ref(0)
 const showPendingOnly = ref(false)
 const toast = useToast()
+const allStates = ref([])
 
 onMounted(async () => {
     loadAquapoints()
+    allStates.value = (await statesService.getAll()).data
 })
 
 function GetInactiveAquaPoints() {

@@ -61,7 +61,7 @@
 
                             <div class="d-flex align-items-center">
                                 <span class="status-dot maintenance me-2"></span>
-                                <span>Estragados: <strong>{{ maintenance }}</strong></span>
+                                <span>Avariados: <strong>{{ maintenance }}</strong></span>
                             </div>
 
                             <div class="d-flex align-items-center">
@@ -223,7 +223,7 @@ function createPieChart() {
         {
             type: "pie",
             data: {
-                labels: ["Ativos", "Inativos", "Estragados", "Pendentes"],
+                labels: ["Ativos", "Inativos", "Avariados", "Pendentes"],
                 datasets: [{
                     data: [active.value, inactive.value, maintenance.value, pending.value],
                     backgroundColor: ["#00cc00", "#e63946", "#ffd700", "#f4a261"]

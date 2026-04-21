@@ -1,5 +1,83 @@
 <template>
-    <h1>Mapa</h1>
+    <!--<h1>Mapa</h1>-->
+    <div class="p-1" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+    
+        <!-- Botão Filtros -->
+        <div style="position: relative;">
+            <button @click="showFilters = !showFilters" 
+                style="background: white; border: 0.5px solid #ccc; border-radius: 8px; padding: 8px 16px; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-sliders"></i>
+                Filtros
+                <i :class="showFilters ? 'bi bi-chevron-up' : 'bi bi-chevron-down'"></i>
+            </button>
+
+            <!-- Dropdown -->
+            <div v-if="showFilters" 
+                style="position: absolute; top: 44px; left: 0; background: white; border: 0.5px solid #ddd; border-radius: 12px; padding: 16px; min-width: 260px; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
+                
+                <!-- State Filter -->
+                <p style="font-size: 12px; font-weight: 500; color: gray; margin: 0 0 10px; text-transform: uppercase;">Estado</p>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                    <label v-for="state in allPointStates" :key="state.id" style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px;">
+                        <input type="checkbox" :value="state.state_name" v-model="filters.states">
+                        <i :class="GetPointStateIcon(state.state_name, true)"></i>{{ state.state_name }}
+                    </label>
+                </div>
+
+                <hr style="margin: 0 0 14px;">
+
+                <!-- Type Filter -->
+                <p style="font-size: 12px; font-weight: 500; color: gray; margin: 0 0 10px; text-transform: uppercase;">Tipo</p>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                    <label v-for="type in allTypes" :key="type.id" style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px;">
+                        <input type="checkbox" :value="type.type_name" v-model="filters.types">
+                        {{ type.type_name }}
+                    </label>
+                </div>
+
+                <hr style="margin: 0 0 14px;">
+
+
+                <!-- City Filter -->
+                <p style="font-size: 12px; font-weight: 500; color: gray; margin: 0 0 10px; text-transform: uppercase;">Cidade</p>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                    <input v-model="filters.city" class="form-control form-control-sm" placeholder="Filtrar por cidade" @keyup.enter="AddCityFilterToList(); ApplyFilters()">
+                </div>
+
+
+                <!-- Filter dropdown button , clear and apply -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 0.5px solid #eee; padding-top: 12px;">
+                    <button @click="ClearFilters" style="background: none; border: none; font-size: 13px; color: gray; cursor: pointer; text-decoration: underline;">Limpar</button>
+                    <button @click="ApplyFilters()" 
+                        style="background: #378ADD; color: white; border: none; border-radius: 8px; padding: 6px 16px; font-size: 13px; cursor: pointer;">
+                        Aplicar
+                    </button>
+                </div>
+
+                
+            </div>
+        </div>
+
+        <!-- Badges filtros ativos -->
+        <span v-for="state in activeFilters.states" :key="state"
+            :style="[{ borderRadius: '20px', padding: '4px 10px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }, GetStateStylesFromStateName(allPointStates, state)]">
+            <i :class=GetPointStateIcon(state)></i>{{ state }}
+            <span @click="RemoveStateFilter(state)" style="font-size: 14px; line-height: 1;">x</span>
+        </span>
+
+        <span v-for="type in activeFilters.types" :key="type"
+            style="background: #0c447c; color: #b5d4f4; border-radius: 20px; padding: 4px 10px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+            {{ type }}
+            <span @click="RemoveTypeFilter(type)" style="font-size: 14px; line-height: 1;">x</span>
+        </span>
+
+        <span v-for="cityFilter in activeCityFilter" :key="cityFilter"
+            :style="{ borderRadius: '20px', padding: '4px 10px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', background: '#378ADD', color: 'white' }">
+            <i class="bi bi-geo-alt me-1"></i>{{ cityFilter }}
+            <span @click="RemoveCityFilter(cityFilter)" style="font-size: 14px; line-height: 1;">×</span>
+        </span>
+
+    </div>
 
     <div style="position: relative">
         <!-- Loading Spinner while loading markers on map -->
@@ -52,14 +130,14 @@
                 </div>
                 <!-- Tipo de bebedouro -->
                 <h6>Tipo de Bebedouro:</h6>
-                <button v-for="type in aquapointTypes" :key="type.id" 
+                <button v-for="type in allTypes" :key="type.id" 
                 :class="newAquapointType === type.id ? 'btn bg-aquapoint-blue text-white shadow-sm' : 'btn bg-aquapoint-gray'"
-                 v-on:click="newAquapointType = type.id"> {{ type.nome }}</button>
+                 v-on:click="newAquapointType = type.id"> {{ type.type_name }}</button>
                  <!----------------------->
                 <h6>Estado do Bebedouro:</h6>
-                <button v-for="state in aquapointStates" :key="state.id" 
+                <button v-for="state in allPointStates" :key="state.id" 
                 :class="newAquapointState === state.id ? 'btn bg-aquapoint-blue text-white shadow-sm' : 'btn bg-aquapoint-gray'"
-                 v-on:click="newAquapointState = state.id"> {{ state.nome }}</button>
+                 v-on:click="newAquapointState = state.id"> {{ state.state_name }}</button>
             </div>
 
             <div class="d-flex justify-content-center mt-5">
@@ -84,6 +162,7 @@
     import { Offcanvas } from 'bootstrap';
     import L, { icon } from 'leaflet'
     import 'leaflet/dist/leaflet.css'
+    import { GetPointStateStylesFromList, GetStateStylesFromStateName, GetPointStateIcon } from '../utilities/tools';
     import { useToast } from 'vue-toastification';
     import { useAuth } from '../utilities/useAuth';
     import { useModalStore } from '../utilities/modal';
@@ -91,6 +170,8 @@
     import { aquapointService } from '../services/aquapointService' 
     import { localsService } from '../services/localsService';
     import { zonesService } from '../services/zonesService';
+    import { statesService } from '../services/statesService';
+    import { typesService } from '../services/typesService';
     import { point } from 'leaflet';
     import { favoriteService } from '../services/favoriteService';
     import AquapointDetailsModal from '../components/AquapointDetailsModal.vue';
@@ -107,18 +188,8 @@
     const offcanvasRef = ref(null)
     let offcanvasInstance = null
     const newMarkerAquapoint = ref(null)
-    const aquapointTypes = [
-        { id: 1, nome: 'Pessoas' },
-        { id: 2, nome: 'Animais' },
-        { id: 3, nome: 'Ambos' }
-    ]
     const newAquapointType = ref(1)
     const newAquapointState = ref(1)
-    const aquapointStates = [
-        { id: 1, nome: 'Necessita manutenção' },
-        { id: 2, nome: 'Funcional' },
-        { id: 3, nome: 'Inativo' },
-    ]
     const fileInput = ref(null)
     const fileName = ref('')
     const newAquapointImagePreview = ref(null)
@@ -130,24 +201,48 @@
     const selectedMarker = ref(null)
     const userFavoritePoints = ref([])
     const showAquapointDetailsModal = ref(false)
+
+    const showFilters = ref(false)
+    const activeCityFilter = ref([])
+    const allPointStates = ref([])
+    const allTypes = ref([])
+    const filters = ref({
+        states: [],
+        types: [],
+        city: ''
+    })
+    const activeFilters = ref({
+        states: [],
+        types: [],
+        city: ''
+    })
+
     let userCoords = {
         lat: 38.781558,
         lng: -9.102584,
     }
 
     onMounted(async() => {
+        console.log(Auth.user.id)
+        allPointStates.value = (await statesService.getAll()).data
+        allTypes.value = (await typesService.getAll()).data
+        //filters.value.states = allPointStates.value.map(e => e.state_name)
+        //filters.value.types = allTypes.value.map(e => e.type_name)
+
+        console.log(allPointStates)
         // Inicializa o offcanvas das informações no momento de adicionar um novo bebedouro
         offcanvasInstance = new Offcanvas(offcanvasRef.value)
         offcanvasRef.value.addEventListener('hide.bs.offcanvas', () => {
-            console.log('offcanvas fechado')
+            //console.log('offcanvas fechado')
             closeOffcanvas()
         })
 
-        mapaRef.value = L.map('mapa').setView([userCoords.lat, userCoords.lng], 13)
+        mapaRef.value = L.map('mapa', { zoomControl: false }).setView([userCoords.lat, userCoords.lng], 13)
         L.tileLayer('https://tile.jawg.io/jawg-lagoon/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
             attribution: '© Jawg Maps',
             accessToken: 'BumVzniBYxFsvv2lUwvsZ8fQMn6WdPC2sS5bAqyeSyDrROwuULnZrt0lE1uKPHrT'
         }).addTo(mapaRef.value)
+        L.control.zoom({position: 'topright'}).addTo(mapaRef.value)
 
         mapaRef.value.on('click', async (e) => {
             if(!AddNewMode.value) return 
@@ -217,7 +312,6 @@
         )
         .addTo(mapaRef.value)
         .on('click', async () => {
-
             selectedMarker.value = marker
             selectedAquapoint.value = (await aquapointService.getById(point.id)).data
 
@@ -318,20 +412,74 @@
 
     async function SetUpAquapointsOnMap() {
         loadingMarkers.value = true
+        ClearMapMarkers()
+
         aquapointsList.value = await GetAquapointsList()
-        console.log(aquapointsList)
+        //console.log(aquapointsList)
         
-        if (aquapointsList) {
-            aquapointsList.value.forEach(point => {
+        aquapointsList.value
+            .filter(point => activeFilters.value.states.length === 0 || activeFilters.value.states.includes(point.state_name))
+            .filter(point => activeFilters.value.types.length === 0 || activeFilters.value.types.includes(point.type_name))
+            .filter(point => activeCityFilter.value.length === 0 || activeCityFilter.value.some(city => point.local_name.toLowerCase().includes(city.toLowerCase())))
+            .forEach(point => {
                 if (point.isPending != 1) {
                     AddMarkerToMap(point)
                 } else if (Auth.isLoggedIn && Auth.user.id === point.createdBy) {
                     AddMarkerToMap(point)
                 }
-            })
-        }
+            })        
 
         loadingMarkers.value = false
+    }
+
+    function AddCityFilterToList(){        
+        if(filters.value.city && !activeCityFilter.value.includes(filters.value.city)){
+            activeCityFilter.value = [...activeCityFilter.value, filters.value.city]
+            filters.value.city = ''
+        }
+    }
+
+    function ApplyFilters(){
+        loadingMarkers.value = true
+
+        AddCityFilterToList()
+
+        activeFilters.value.states = [...filters.value.states]
+        activeFilters.value.types = [...filters.value.types]
+        activeFilters.value.city = filters.value.city
+
+        showFilters.value = false
+
+        SetUpAquapointsOnMap()
+        loadingMarkers.value = false
+    }
+
+    function RemoveTypeFilter(type){
+        filters.value.types = filters.value.types.filter(t => t !== type)
+        activeFilters.value.types = activeFilters.value.types.filter(t => t !== type)
+        SetUpAquapointsOnMap()
+    }
+
+    function RemoveStateFilter(state){
+        filters.value.states = filters.value.states.filter(s => s !== state)
+        activeFilters.value.states = activeFilters.value.states.filter(s => s !== state)
+        SetUpAquapointsOnMap()
+    }
+
+    function RemoveCityFilter(city){
+        activeCityFilter.value = activeCityFilter.value.filter(c => c !== city)
+        filters.city = '';
+        SetUpAquapointsOnMap()
+    }
+
+    function ClearFilters(){
+        filters.value.city = ''
+        
+        activeFilters.value.states = []
+        activeFilters.value.types = []
+        activeCityFilter.value = []
+        
+        SetUpAquapointsOnMap()
     }
 
     function AddOrCancelMarkerClick(){
@@ -382,9 +530,7 @@
         }
         reader.readAsDataURL(file)
         
-    }
-
-    
+    }   
 
     async function SubmitNewAquapoint(){
         if (!newAquapointName.value || newAquapointName.value.trim() === ''){
@@ -393,7 +539,7 @@
             return;
         }
 
-        console.log(`${newAquapointName.value} \n${newAquapointType.value}`)
+        //console.log(`${newAquapointName.value} \n${newAquapointType.value}`)
         //offcanvasClosedBySubmitButton.value = true
 
         const coords = newMarkerAquapoint.value.getLatLng()
@@ -429,7 +575,11 @@
             isPending: 1,
         }
 
-        AddNewAquaPoint(newPoint)
+        loadingMarkers.value = true
+        newPoint.id = await AddNewAquaPoint(newPoint)
+        AddMarkerToMap(newPoint)
+        loadingMarkers.value = false
+
     }
 
     async function GetPlaceDataByCoords(lat, lng) {
@@ -505,6 +655,7 @@
                 offcanvasInstance.hide()
 
                 aquapointsList.value = await GetAquapointsList()
+                return createdPoint.data.id
             }
         } catch (err) {
             console.log("Status:", err.response?.status)
@@ -534,6 +685,8 @@
             popupAnchor: [0, -40]
         })
     }
+
+    
 </script>
 
 <style scoped>
