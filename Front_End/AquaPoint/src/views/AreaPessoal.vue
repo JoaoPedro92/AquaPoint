@@ -93,7 +93,7 @@
 
             <div class="row g-3 ">
                 <div class="col-md-4 pe-3 mb-3" v-for="aquapoint in userPointsFavorite" :key="aquapoint.id">
-                    <FavoriteAquapointCard :aquapoint="aquapoint" :favoriteChanged="LoadAllUserFavoritePoints"/>
+                    <FavoriteAquapointCard :aquapoint="aquapoint" @favoriteChanged="LoadAllUserFavoritePoints"/>
                 </div>
                 
             </div><!-- Content row end -->
