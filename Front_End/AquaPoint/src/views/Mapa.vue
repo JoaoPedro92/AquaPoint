@@ -382,6 +382,10 @@
     async function ChangeFavoriteSelectedMarker(){
         selectedMarker.value.remove()
         selectedAquapoint.value = (await aquapointService.getById(selectedAquapoint.value.id)).data
+        const response = await fetch(`https://routing.openstreetmap.de/routed-foot/route/v1/foot/${userCoords.lng},${userCoords.lat};${selectedAquapoint.value.longitude},${selectedAquapoint.value.latitude}?overview=false`)
+        const data = await response.json()
+        selectedAquapoint.value.distanceMeters = data.routes[0].distance
+
         await GetUserFavoritePoints()
         AddMarkerToMap(selectedAquapoint.value)
     }
