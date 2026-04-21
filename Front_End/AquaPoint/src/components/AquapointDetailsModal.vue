@@ -44,7 +44,7 @@
                     <span class="ms-1">{{ aquapoint.ratingAVG || 0.0 }}</span> <span class="ms-1"
                         style="font-size:0.8rem"> - {{ aquapoint.ratingsAmount || 0.0 }} opiniões</span>
                 </div>
-                <span>15min - 3,8km</span>
+                <span>{{ GetPointDistance(aquapoint.latitude, aquapoint.longitude) }}</span>
             </div>
             <!----------------------------------------->
 
@@ -208,7 +208,7 @@ const openReviewDropdown = ref(null)
 const editMode = ref(false)
 const edittingReviewId = ref(null)
 const edittingComment = ref('')
-
+const userSpeed = 5 // 5 metros por segundo
 
 watch(() => props.visible, async (newValue) => {
     if (newValue) {
@@ -360,6 +360,40 @@ async function DeleteReview(id){
     catch(err){
         toast.error(err.message)
     }
+}
+
+function GetPointDistance(pointLat, pointLng) {
+    if (!navigator.geolocation) {
+        return 'Estimativa indisponível'
+    }
+
+    const distanceMeters = props.aquapoint.distanceMeters
+    const distanceKm = distanceMeters / 1000
+
+    const timeHours = distanceKm / userSpeed
+    const timeMinutes = timeHours * 60
+    const timeSeconds = timeMinutes * 60
+
+  
+    let distanceStr
+    if (distanceKm < 1) {
+        distanceStr = Math.round(distanceMeters) + ' m'
+    } else {
+        distanceStr = distanceKm.toFixed(2) + ' km'
+    }
+
+    let timeStr
+    if (timeMinutes < 1) {
+        timeStr = Math.round(timeSeconds) + ' s'
+    } else if (timeMinutes < 60) {
+        timeStr = Math.round(timeMinutes) + ' min'
+    } else {
+        const hours = Math.floor(timeHours)
+        const minutes = Math.round(timeMinutes % 60)
+        timeStr = `${hours}h ${minutes}min`
+    }
+
+    return `${timeStr} - ${distanceStr}`
 }
 
 function EditReview(review){
