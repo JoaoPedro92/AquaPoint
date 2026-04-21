@@ -107,8 +107,11 @@ export async function isVoteEnableByUserAndAquapointId(req, res){
             [userId, pointId]
         )
 
-        if (rows.length === 0) return res.status(404).json({ error: 'Registo não encontrado' });
-        
+        // No records, users has no logs on trustlevel votes on that specific aquapoint
+        if (!rows || rows.length === 0) {
+            return res.json({ valid: true })
+        }
+
         if(!rows[0].valid){
             return res.status(200).json({ 
                 valid: false,
