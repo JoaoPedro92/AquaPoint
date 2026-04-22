@@ -31,7 +31,7 @@
             <!-- Footer -->
             <div class="d-flex align-items-center justify-content-between">
                 <span class="text-muted" style="font-size: 12px;">{{ formatDateExtense(props.interaction.createdAt) }}</span>
-                <button class="btn btn-sm btn-outline-primary" @click="showAquapointDetails = true">Verificar</button>
+                <button class="btn btn-sm btn-outline-primary" @click="showAquapointDetailsModal()">Verificar</button>
             </div>
         </div>
 
@@ -56,12 +56,36 @@
         }
     })
 
+    let userCoords = {
+        lat: 38.781558,
+        lng: -9.102584,
+    }
+
     onMounted(async () => {
         aquapoint.value = (await aquapointService.getById(props.interaction.point_id)).data
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude
+                    const lng = position.coords.longitude
+
+                    userCoords.lat = lat
+                    userCoords.lng = lng
+                }
+            )
+        }      
     })
 
     const aquapoint = ref(null)
     const showAquapointDetails = ref(false)
+
+    async function showAquapointDetailsModal(){
+        showAquapointDetails.value = true
+        const response = await fetch(`https://routing.openstreetmap.de/routed-foot/route/v1/foot/${userCoords.lng},${userCoords.lat};${aquapoint.value.longitude},${aquapoint.value.latitude}?overview=false`)
+        const data = await response.json()
+        aquapoint.value.distanceMeters = data.routes[0].distance
+    }
 
 </script>
 
