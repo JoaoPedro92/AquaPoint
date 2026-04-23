@@ -1,5 +1,9 @@
 import express from "express";
 import cors from "cors";
+import swaggerUI from 'swagger-ui-express'
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+const swaggerDocument = require('./swagger.json')
 import usersRoutes from "./routes/user.routes.js";
 import aquaPointsRoutes from "./routes/aquapoints.routes.js";
 import favoritesRoutes from "./routes/favorites.routes.js";
@@ -40,5 +44,6 @@ app.use("/api/trustlevels", trustlevelsRoutes);
 app.use("/api/trustlogs", trustLogsRoutes);
 app.use("/api/states", statesRoutes);
 
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 export default app;
