@@ -378,6 +378,8 @@
             //showAquapointPopup.value = true
             showAquapointDetailsModal.value = true
         })
+
+        return marker
     }
 
     async function RefreshSelectedMarker(){
@@ -392,7 +394,7 @@
         selectedAquapoint.value.distanceMeters = data.routes[0].distance
 
         await GetUserFavoritePoints()
-        AddMarkerToMap(selectedAquapoint.value)
+        selectedMarker.value = AddMarkerToMap(selectedAquapoint.value)
     }
 
     function GetAquapointMarker(point) {

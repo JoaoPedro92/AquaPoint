@@ -378,6 +378,10 @@ function GetPointDistance(pointLat, pointLng) {
         return 'Estimativa indisponível'
     }
 
+    if (!props.aquapoint.distanceMeters) {
+        return 'A calcular distância...'
+    }
+
     const distanceMeters = props.aquapoint.distanceMeters
     const distanceKm = distanceMeters / 1000
 
